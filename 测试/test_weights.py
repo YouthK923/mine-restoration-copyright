@@ -11,6 +11,12 @@ import os
 import sys
 
 sys.stdout.reconfigure(encoding="utf-8")
+# 本脚本位于 测试/ 子目录，先把仓库根目录加入模块搜索路径，
+# 使 `from app import ...` 与 app/app.db 的定位不受影响。
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)
+
 from app import create_app
 from app.models import (db, Project, MinePatch, MicroUnit, IndicatorData,
                         ConstraintCheck, EvaluationResult, WeightScheme,
@@ -19,7 +25,7 @@ from app.services import workflow as wf
 from app.services import weight_service as ws
 
 LINE = "=" * 72
-BASE = os.path.dirname(os.path.abspath(__file__))
+BASE = ROOT
 
 
 class TestConfig:

@@ -9,7 +9,9 @@
 import os, sys, re, shutil, zipfile
 sys.stdout.reconfigure(encoding='utf-8')
 
-FN = '软件著作权登记项目计划书_历史遗留废弃矿山自然恢复适宜性评价系统V1.0.docx'
+# 目标文档：归类后计划书位于 文档/ 目录
+BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+FN = os.path.join(BASE, '文档', '软著功能计划.docx')
 BAK = FN.replace('.docx', '_改色前备份.docx')
 
 if not os.path.exists(BAK):

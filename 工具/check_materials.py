@@ -11,8 +11,12 @@ import sys
 import fitz
 
 sys.stdout.reconfigure(encoding="utf-8")
+# 本脚本位于子目录，仓库根目录才是 app/ 与 软著材料/ 所在位置
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)
 
-BASE = os.path.dirname(os.path.abspath(__file__))
+BASE = ROOT
 MAT = os.path.join(BASE, "软著材料")
 NAME = "历史遗留废弃矿山自然恢复适宜性评价系统V1.0"
 VERSION = "V1.0"

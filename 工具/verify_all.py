@@ -10,7 +10,11 @@ import sys
 import fitz
 
 sys.stdout.reconfigure(encoding="utf-8")
-BASE = os.path.dirname(os.path.abspath(__file__))
+# 本脚本位于子目录，仓库根目录才是 app/ 与 软著材料/ 所在位置
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)
+BASE = ROOT
 LINE = "=" * 78
 MAT = os.path.join(BASE, "软著材料")
 NAME = "历史遗留废弃矿山自然恢复适宜性评价系统V1.0"
@@ -52,12 +56,14 @@ for name, need in modules.items():
 print()
 print("二、测试套件")
 print("-" * 78)
-tests = sorted(f for f in os.listdir(BASE)
+TEST_DIR = os.path.join(BASE, "测试")
+tests = sorted(f for f in os.listdir(TEST_DIR)
                if f.startswith("test_") and f.endswith(".py"))
 passed = 0
 for t in tests:
-    r = subprocess.run([sys.executable, t], capture_output=True, text=True,
-                       cwd=BASE, encoding="utf-8", errors="replace")
+    r = subprocess.run([sys.executable, os.path.join(TEST_DIR, t)],
+                       capture_output=True, text=True, cwd=BASE,
+                       encoding="utf-8", errors="replace")
     ok = r.returncode == 0
     passed += ok
     print("  %s %-24s" % ("[通过]" if ok else "[失败]", t))
@@ -97,8 +103,10 @@ print("  [存在] %-24s %d 张" % ("界面截图", len(shots)))
 print()
 print("四、形式要求自检")
 print("-" * 78)
-r = subprocess.run([sys.executable, "check_materials.py"], capture_output=True,
-                   text=True, cwd=BASE, encoding="utf-8", errors="replace")
+TOOL_DIR = os.path.dirname(os.path.abspath(__file__))
+r = subprocess.run([sys.executable, os.path.join(TOOL_DIR, "check_materials.py")],
+                   capture_output=True, text=True, cwd=BASE,
+                   encoding="utf-8", errors="replace")
 for l in r.stdout.splitlines():
     if "自检结论" in l or "全部符合" in l or "待处理事项" in l:
         print("  " + l.strip())
@@ -121,6 +129,8 @@ for dp, dn, fn in os.walk(os.path.join(BASE, "app")):
 print("  Python 源码 %d 行，页面模板 %d 行，合计 %d 行" % (py, tpl, py + tpl))
 
 try:
+    if TOOL_DIR not in sys.path:
+        sys.path.insert(0, TOOL_DIR)
     import make_source_doc as msd
     lines = msd.collect_lines()
     print("  源程序鉴别材料收录 %d 个文件、%d 行有效代码"

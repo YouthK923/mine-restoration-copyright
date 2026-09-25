@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
 import os, sys, io, json
+
+# 本脚本位于子目录，仓库根目录才是 app/ 与 软著材料/ 所在位置
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)
 sys.stdout.reconfigure(encoding='utf-8')
 
-BASE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(BASE, '_dump')
+BASE = ROOT
+OUT = os.path.join(BASE, '参考资料', '论文与模板解析文本')
 os.makedirs(OUT, exist_ok=True)
 
 def dump_docx(path, outname):
@@ -63,9 +68,9 @@ def dump_pdf(path, outname, maxpages=None):
     return doc.page_count
 
 res = {}
-res['docx'] = dump_docx(os.path.join(BASE, '20261095_审改稿.docx（8.10）.docx'), 'draft_docx.txt')
-res['biansu_shuomingshu'] = dump_pdf(os.path.join(BASE, '变压器抗短路能力评估系统V1.0-说明书(1).pdf'), 'tpl_biansu_manual.txt')
-res['biansu_code'] = dump_pdf(os.path.join(BASE, '变压器抗短路能力评估系统V1.0-代码(1).pdf'), 'tpl_biansu_code.txt', maxpages=3)
-res['dianwang_manual'] = dump_pdf(os.path.join(BASE, '电网安全风险数据分析系统-用户手册.pdf'), 'tpl_dianwang_manual.txt')
-res['dianwang_code'] = dump_pdf(os.path.join(BASE, '电网安全风险数据分析系统-源代码.pdf'), 'tpl_dianwang_code.txt', maxpages=6)
+res['docx'] = dump_docx(os.path.join(BASE, '参考资料', '论文原稿.docx'), 'draft_docx.txt')
+res['biansu_shuomingshu'] = dump_pdf(os.path.join(BASE, '参考资料', '同类软著样例/变压器抗短路能力评估系统V1.0-说明书.pdf'), 'tpl_biansu_manual.txt')
+res['biansu_code'] = dump_pdf(os.path.join(BASE, '参考资料', '同类软著样例/变压器抗短路能力评估系统V1.0-代码.pdf'), 'tpl_biansu_code.txt', maxpages=3)
+res['dianwang_manual'] = dump_pdf(os.path.join(BASE, '参考资料', '同类软著样例/电网安全风险数据分析系统-用户手册.pdf'), 'tpl_dianwang_manual.txt')
+res['dianwang_code'] = dump_pdf(os.path.join(BASE, '参考资料', '同类软著样例/电网安全风险数据分析系统-源代码.pdf'), 'tpl_dianwang_code.txt', maxpages=6)
 print(json.dumps(res, ensure_ascii=False, indent=1))

@@ -13,6 +13,12 @@ import sys
 sys.stdout.reconfigure(encoding="utf-8")
 import fitz
 
+# 本脚本位于 测试/ 子目录，先把仓库根目录加入模块搜索路径，
+# 使 `from app import ...` 与 app/app.db 的定位不受影响。
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)
+
 from app import create_app
 from app.models import (db, User, Project, MinePatch, MicroUnit, IndicatorData,
                         Indicator, ExpertMatrix, OperationLog)
@@ -20,7 +26,7 @@ from app.utils.schema import ensure_schema
 from app.utils import browser, charts
 
 LINE = "=" * 72
-BASE = os.path.dirname(os.path.abspath(__file__))
+BASE = ROOT
 
 
 class TestConfig:

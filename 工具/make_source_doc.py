@@ -19,6 +19,10 @@ import sys
 import fitz
 
 sys.stdout.reconfigure(encoding="utf-8")
+# 本脚本位于子目录，仓库根目录才是 app/ 与 软著材料/ 所在位置
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)
 
 # ---------------------------------------------------------------------------
 # 排版参数
@@ -38,7 +42,7 @@ CODE_TOP = 58
 NUM_X = PAGE_W - MARGIN_R             # 行号右对齐位置
 AVAIL_W = NUM_X - MARGIN_L - 26       # 代码文本可用宽度（右侧留出行号空间）
 
-BASE = os.path.dirname(os.path.abspath(__file__))
+BASE = ROOT
 OUT_DIR = os.path.join(BASE, "软著材料")
 
 # 字体缺字替换：这些字符在当前字体中渲染为空白，替换为等价可显示字符
@@ -126,16 +130,16 @@ SOURCE_ORDER = [
     "app/templates/report/detail.html",
     "app/templates/report/print.html",
     "seed_demo.py",
-    "test_ahp.py",
-    "test_evaluate.py",
-    "test_web_ahp.py",
-    "test_web_modules.py",
-    "test_web_evaluate.py",
-    "test_web_report.py",
-    "test_ui_fixes.py",
-    "test_new_features.py",
-    "test_workflow.py",
-    "test_weights.py",
+    "测试/test_ahp.py",
+    "测试/test_evaluate.py",
+    "测试/test_web_ahp.py",
+    "测试/test_web_modules.py",
+    "测试/test_web_evaluate.py",
+    "测试/test_web_report.py",
+    "测试/test_ui_fixes.py",
+    "测试/test_new_features.py",
+    "测试/test_workflow.py",
+    "测试/test_weights.py",
 ]
 
 

@@ -4,6 +4,12 @@ import os
 import sys
 sys.stdout.reconfigure(encoding="utf-8")
 
+# 本脚本位于 测试/ 子目录，先把仓库根目录加入模块搜索路径，
+# 使 `from app import ...` 与 app/app.db 的定位不受影响。
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)
+
 from app import create_app
 
 LINE = "=" * 66
@@ -11,7 +17,7 @@ LINE = "=" * 66
 class TestConfig:
     SECRET_KEY = "test"
     SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(
-        os.path.dirname(__file__), "app", "app.db")
+        ROOT, "app", "app.db")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     WTF_CSRF_ENABLED = False
     TESTING = True

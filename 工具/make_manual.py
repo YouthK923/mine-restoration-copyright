@@ -18,6 +18,10 @@ import sys
 import fitz
 
 sys.stdout.reconfigure(encoding="utf-8")
+# 本脚本位于子目录，仓库根目录才是 app/ 与 软著材料/ 所在位置
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)
 
 SOFTWARE_NAME = "历史遗留废弃矿山自然恢复适宜性评价系统V1.0"
 FONT = "china-s"
@@ -34,7 +38,7 @@ CONTENT_BOTTOM = PAGE_H - MARGIN_B
 IMG_TARGET_W = 1000          # 截图嵌入前的下采样宽度
 IMG_QUALITY = 80             # JPEG 压缩质量
 
-BASE = os.path.dirname(os.path.abspath(__file__))
+BASE = ROOT
 SHOT_DIR = os.path.join(BASE, "软著材料", "截图")
 OUT_DIR = os.path.join(BASE, "软著材料")
 
