@@ -46,7 +46,12 @@ with app.app_context():
     ensure_schema(db)
     ExpertMatrix.query.delete()
     db.session.commit()
-    patch_id = MinePatch.query.first().id
+    # 固定取内置演示案例的图斑，避免受库中用户自建项目的影响
+    demo = Project.query.filter_by(code="DEMO-001").first()
+    if demo is not None:
+        patch_id = MinePatch.query.filter_by(project_id=demo.id).first().id
+    else:
+        patch_id = MinePatch.query.first().id
 
 c = app.test_client()
 c.post("/login", data={"username": "admin", "password": "admin123"})
@@ -87,16 +92,16 @@ r = c.get("/users/%d/edit" % uid)
 ok(r.status_code == 200, "用户编辑页可访问")
 c.post("/users/%d/edit" % uid, data={"role": "evaluator", "active": "1"})
 with app.app_context():
-    ok(User.query.get(uid).role == "evaluator", "角色已修改并保存")
+    ok(db.session.get(User, uid).role == "evaluator", "角色已修改并保存")
 # 最后一个管理员保护
 with app.app_context():
     admin_id = User.query.filter_by(role="admin").first().id
 c.post("/users/%d/edit" % admin_id, data={"role": "viewer", "active": "1"})
 with app.app_context():
-    ok(User.query.get(admin_id).role == "admin", "拒绝把最后一个管理员降级")
+    ok(db.session.get(User, admin_id).role == "admin", "拒绝把最后一个管理员降级")
 c.post("/users/%d/delete" % uid, follow_redirects=True)
 with app.app_context():
-    ok(User.query.get(uid) is None, "用户删除生效")
+    ok(db.session.get(User, uid) is None, "用户删除生效")
 # 清理日志核对用的项目
 with app.app_context():
     for p in Project.query.filter_by(name="日志核对项目").all():
@@ -121,7 +126,7 @@ r = c.post("/project/patch/%d/image" % patch_id,
 body = r.get_data(as_text=True)
 ok("已挂接" in body and "<img" in body, "影像上传并显示")
 with app.app_context():
-    rel = MinePatch.query.get(patch_id).image_path
+    rel = db.session.get(MinePatch, patch_id).image_path
 ok(bool(rel), "数据库记录影像路径", rel)
 abs_path = os.path.join(TestConfig.UPLOAD_FOLDER, rel.replace("uploads/", "", 1))
 ok(os.path.isfile(abs_path), "影像文件落盘")
@@ -133,7 +138,7 @@ r = c.post("/project/patch/%d/image" % patch_id,
 ok("不支持" in r.get_data(as_text=True), "拒绝非图片格式")
 c.post("/project/patch/%d/image/delete" % patch_id, follow_redirects=True)
 with app.app_context():
-    ok(MinePatch.query.get(patch_id).image_path is None, "影像移除后字段清空")
+    ok(db.session.get(MinePatch, patch_id).image_path is None, "影像移除后字段清空")
 ok(not os.path.isfile(abs_path), "影像文件已删除")
 
 # ---------------------------------------------------------------------------
@@ -225,6 +230,11 @@ svg = charts.hbars([("岩质边坡", 0.54, "0.5401"), ("平台", 0.84, "0.8376")
 ok("<svg" in svg and "0.8376" in svg, "条形图生成且带数值标签")
 svg2 = charts.donut([("植被指标", 0.6, "0.6000"), ("土壤指标", 0.4, "0.4000")])
 ok("<svg" in svg2 and "占比" in svg2, "环形图生成且带图例")
+
+# 报告是评价结论的呈现，需先真实执行一次评价才能打开
+with app.app_context():
+    from app.views.evaluate import load_patch_input, save_evaluation
+    save_evaluation(patch_id, load_patch_input(patch_id))
 
 r = c.get("/report/%d" % patch_id)
 body = r.get_data(as_text=True)
