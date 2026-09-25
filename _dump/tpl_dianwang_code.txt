@@ -1,0 +1,257 @@
+### PDF: 电网安全风险数据分析系统-源代码.pdf pages=60
+
+===== PAGE 1 =====
+电网安全风险数据分析系统V1.0
+1
+package com.electric.gridsafety.controller;
+import com.electric.gridsafety.service.SystemHomePageService;
+import com.electric.gridsafety.entity.SystemHomePageData;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import java.sql.Date;
+import java.util.List;
+/**
+* 系统首页控制层
+*/
+@RestController
+public class SystemHomePageController {
+@Autowired
+private SystemHomePageService systemHomePageService;
+/**
+* 获取各区域用电成本合计及排名
+* @return 各区域用电成本合计
+*/
+@GetMapping("/areaPowerCost")
+public List<SystemHomePageData> getAreaPowerCost() {
+return systemHomePageService.getAreaPowerCost();
+}
+/**
+* 获取各公司用电成本统计信息
+* @return 各公司用电成本统计
+*/
+@GetMapping("/companyPowerCost")
+public List<SystemHomePageData> getCompanyPowerCost() {
+return systemHomePageService.getCompanyPowerCost();
+}
+/**
+* 获取实时总负荷
+* @return 实时总负荷
+*/
+@GetMapping("/realtimeLoad")
+public double getRealtimeLoad() {
+return systemHomePageService.getRealtimeLoad();
+
+===== PAGE 2 =====
+电网安全风险数据分析系统V1.0
+2
+}
+/**
+* 获取实时发电量
+* @return 实时发电量
+*/
+@GetMapping("/realtimeGeneration")
+public double getRealtimeGeneration() {
+return systemHomePageService.getRealtimeGeneration();
+}
+/**
+* 获取发电机组数
+* @return 发电机组数
+*/
+@GetMapping("/generatorCount")
+public int getGeneratorCount() {
+return systemHomePageService.getGeneratorCount();
+}
+/**
+* 获取故障电机组数
+* @return 故障电机组数
+*/
+@GetMapping("/faultyGeneratorCount")
+public int getFaultyGeneratorCount() {
+return systemHomePageService.getFaultyGeneratorCount();
+}
+/**
+* 获取系统概况信息
+* @return 发动机分布地图
+*/
+@GetMapping("/systemOverview")
+public SystemHomePageData getSystemOverview() {
+return systemHomePageService.getSystemOverview();
+}
+}
+package com.electric.gridsafety.service;
+import com.electric.gridsafety.dao.SystemHomePageDao;
+import com.electric.gridsafety.entity.SystemHomePageData;
+import org.springframework.beans.factory.annotation.Autowired;
+
+===== PAGE 3 =====
+电网安全风险数据分析系统V1.0
+3
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import java.sql.Date;
+import java.util.List;
+/**
+* 系统首页业务层
+*/
+@Service
+public class SystemHomePageService {
+@Autowired
+private SystemHomePageDao systemHomePageDao;
+/**
+* 获取各区域用电成本合计及排名
+* @return 区域用电成本信息列表
+*/
+public List<SystemHomePageData> getAreaPowerCost() {
+return systemHomePageDao.getAreaPowerCost();
+}
+/**
+* 获取各公司用电成本统计信息
+* @return 公司用电成本信息列表
+*/
+public List<SystemHomePageData> getCompanyPowerCost() {
+return systemHomePageDao.getCompanyPowerCost();
+}
+/**
+* 获取实时总负荷
+* @return 实时总负荷值
+*/
+public double getRealtimeLoad() {
+return systemHomePageDao.getRealtimeLoad();
+}
+/**
+* 获取实时发电量
+* @return 实时发电量值
+*/
+public double getRealtimeGeneration() {
+return systemHomePageDao.getRealtimeGeneration();
+}
+
+===== PAGE 4 =====
+电网安全风险数据分析系统V1.0
+4
+/**
+* 获取发电机组数
+* @return 发电机组数量
+*/
+public int getGeneratorCount() {
+return systemHomePageDao.getGeneratorCount();
+}
+/**
+* 获取故障电机组数
+* @return 故障电机组数量
+*/
+public int getFaultyGeneratorCount() {
+return systemHomePageDao.getFaultyGeneratorCount();
+}
+/**
+* 获取系统概况信息
+* @return 系统概况对象
+*/
+public SystemHomePageData getSystemOverview() {
+return systemHomePageDao.getSystemOverview();
+}
+}
+package com.electric.gridsafety.entity;
+import lombok.Data;
+import java.sql.Date;
+import java.util.List;
+import java.util.Map;
+/**
+* 系统首页实体类
+*/
+@Data
+public class SystemHomePageData {
+private String areaName; // 区域名称
+private Double areaPowerCost; // 区域用电成本
+private Integer areaRanking; // 区域排名
+private String companyName; // 公司名称
+private Double companyPowerCost; // 公司用电成本
+private Double realtimeLoad; // 实时总负荷
+
+===== PAGE 5 =====
+电网安全风险数据分析系统V1.0
+5
+private Double realtimeGeneration; // 实时发电量
+private Integer generatorCount; // 发电机组数
+private Integer faultyGeneratorCount; // 故障电机组数
+private String engineMapUrl; // 发动机分布地图URL
+/**
+* 获取区域名称
+* @return 区域名称
+*/
+public String getAreaName() {
+return areaName;
+}
+/**
+* 设置区域名称
+* @param areaName 区域名称
+*/
+public void setAreaName(String areaName) {
+this.areaName = areaName;
+}
+/**
+* 获取区域用电成本
+* @return 区域用电成本
+*/
+public Double getAreaPowerCost() {
+return areaPowerCost;
+}
+/**
+* 设置区域用电成本
+* @param areaPowerCost 区域用电成本
+*/
+public void setAreaPowerCost(Double areaPowerCost) {
+this.areaPowerCost = areaPowerCost;
+}
+/**
+* 获取区域排名
+* @return 区域排名
+*/
+public Integer getAreaRanking() {
+return areaRanking;
+}
+
+===== PAGE 6 =====
+电网安全风险数据分析系统V1.0
+6
+/**
+* 设置区域排名
+* @param areaRanking 区域排名
+*/
+public void setAreaRanking(Integer areaRanking) {
+this.areaRanking = areaRanking;
+}
+/**
+* 获取公司名称
+* @return 公司名称
+*/
+public String getCompanyName() {
+return companyName;
+}
+/**
+* 设置公司名称
+* @param companyName 公司名称
+*/
+public void setCompanyName(String companyName) {
+this.companyName = companyName;
+}
+/**
+* 获取发电机组数
+* @return 发电机组数
+*/
+public Integer getGeneratorCount() {
+return generatorCount;
+}
+/**
+* 设置发电机组数
+* @param generatorCount 发电机组数
+*/
+public void setGeneratorCount(Integer generatorCount) {
+this.generatorCount = generatorCount;
+}
+/**
+* 获取故障电机组数
+* @return 故障电机组数
+... [truncated at page 6]

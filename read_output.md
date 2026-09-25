@@ -1,0 +1,436 @@
+文章编号：             DOI：
+
+历史遗留废弃矿山自然恢复适宜性评价指标体系建设及典型案例验证
+
+古孜拉·依力哈木1，刘冠男1 *，于  帅2，秦志平3，张  鸽2，付  博1，刘  斌3，
+
+李瑞萍1，李万增2，冯学远3，董国明2，史常青4
+
+（1. 中国地质科学院矿产资源研究所，自然资源部成矿作用与资源评价重点实验室，北京 100037；
+
+2. 河北省地质矿产勘查开发局第二地质大队（河北省矿山环境修复治理技术中心），河北 唐山 050081；3.华北地质勘查局五一九大队，河北 保定 071000；4. 北京林业大学水土保持学院，北京 100083）
+
+摘 要：历史遗留废弃矿山责任主体缺失，政府主导的单一投入修复模式难以为继。历史遗留废弃矿山自然恢复是解决该问题的有效途径，但是自然恢复适宜性定量评价及其指标体系的建设尚不完善。本文梳理废弃矿山自然恢复的发展历程、内涵及影响因素，总结各省现有的标准、规范及文件，提出历史遗留废弃矿山自然恢复适宜性评价流程及定量评价指标体系，并开展典型案例分析。矿山自然恢复的内涵是依靠生态系统自我调节能力实现正向演替，也包含少量人工辅助措施消除自然恢复的限制因子。政策与区位约束、地质环境、水热条件、土壤环境及植被恢复现状是影响矿山自然恢复适宜性的关键控制因素。当前各省（区）出台了历史遗留废弃矿山自然恢复的地方标准、规范或文件，明确了自然恢复矿山的调查、判定、监测、管护和评估的流程。本文在此基础上筛选出了四项限制性指标（政策、区位约束、土壤污染、地质灾害）和三项评价指标（土壤指标、植被指标、地形指标），对废弃矿山不同微地质单元（平台、碎石边坡、岩质边坡）分别进行定量评价，并将废弃矿山自然恢复适宜性划分为不适宜、基本适宜和适宜三个等级。结果表明，河北省玉田县历史遗留废弃矿山适宜自然恢复，所建立的自然恢复适宜性评价体系具有较强的可操作性，可为矿山自然恢复适宜性的精准判定和科学决策提供理论依据与技术支撑，推动矿山生态修复从单一人工干预向自然恢复与人工辅助相结合的模式转变，助力实现生态安全与可持续发展目标。（基于正文的修改，建议对应的完善摘要）
+
+关键词：历史遗留废弃矿山；矿山自然恢复；适宜性评价；指标体系；生态修复
+
+创新点：系统构建了包含约束性与评价性指标的分层量化评价体系，针对不同微地质单元开展差异化定量评价，明确了废弃矿山自然恢复的适应条件与分级依据。建立不适宜、基本适宜、适宜三级分级判定标准，为解决传统自然恢复缺乏统一评价标准的困境提供了系统化、可操作的科学判定框架。
+
+中图分类号：TD98；X171.4              文献标识码：A
+
+Construction of the Suitability Evaluation Index System for the Natural Restoration of Historically Abandoned Mines and Analysis of Typical Cases
+
+GUZILA Yilihamu1, LIU Guannan1, YU Shuai2,QIN Zhiping3,ZHANG Ge2, FU Bo1, LIU Bin3,
+
+LI Ruiping1, LI Wanzeng2, FENG Xueyuan3, DONG Guoming2, SHI Changqing4
+
+（1 Institute of Mineral Resources, Chinese Academy of Geological Sciences, Key Laboratory of Metallogeny and Resource Evaluation, Ministry of Natural Resources, Beijing 100037, China; 2 The Second Geological Brigade of Hebei Geology and Mineral Exploration Bureau（Hebei Province Mine Environment Restoration and Treatment Technology Center）, Tangshan 063004，China; 3 No. 519 Geological Party, North China Geological Exploration Bureau, Baoding 071000, China; 4 School of Soil and Water Conservation, Beijing Forestry University, Beijing 100083, China）
+
+Abstract: Due to the absence of responsible entities for historically abandoned mines, the single investment model for the ecological restoration of historical abandoned mines led by the government is no longer sustainable. Natural restoration of historically abandoned mines represents an effective approach to solving this problem. Nevertheless, the quantitative assessment of the suitability of natural restoration and the establishment of its index system remain imperfect. This paper comprehensively reviews the development process, connotations, and influencing factors of the natural restoration of abandoned mines. It systematically summarizes the existing standards, regulations, and documents in each province. Moreover, it proposes an evaluation process for the suitability of natural restoration of historically abandoned mines and a quantitative evaluation index system. A case study was conducted on the historically abandoned mines in Yutian County, Hebei Province, by utilizing the established natural restoration suitability evaluation system. The connotation of natural mine restoration is to achieve positive succession by relying on the self - regulatory ability of the ecosystem. Additionally, it involves a small number of artificial auxiliary measures to remove the limiting factors for natural restoration. Currently, different provincial-level administrative regions have issued local standards, regulations, or documents concerning the natural restoration of historically abandoned mines, clearly defining the procedures for the investigation, determination, monitoring, management, and evaluation of naturally restored mines. This paper selects four restrictive indicators (policies, location constraints, soil pollution, and geological disasters) and three evaluation indicators (soil indicators, vegetation indicators, and topographic indicators). It then conducts quantitative evaluations on different micro-geological units (platforms, gravel slopes, and rocky slopes) of abandoned mines respectively, and divides the natural restoration suitability of abandoned mines into three grades: unsuitable, basically suitable, and suitable.
+
+The results indicated that the studied mine is suitable for natural restoration, and the established evaluation system for natural restoration suitability is highly operational. This study can provide a theoretical basis and technical support for the accurate assessment and scientific decision-making of mine natural restoration suitability. It also promotes the transformation of mine ecological restoration from pure artificial intervention to the integrated mode of natural restoration combined with artificial assistance, and helps achieve the goals of ecological security and sustainable development.
+
+Keywords: historically abandoned mines; natural restoration of mine; suitability evaluation; index system; ecological restoration
+
+Highlights:This study systematically constructs a hierarchical quantitative evaluation system consisting of constraint and evaluative indicators and conducts differentiated quantitative evaluations for different micro-geological units, which clarifies the applicable conditions and grading basis for the natural restoration of abandoned mines. A three-level classification criterion, including unsuitable, basically suitable, and suitable grades, is established, providing a systematic and operable scientific judgment framework to solve the problem of lacking unified evaluation standards in traditional natural restoration assessment.
+
+收稿日期：    责任编辑：
+
+基金项目：自然资源部部省合作项目（编号：2024ZRBSHZ092）；地球深部探测与矿产资源勘查国家科技重大专项（编号：2025ZD1010806）。
+
+第一作者简介：古孜拉·依力哈木（1986—），女，维吾尔族，新疆伊犁人，硕士，工程师，主要从事矿山生态修复工作，E-mail：1530201801@qq.com。
+
+*通讯作者简介：刘冠男（1984—），男，汉族，河北保定人，博士，副研究员，主要从事矿山生态环境修复研究，E-mail: liu.guannan@126.com。
+
+引用格式：
+
+0  引  言
+
+矿产资源国民经济建设提供了重要能源物质保障，但是长期大规模、高强度的资源开采造成了地质灾害、水土污染、植被退化等严重的生态环境问题[1-3]。截至2018年，我国共有各类废弃矿山约9.9万座，其中非金属矿、金属矿山与能源矿山分别约7.50万座、1.17万座和1.23万座，大中型废弃矿山、小型废弃矿山分别有0.62万座和9.28万座，且开采方式以露天开采为主[4]。尽管自20世纪以来我国在历史遗留矿山生态修复方面投入大量资金，取得了显著成效，但是由于众多历史矿山责任主体的缺失，修复资金只能完全依靠政府投入，所需资金庞大，远超财政承受能力。因此政府主导的单一投入模式难以持续。
+
+自然恢复作是生态修复的重要模式之一。2023年7月17—18日习近平总书记在全国生态环境保护大会上深刻阐述了推进生态文明建设需要正确处理的“五个重大关系”，其中之一就是“自然恢复和人工修复的关系”。要求“综合运用自然恢复和人工修复两种手段，因地因时制宜、分区分类施策，努力找到生态保护修复的最佳解决方案”。这一背景下针对矿山的基于自然的解决方案（Nature-based Solution，NbS），即“矿山自然恢复”，也被广泛关注，为历史遗留废弃矿山生态修复提供了可持续发展的新路径[5-11]。近年来，国内辽宁、湖北等省份先后出台了矿山自然恢复的地方标准，但总体来说矿山自然恢复体系尚不完善，且缺少定量评价。这导致一些划为自然恢复的矿山自然恢复效果不佳，不利于矿山自然恢复在实际中的推广和应用。
+
+本文通过调研和收集国内外政策和文献资料，介绍矿山自然恢复的定义和内涵，筛选出影响矿山自然恢复的关键要素和条件，构建划分不同微地质单元的矿山自然恢复适宜性定量评价指标体系，并将适宜性划分成不同等级，为矿山自然恢复适宜性精准判定提供思路。
+
+# 1  矿山自然恢复的定义及内涵（此节建议加强，可从别人是如何定义的，我们是如何定义的；别人的自然恢复内涵包括哪些，此文现在表达的内涵是哪些？）
+
+自然恢复本身在生态领域讨论和研究较多，也常被写为自然修复（natural restoration），目前国内认为两者含义相同[12]。我国2022年发布并实施的《矿山生态修复技术规范 第1部分：通则》（TD/T 1070.1—2022）中在矿山环境这一特定条件下对自然恢复进行了定义，是指对生态系统停止人为干扰，以减轻负荷压力，依靠生态系统的自我调节能力和自组织能力使其向有序的方向自然演替和更新恢复[13]。矿山自然恢复这一概念出现较早，多针对土地复垦，是自然恢复内涵的延伸。胡振琪等讨论了煤矿区生态环境的自修复、自然修复和人工修复之间的关系，并将煤矿区自然修复定义为“指靠自然力量（营力）修复的一种过程或方法”[6]。有学者认为，矿山自然恢复应该较纯粹，不应该有人工干预。但是笔者认为广义的矿山自然恢复更应强调适度人为干预，去除生态胁迫因子，发挥矿山生态环境自营力的主体作用，最终实现矿山生态的自我修复。
+
+矿山自然恢复周期较长，植被恢复受到多方面的影响，国内外相关学者针对矿山自然恢复过程做了大量的研究。1997年，李青丰等研究了准格尔煤田排土场植被自然恢复，认为植被自然恢复是一个漫长的过程，人工种草非常必要[14]。Bradshaw认为矿山自然恢复过程中土壤发育是关键，其过程受到土壤物理性质、养分和污染物等问题的影响[15]。郝婧等发现煤矸石场植被自然恢复初期草本植物地上生物量呈现递减趋势[16]。翟正江等发现黄土高原某排土场矿山自然恢复中植物物种多样性指数和地上生物量在恢复18年后达到最大，之后随恢复年限增加而减小[17]。近年来，国内外学者还将NbS概念引入到了矿山生态修复当中，矿山自然恢复与NbS的内涵不谋而合[5,8,18-21]。2002年，NbS在国际自然保护联盟（International Union for Conservation of Nature，IUCN）内部通过协商过程制定并达成一致[22]。2021年6月，自然资源部与IUCN发布了《IUCN基于自然的解决方案全球标准使用指南》中文版以及《基于自然的解决方案中国实践典型案例》，对矿山自然恢复具有重要意义[23]。近年来受到广泛关注的“以自然修复为主、人工修复为辅”的理念也正是NbS理念在我国矿山生态修复领域的具体实践。
+
+# 2  自然恢复的影响因素及适宜条件分析
+
+2.1 政策管理
+
+近年来对矿山自然恢复影响因素及适宜性研究逐渐增加[17-18,23-26]。大多数研究主要关注矿山自然恢复理论和影响因素。针对历史遗留露天废弃矿山的政策限制条件多从政府部门管理角度出发，往往是判定自然恢复的先决条件（图1）。政府部门发布的政策指导文件适用范围多为历史遗留废弃矿山。除此之外，需要自然恢复的矿山还应具备较少人为干扰这一必要条件，防止人为活动影响自然恢复进程。2023年湖南省发布的《湖南省历史遗留矿山自然恢复指导意见（试行）》中还规定矿山所在区域要符合当地的国土空间规划，且在三区两线（自然保护区、重要景观区、居民集中生活区的周边和重要交通干线、河流湖泊岸线）直观可视范围外。
+
+2.2 立地条件
+
+地质环境、水热条件、土壤环境和植被恢复现状也是影响矿山是否可自然恢复的关键因素。王明君等认为矿山自然恢复的判别条件包括地质灾害隐患、地形地貌、表层土壤和植被覆盖[26]。朱晓华等认为自然恢复的限制指标包括安全功能类（如地质灾害危险性等）和保障植被生长基本需求类（如降水、积温、有效土层厚度等）[9]。
+
+一般研究认为纳入自然恢复的历史遗留矿山应确保图斑内地质灾害不发育，或者地质危害程度低[7,26]。划入自然恢复的矿山一般离人员活动密集区相对较远，没有威胁对象。地貌的搬运堆积等过程可对植被产生直接的作用，通过坡度、起伏度等形态的变化控制影响植被生长所需养分的资源分配；同一地点，不同海拔植被类型等也呈现显著差异[27]。地形还可以通过调整水热分配和土壤发育进而影响植被生长。矿山坡度和边坡风化程度直接影响植被定植难度，坡向和海拔直接影响水热条件，不同朝向斜坡植被种类也可呈现显著差异[28-29]。不同矿山微地质单元，如平台、岩质边坡、碎石边坡等，其坡度、边坡风化程度、土壤环境、水热条件存在显著差异。可见地形地貌是影响自然恢复适宜性的关键条件。（归纳表述一下，如地貌要素影响？，微地形要素影响？）
+
+水热条件可直接影响植被恢复情况，影响生态系统的演化进程，是判定矿山自然恢复适宜性的关键指标之一。比如降水是矿山自然恢复过程中植被需水的主要来源；温度和光影响植被光合作用，对植被种类的筛选也起到了决定性的作用[30]。同时水热条件还可影响有机碳、磷、氮等土壤肥力指标，进而影响矿山恢复效果[31-32]。研究表明归一化植被指数（Normalized Difference Vegetation Index，NDVI）与气温多呈负相关；与降水和土壤湿度呈正相关[33]。但自然恢复判定区域与参照生态系统基本一致，水热条件往往不作为自然恢复适宜性评价的判定指标。
+
+图1  废弃矿山自然恢复的影响因素
+
+Fig .1  Impact factors of natural restoration for abandoned mines
+
+土壤可为植被生长提供必要的水分、养分，因此矿山自然恢复还需要具备有效的土壤层[9,34]。土壤重金属等有毒有害物质、理化性质及肥力是矿山自然恢复的关键判断与监测指标[14, 35]。矿山开采主要导致土壤重金属污染，且一般认为具有土壤污染的矿山不适宜自然恢复。目前我国土壤重金属的标准主要针对农田土壤的《土壤环境质量 农用地土壤污染风险管控标准（试行）》(GB 15618—2018)和针对建设用地的《土壤环境质量 建设用地土壤污染风险管控标准（试行）》(GB36600—2018)。这两个标准主要根据土壤重金属对人体健康风险的影响发布的标准。矿山生态修复中土壤重金属等污染应更多关注土壤质量对植被恢复的影响，因此对于矿山生态修复过程中的重金属等污染阈值还需进一步厘清。尽管矿山土壤是否污染是判定矿山是否可以进行自然恢复的先决条件，但是对于污染程度较低的矿山，土壤重金属也会影响植物正常生长，因此土壤重金属含量依然可以作为自然恢复的定量指标进行计算。矿山自然恢复还受到肥力、理化性质等土壤条件的限制，但随着矿山自然恢复的进程，土壤肥力和理化性质也会得到显著改善[36]。
+
+从管理角度判定矿山是否符合自然恢复的条件还取决于其是否具备基本的生态环境条件，即植被现状是否可实现废弃矿山生态系统的正向演替。因此生态指标中的植被覆盖度、生物多样性等是废弃矿山自然恢复的关键判定指标。（这个阶段落脚点应该是自然恢复时间长短）
+
+# 3  我国矿山自然恢复标准及政策文件比较分析
+
+3.1 自然恢复标准
+
+为了加强矿山自然恢复的管理，辽宁、湖北、内蒙古自治区、江西和宁夏回族自治区等五个省份出台了废弃矿山自然恢复的地方标准规范（宁夏回族自治区标准2026年6月18日挂网征求意见），明确了自然恢复矿山的调查、判定、监测、管护和评估的流程（表1）。辽宁的《矿山废弃地植被自然恢复技术规程》（DB21/T 3702—2023），提出了废弃矿山自然恢复的必要条件，是全国第一个正式发布的关于矿山自然恢复的地方标准。湖北省的《废弃露天矿山生态环境自然恢复标准》（DB42/T 2421—2025），提出结合矿山生态需求对生态环境问题进行自然恢复适宜性分级判断。内蒙古自治区出台地方标准《历史遗留废弃矿山自然恢复判定规范》（DB15/T 4280—2026），要求开展参照生态系统的调查，并规定了历史遗留矿山废弃地自然恢复判定的条件。江西省的《废弃矿山自然恢复技术规范》（DB36/T 2221—2026），特点在于提出自然恢复适宜性指数，对自然恢复适宜性量化和分级。宁夏回族自治区的《矿山自然恢复认定规程》对宁夏进行了差异化分区，划分为北部引黄灌溉平原区、中部干旱草原区、南部黄土高原区3个一级生态修复分区及22个二级分区，并根据分区确定参照生态系统。总体来看，已发布的地方标准废弃矿山的自然恢复判定条件相似，主要为地质灾害、水土污染和植被恢复情况。
+
+3.2 自然恢复政策文件
+
+除此之外，安徽、山东、湖南、广西、新疆和西藏等省（自治区）发布了矿山自然恢复治理的文件或通知，明确了历史遗留废弃矿山的实施条件、工作程序等流程（表1）。其中最核心的自然恢复的适用条件主要包括：无地质灾害、无水土污染、具备自然恢复的水土条件、植被覆盖度趋向正向增长等几方面。同时新疆和西藏等地区因其独特的生态环境条件，相关文件还提出了有针对性的废弃矿山自然恢复适用条件。新自然资源办函〔2024〕219号文中明确新疆荒漠区周边土地利用现状地类为沙地、裸土地、裸岩石砾地的，满足无地质灾害、地形地貌协调和无水土污染的要求即可判定为自然恢复图斑，突破了以恢复为植被判定的思路。西藏自然资发〔2025〕19号中明确矿山水土条件欠缺，水土、气候、交通等条件不满足植树种草生态修复需求；或植树种草措施也难以实现修复效果；或修复难度大、成本高，生态修复与生态效益不匹配的也可作为自然恢复适用条件之一。
+
+尽管相关省份出台了废弃矿山自然恢复的地方标准，且多个省份发布了历史遗留矿山自然恢复判定标准的文件，但是目前历史遗留废弃矿山自然恢复适宜性评价指标体系仍然不完善，且缺少定量评价。因此历史遗留废弃矿山自然恢复适宜性定量评价指标体系建设具有重要意义。
+
+表1  废弃矿山自然恢复地方标准及地方政策文件
+
+Table 1  Local standards and policy documents of natural restoration for abandoned mines
+
+| 省份 | 标准或文件名称 | 标准编号或文件文号 | 发布时间和实施时间 | 特点或自然恢复判定标准 |
+| --- | --- | --- | --- | --- |
+| 辽宁 | 矿山废弃地植被自然恢复技术规程 | DB21/T 3702—2023 | 2023年3月30日发布，2023年4月30日实施 | 提出了必要条件（无地质灾害或地质灾害可能性较小、无水土污染、地质稳定且地形地貌与周边协调、植被覆盖度≥50%）和充分条件（评估区植被平均高度或平均盖度或平均群落物种多样性与生态恢复参照系相差小于20%；群种包含生态恢复参照系建群树种至少2种以上） |
+| 湖北 | 废弃露天矿山生态环境自然恢复标准 | DB42/T 2421—2025 | 2025年8月20日发布，2025年10月20日实施 | 结合矿山生态需求对生态环境问题进行自然恢复适宜性分级判断。自然恢复还可以采取围护抚育、播撒植物种子、设立建议排水沟、警示陪等辅助措施 |
+| 内蒙古 | 历史遗留废弃矿山自然恢复判定规范 | DB15/T 4280—2026 | 2026年1月30日发布，2026年3月1日实施 | 调查内容包含参照生态系统调查。自然恢复判定条件：①地质灾害弱发育，遭受地质灾害可能性小；②地形地貌与周围协调；③有利于植被恢复的表层土壤；④已经形成稳定的植被覆盖 |
+| 江西 | 废弃矿山自然恢复技术规范 | DB36/T 2221—2026 | 2026年2月2日发布，2026年8月1日实施 | 对参照生态系统进行了要求。提出自然恢复适宜性指数，对自然恢复适宜性量化和分级 |
+| 宁夏 | 矿山自然恢复认定规程 | / | 2026年6月18日挂网征求意见 | 分区差异化，划分为北部引黄灌溉平原区、中部干旱草原区、南部黄土高原区三个一级生态修复分区及22个二级分区，根据分区确定参照生态系统。必要条件：无地质灾害风险，植被覆盖度等生态指标呈稳定或正增长趋势；充分条件：与参照生态系统差距小于20%或群落中包含参照系统建群树种2种以上 |
+| 安徽 | 安徽省自然资源厅关于规范废弃露天矿山采取自然恢复方式进行治理的通知 | 皖自然资修函[2020]34号 | 2020年3月3日 | 自然恢复条件：①责任主体为政府；②无地质灾害；③无水土污染；④不在“三线三边”范围内；⑤具备水土条件，植被恢复良好 |
+| 山东 | 山东省自然资源厅关于进一步规范历史遗留废弃露天开采矿山采取自然恢复方式进行治理的通知 | 鲁自然资字[2022]104号 | 2022年8月2日 | 自然恢复条件与安徽省文件相同，但又增加了自然恢复认定标准 |
+| 湖南 | 关于印发《湖南省历史遗留矿山自然恢复指导意见（试行）》的通知 | 湘自资办发[2023]58号 | 2023年7月20日 | 自然恢复认定标准：①无地质灾害或局部地质灾害但无威胁对象；②无水土污染；③废弃设备和构筑物拆除或清运完毕；④符合国土空间规划；⑤植被覆盖度>75%；⑥连续3年植被覆盖率和郁闭度等呈正向增长 |
+| 新疆 | 自治区历史遗留废弃矿山自然恢复方式销号图斑工作指南(试行) | 新自然资源办函〔2024〕219号 | 2024年12月20日 | 自然恢复判定标准：①无地质灾害或局部地质灾害但无威胁对象；②地形平缓、地貌稳定、边坡满足技术规范要求、无固体废弃物；③无水土污染；④具备适宜乡土植物恢复的水土条件；⑤植被覆盖度达到周边的30%。同时规定若周边土地利用现状地类为沙地、裸土地、裸岩石砾地的，同时符合上述①至③即可判定为达到自然恢复状态 |
+| 广西 | 广西壮族自治区自然资源厅办公室关于印发《广西壮族自治区历史遗留矿山自然恢复技术指南》的通知 | 桂自然资办〔2024〕250号 | 2024年12月30日 | 自然恢复适用条件：①无地质灾害或局部地质灾害但无威胁对象；②除高陡边坡和裸露岩体，水土和水热条件良好，植被自然恢复趋势明显；③区内生产设备拆除完毕；④涉及生态保护红线、自然保护区、饮用水水源保护区、风景名胜区等需符合相关规定和要求；⑤评估可保留的坑塘水面，已落实防溺水相关安全管护措施 |
+| 西藏 | 西藏自治区自然资源厅关于印发《西藏自治区历史遗留废弃矿山生态自然恢复认定指导意见（试行）》的通知 | 藏自然资发〔2025〕19号 | 2025年9月24日 | 自然恢复适用条件：①责任主体为政府；②地形地貌完整与周边协调；③无地质灾害或局部地质灾害但无威胁对象；④无水土污染；⑤地理位置偏远；⑥植被自然恢复趋势明显，具备自然恢复的水土条件，或者是矿山不具备植树种草等修复条件，或者修复成本高，生态修复效益不显著 |
+
+4  自然恢复适宜性评价指标体系建设
+
+4.1  自然恢复适宜性评价指标及流程
+
+围绕废弃矿山自然恢复，本次研究依据矿山自然恢复影响因素，在现有地方标准、政策文件的基础上，构建了完整的定量评价，补齐了原有标准难以量化分析的缺陷。适宜性指标选择遵循目标性原则、科学性原则、整体性原则、可操作性原则、定量与定性相结合原则，根据矿山自然恢复的影响关键因素及前人对矿山自然恢复指标体系建设的相关成果，筛选出四项限制性指标和三项评价指标（表2），其中土壤污染状况同时作为限制性指标与评价指标。水热条件属于区域背景要素，在同一评价单元内保持稳定一致，且无空间分异特征，因此将其作为区域性背景条件，不纳入具体评价指标体系。限制性指标主要是政策、区位约束和地质灾害，直接判定是否可进行废弃矿山的自然恢复。评价指标分为土壤指标、植被指标和地形指标三个一级指标。一级指标又对应着二级指标，部分二级指标还有三级指标。三级指标主要用于二级指标的定量分析。可以通过层次分析法（Analytic Hierarchy Process）对各级指标重要性赋予权重，二级指标和三级指标在进行标准化后可进行定量计算，最终形成废弃矿山自然恢复适宜性定量评价。
+
+表2  废弃矿山自然恢复适宜性评价指标
+
+Table 2  Adaptability evaluation indicators for natural restoration of abandoned mines
+
+| 限制性指标 |  |  |
+| --- | --- | --- |
+| 一级指标 | 二级指标 | 三级指标 |
+| 政策 | 是否在重要区域可视范围内 | / |
+| 区位约束 | 区位约束 | 与市区乡镇距离 |
+| 土壤污染 | 开采过程中是否导致土壤重金属污染 | 重金属污染等级 |
+| 地质环境 | 地质灾害 | 地灾危害等级 |
+|  |  | 威胁对象 |
+| 评价指标 |  |  |
+| 一级指标 | 二级指标 | 三级指标 |
+| 土壤指标 | 土石比 | / |
+|  | 厚度 | / |
+|  | pH | / |
+|  | 有机质 | / |
+|  | 污染指标 | 重金属（As/Cd/Cr/Cu/Hg/Ni/Pb/Zn） |
+| 植被指标 | 植被覆盖度 | / |
+|  | 生物多样性 | / |
+| 地形指标 | 坡度 | / |
+|  | 坡向 | / |
+
+废弃矿山自然恢复流程如图2所示。根据不同指标条件，先进行政策、位置约束、地质灾害判断、是否有污染（有污染不适宜，为约束性）、是否为耕地（耕地不适宜，为约束性）。对于不符合相关政策规定、距离人员密集区较近，且地质灾害风险较高、有明显威胁对象的废弃矿山，直接判定为人工辅助或生态重建。对于满足限制性条件的废弃矿山，按照地形地貌划分，将其划分为平台、碎石边坡和岩质边坡三种地质微单元类型，并计算各种地形面积占比。然后针对每个地质微单元，选取土壤指标、植被指标和地形指标进行定量评价。每个微地质单元面积占比与指标得分的乘积之和即为废弃矿山自然恢复适宜性评价的最终得分。
+
+图2  历史遗留废弃矿山自然恢复适宜性评价流程（流程图修改建议：1人工辅助修改为自然恢复《目的是与工程修复相对应》，生态重建修改为工程修复；2红色的菱形还应该加入是否存在土壤污染，是否是耕地等，都是判定自然恢复的首要条件；3地形地貌建议修改为“微地形地貌”；4土壤指标中污染指标必须提级为红色菱形内容）
+
+Fig .2  Suitability evaluation process for the natural restoration of historically abandoned mines
+
+4.2  自然恢复适宜性评价方法构建
+
+### 4.2.1确定评价指标权重（以下部分按照修改后的流程进行相应的修改完善）
+
+采用层次分析法针对一级指标和二级指标分别建立递阶层次结构模型，层层分解，对评价指标进行权重计算[37-40]。通过组织10位专家对各项指标权重进行打分对比各评价指标重要性，并通过两两对比重要性来建立比较矩阵。a与b指标相同重要得1分，a与b指标稍微重要得3分；a与b指标明显重要得5分；a与b指标强烈重要得7分；a与b指标极端重要得9分。2、4、6和8代表相邻判断的中间值。据此构成成对比较矩阵A，具体公式见式（1）：
+
+（1）
+
+式中：=(i≠j,如A比B重要性为3，则B比A为1/3)；n为矩阵A的阶数。
+
+用特征根法计算权重，先计算判断矩阵每行元素乘积（）：
+
+=()     （2）
+
+再计算每行乘积的次方根（）：
+
+=      （3）
+
+最后归一化得到权重（，权重之和为1）：
+
+=     （4）
+
+鉴于不同微地质单元自然恢复的影响因素具有差异性，划分岩质边坡、碎石土边坡、平台三类微地质单元开展独立评价，分别计算评价指标权重。一级指标土壤指标、植被指标和地形指标归一化权重及二级指标归一化权重如表3所示。污染指标存在三级指标，八种重金属的权重均为0.125。
+
+表3  各级指标权重
+
+Table 3  Weights of indicators at various levels
+
+|  | 一级指标 |  |  | 权重 | 二级指标 |  |  |  |  |  |  |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+|  |  |  |  |  | 土壤指标 |  | 权重 |  | 植被指标 |  | 权重 |  | 地形指标 |  | 权重 |  |
+| 岩质边破 | 植被指标 |  |  | 0.45 | / |  | / |  | 植被覆盖度 |  | 0.67 |  | 坡度 |  | 0.64 |  |
+|  | 地形指标 |  |  | 0.55 | / |  | / |  | 生物多样性 |  | 0.33 |  | 坡向 |  | 0.36 |  |
+| 碎石土<br>边坡 | 土壤指标 |  |  | 0.44 | 土石比 |  | 0.25 |  | 植被覆盖度 |  | 0.64 |  | 坡度 |  | 0.67 |  |
+|  | 植被指标 |  |  | 0.31 | 土层厚度 |  | 0.25 |  | 生物多样性 |  | 0.36 |  | 坡向 |  | 0.33 |  |
+|  | 地形指标 |  |  | 0.25 | pH |  | 0.17 |  |  |  |  |  |  |  |  |  |
+|  |  |  |  |  | 有机质 |  | 0.17 |  |  |  |  |  |  |  |  |  |
+|  |  |  |  |  | 污染指标 |  | 0.17 |  |  |  |  |  |  |  |  |  |
+| 平台 | 土壤指标 |  |  | 0.54 | 土石比 |  | 0.25 |  | 植被覆盖度 |  | 0.61 |  | / |  | / |  |
+|  | 植被指标 |  |  | 0.46 | 土层厚度 |  | 0.25 |  | 生物多样性 |  | 0.39 |  | / |  | / |  |
+|  |  |  |  |  | pH |  | 0.17 |  |  |  |  |  |  |  |  |  |
+|  |  |  |  |  | 有机质 |  | 0.17 |  |  |  |  |  |  |  |  |  |
+|  |  |  |  |  | 污染指标 |  | 0.17 |  |  |  |  |  |  |  |  |  |
+
+通过一致性检验避免全因素对判断矩阵构成干扰，保证构造矩阵排序的正确性。计算对比矩阵的最大特征值（λmax）：
+
+=   （5）
+
+式中是矩阵A与权重向量W =乘积的第个元素。
+
+计算一致性指标（CI）：
+
+CI=     （6）
+
+计算一致性比例（CR）：
+
+CR=      （7）
+
+式中RI为平均随机一致性（查表可得，如n=2时，RI=0；n=3时RI=0.58；n=4时，RI=0.90；n=5时，RI=1.12）。当CR<0.1时，判断矩阵满足一致性要求。
+
+对于污染指标中的三级指标，考虑到重要性相当，权重平均分配。
+
+### 4.2.2 适宜性评价因子计算
+
+各指标通过标准化处理，具体公式见式（8）[44]：
+
+（8）
+
+式中为指标的标准化值；为指标值；和表示分别为指标最大值、最小值（或理想极值）。各指标标准化过程中，土壤理化性质中的土石比、土壤厚度和pH值理想值根据矿山修复实际情况确定，分别为0.8，20 cm和5~9。pH值用适中指标的标准化方法计算。有机质推荐参考《全国第二次土壤普查养分等级划分标准》中二等（较丰富）的最低值，为30g/kg；重金属的极值推荐参考《绿化种植土壤》（CJT 340—2016）中土壤重金属含量IV级的最高值，镉、汞、铅、铬、砷、镍、铜、锌分别为2、2、530、400、45、220、600和800 mg/kg；植被覆盖度和植物多样性指标（Shannon-Wiener多样性指数）参考参照生态系统，分别为75%和0.7；地形指标分为坡度和坡向，坡度依据《新一轮退耕还林还草总体方案》发改西部〔2014〕1772 号文，把 25°作为陡坡重要分界，坡度＞25°水土流失强烈，不适宜生态修复优先封育、自然恢复。坡向中阴坡及半阴坡水分条件更为优越，土壤蒸发损耗较弱，相较于阳坡更利于植被定植与群落发育，矿山自然恢复整体状况优于阳坡，因此阳坡、阴阳坡、阳坡分别赋值0.2、0.6、1。
+
+每个微地质单元的自然恢复适宜性评价因子（F'）具体计算公式见式（9）：
+
+（9）
+
+式中xij为第i个二级指标中第j个三级指标标准化后的指标值。
+
+针对整个矿山，最终自然恢复适宜性评价因子（F）为：
+
+式中S为各微地质单元面积占比。
+
+### 4.2.3历史遗留废弃矿山自然恢复适宜性评价等级划分
+
+结合我国各省自然恢复出台的政策和标准、我国历史遗留废弃矿山的分布特点、自然恢复实践经验，以及各类控制因子对自然恢复过程的影响，可根据废弃矿山自然恢复适宜性得分，将其划分为不适宜、基本适宜和适宜3个等级，划分标准见表4。
+
+不适宜自然恢复的历史遗留矿山主要受限制性条件约束或者自然恢复影响因子不适合自然恢复，需要开展生态重建或者人工辅助措施。基本适宜自然恢复的历史遗留矿山生态本底良好，土壤、生态和地质条件能够支撑植被自然生长，同时为了加快生态系统正向演替，可采取补种、飞播等简单的人工辅助措施。对于适宜自然恢复的历史遗留废弃矿山，各影响因子均能够满足自然恢复需求，且目前植被覆盖度高、生物多样性好，生态系统稳定。
+
+表4  历史遗留废弃矿山自然恢复适宜性评价等级
+
+Table  4 Adaptability evaluation grades for natural restoration of historical abandoned mine
+
+| 等级 | 适宜性 | F | 核心内涵 | 措施 |
+| --- | --- | --- | --- | --- |
+| Ⅰ | 不适宜 | F<0.3 | 存在政策限制、区位约束、地质灾害等限制性条件或区域生态本底较差，自然恢复影响因子（如土壤贫瘠、水文匮乏、地形破碎严重）严重制约自然恢复 | 生态重建、人工辅助 |
+| Ⅱ | 基本适宜 | 0.3≤F≤0.7 | 生态本底良好，核心自然恢复影响因子基本满足自然恢复需求，土壤、水文、地形等条件能够支撑植被自然生长 | 自然恢复为主，同时可进行封闭场地和少量补种、补植和飞播等简单的人工辅助措施 |
+| Ⅲ | 适宜 | F≥0.7 | 生态本底良好，各自然恢复影响因子均能满足自然恢复需求，土壤肥沃、水文充足、地形相对平缓，自然演替速度快 | 自然恢复 |
+
+5  河北省典型历史遗留废弃矿山自然恢复适宜性评价（依据流程及指标体系做相应的修改完善）
+
+矿山位于河北省唐山市玉田县孤树镇，北靠燕山、南邻兰泉河，地势北高南低。北部土壤为淋溶褐土和草甸褐土，南部为平原洼地，土壤多潮土。研究区为温带季风气候，四季分明，冬季盛行西到西北风，夏季盛行东到东南风。全年平均气温11.2 ℃，最高气温40.2 ℃，最低气温-21.9 ℃，无霜期193天，年均降水量548毫米，适合多种作物生长。该矿山前期为白云岩采石场，用于生产建筑石渣、石粉，已停产多年。该矿山图斑面积约5.6公顷，距离乡镇约6公里，无地质灾害隐患点，可进行自然恢复适宜性定量评价。图斑中岩质边坡、碎石边坡、平台分别占矿区总面积的13.86%、62.95%、23.19%（图3）。
+
+图3  河北省典型历史遗留废弃矿山遥感图
+
+Fig .3  Remote sensing images of Typical Historical Abandoned Mines in Hebei Province
+
+调查矿山指标数据和适宜性评价结果如表5所示。调查矿山岩质边坡植生基质以裂隙土为主，土石比计为0，碎石边坡和平台土石比根据表层土壤样品称重获得，分别为0.34和0.56。土壤厚度有限，计为0 cm，碎石边坡和平台土壤厚度分别为10和30 cm。碎石边坡和平台土壤pH分别为9.24和8.72；有机质分别为4.89和10.92 g/kg。土壤重金属含量均低于《绿化种植土壤》（CJT 340—2016）。岩质边坡、碎石边坡和平台植被覆盖度通过无人机正射影像获得，分别为68.88%，87.92%和58.42%；生物多样性通过植被调查，并计算Shannon-Wiener多样性指数获得，分别为0，0.60和0.72。参照4.2节计算废弃矿山自然恢复适宜性评价因子，结果为0.76，判定该废弃矿山自然恢复适宜自然恢复。
+
+表5  典型矿山调查及自然恢复适宜性评价结果
+
+Table 5  Results of typical mine surveys and the suitability evaluation of natural restoration
+
+| 指标 |  |  | 岩质边破 | 碎石边坡 | 平台 |
+| --- | --- | --- | --- | --- | --- |
+| 土壤指标 | 土石比（cm） |  | 0 | 0.34 | 0.56 |
+|  | 土层厚度（cm） |  | 0 | 10 | 30 |
+|  | pH |  | 0 | 9.24 | 8.72 |
+|  | 有机质（g/kg） |  | 0 | 4.89 | 10.92 |
+|  | 污染指标 | Hg（mg/kg） | 0 | 0.05 | 0.02 |
+|  |  | As（mg/kg） | 0 | 5.17 | 3.13 |
+|  |  | Ni（mg/kg） | 0 | 12.60 | 12.33 |
+|  |  | Cu（mg/kg） | 0 | 11.70 | 11.14 |
+|  |  | Cd（mg/kg） | 0 | 0.04 | 0.09 |
+|  |  | Pb（mg/kg） | 0 | 6.50 | 9.98 |
+| 植被指标 | 植被覆盖度（%） |  | 68.88 | 87.92 | 58.42 |
+|  | 生物多样性 |  | 0 | 0.60 | 0.72 |
+| 地形指标 | 坡度（º） |  | 63.33 | 28.75 | 0 |
+|  | 坡向 |  | 阴阳坡 | 阳坡 | 0 |
+| 地质单元得分 |  |  | 0.56 | 0.74 | 0.85 |
+| 最终得分 |  |  | 0.76 |  |  |
+
+注：典型矿山土壤污染指标未检测Cr和Zn，从矿山类型看矿山土壤未受Cr和Zn污染
+
+6  结  论
+
+1）矿山自然恢复的内涵是对矿山生态系统停止人为干扰，以减轻负荷压力，依靠生态系统的自我调节能力和自组织能力使其向有序的方向自然演替和更新恢复。人工辅助去除限制因子，发挥矿山生态恢复力的主体作用，最终实现矿山的生态的自我修复，是广义的矿山自然恢复。对应完善
+
+2）除政策、区位、地质灾害、土壤污染、地类约束条件外，地形地貌、水热条件、土壤和植被恢复现状是影响矿山是影响废弃矿山自然恢复的关键因素。
+
+3）相关省份出台了废弃矿山自然恢复的地方标准或历史遗留矿山自然恢复判定标准的文件，明确了自然恢复矿山的判定、评估、监测、管护和评估的流程。但是目前历史遗留废弃矿山自然恢复适宜性评价指标体系仍然不完善，且缺少定量评价。
+
+4）废弃矿山自然恢复适宜性评价指标的选择遵循目标性原则、科学性原则、整体性原则、可操作性原则、定量与定性相结合原则。根据矿山自然恢复的影响关键因素及前人对矿山自然恢复指标体系建设的相关成果，筛选出三项限制性指标和三项评价指标。分别开展废弃矿山微地质单元自然恢复适宜性评价，结合微地质单元面积占比，定量评价废弃矿山自然恢复适宜性，最终进行废弃矿山自然恢复适宜性评价等级划分。河北省玉田县典型废弃矿山自然恢复适宜性评价结果表明该矿山适宜自然恢复，所建立的评价体系具有可操作性、科学性与实用性。
+
+5）本文尚存在一定局限性，一是不同区域水热条件、地形地貌差异显著，评价指标标准化过程中的理想值取值需结合具体区域进行细化，后续需针对不同气候区、地貌区开展针对性研究，优化指标取值标准；二是对矿山自然恢复的长期动态演化过程关注不足，未深入探讨各影响因素在不同恢复阶段的作用机制；三是微地质单元的划分方法是否适合所有矿山，普遍适用性还需更多矿山案例检验；四是参与打分的专家数量偏少，易造成评价结果存在主观偏差；五是仅选取单一典型矿山作为验证案例，案例代表性不足，验证效果有限。这些将是今后开展研究的重点方向。
+
+参考文献（References）：简化一部分文献
+
+张进德, 杨利亚, 田磊, 等. 矿山生态修复技术方法研究与展望[J]. 水文地质工程地质, 2025, 52(4): 16-25.
+
+ZHANG Jinde, YANG Liya, TIAN Lei, et al. Exploring methods and technical measures for mine ecological restoration[J]. Hydrogeology & Engineering Geology, 2025, 52(4): 16-25.
+
+郑玉慧, 李小慧, 侯合明, 等. 豫北某煤矿区土壤重金属污染特征及风险评价 [J].中国矿业, 2026, 35(3): 249-256.
+
+ZHENG Yuhui, LI Xiaohui, HOU Heming, et al. Characteristics and risk assessment of soil heavy metal pollution in a coal mining area in North Henan P rovince[J]. China Mining Magazine, 2026, 35(3): 249-256.
+
+[3] 梅振然, 赵中秋, 杨侨, 等.我国金属矿山废弃地生态修复研究进展及趋势分析[J]. 中国矿业, 2024, 33(10): 102-118.
+
+MEI Zhenran, ZHAO Zhongqiu, YANG Qiao, et al. Research progress and trend analysis of ecological restoration of metal mine wasteland in China[J]. China Mining Magazine, 2024, 33(10): 102-118.
+
+[4] 李海东, 王楠, 闫庆武, 等. 修复生态学视角下城镇工矿区生态修复综合体建设[J]. 生态与农村环境学报, 2025, 41(1): 1-10.
+
+LI Haidong, WANG Nan, YAN Qingwu, et al. Construction of Ecologica Restoration Complexin Urban Industrial and Mining Areas from the Perspective of Restoration Ecology[J]. Journal of Ecology and Rural Environment, 2025, 41(1): 1-10.
+
+[5] Hong L, Feng S, Li P, et al, 2025. Ecological Restoration and Regeneration Strategies for the Gumi Mountain Mining Area in Wuhan Guided by Nature-Based Solution (NbS) Concepts[J]. Sustainability, 2025: 1913.
+
+[6] 胡振琪, 龙精华, 王新静. 论煤矿区生态环境的自修复、自然修复和人工修复[J]. 煤炭学报, 2014, 39(8): 1751-1757.
+
+Hu Zhenqi, Long Jinghua, Wang Xinjing. Self-healing, natural restoration and artificial restoration of ecological environment for coal mining[J]. Journal of China Coal Society, 2014, 39(8): 1751-1757.
+
+[7] 李志华, 刘永涛, 渠惠淼, 等. 北方建材类废弃矿山以自然恢复模式修复讨论——以天津市为例[J]. 环境生态学, 2025, 7(08): 143-148.
+
+LI Zhihua, LIU Yongtao, QU Huimiao, et al. Discussion on the restoration of abandoned mines in northern building materials through natural restoration mode——A case study of Tianjin[J]. Environmental Ecology, 2025, 7(8): 143-148.
+
+[8] 王金满, 冯宇, 叶甜甜, 等. 基于NbS的全生命周期矿山生态修复理论框架及技术路径[J]. 煤炭科学技术, 2025, 53(1): 377-391.
+
+WANG Jinman, FENG Yu, YE Tiantian, et al. Theoretical framework and technical pathway for the integrated eco-logical restoration throughout the overall life cycle of mining based on NbS[J]. Coal Science and Technology, 2025, 53(1): 377-391.
+
+[9] 朱晓华, 王立威, 王英男, 等. 矿山自然恢复政策研究及模式探索[J]. 中国土地, 2023, (11): 21-23.
+
+ZHU Xiaohua, WANG Liwei, WANG Yingnan, et al. Research on policies and model exploration of mine natural restoration[J]. China Land, 2023, (11): 21-23.
+
+[10] 廖红为, 马俊飞, 黄奇波, 等. 岩溶区矿山修复新思路：人与自然和谐发展[J]. 中国矿业, 2025, 34(S2): 843-846.
+
+LIAO Hongwei, MA Junfei, HUANG Qibo, et al. New approach to mine restoration in karst regions: harmonious development of man and nature[J]. China Mining Magazine, 2025, 34(S2): 843-846.
+
+[11] 梅振然, 赵中秋, 杨侨, 等. 我国金属矿山废弃地生态修复研究进展及趋势分析[J]. 中国矿业, 2024, 33(10): 102-118.
+
+MEI Zhenran, ZHAO Zhongqiu, YANG Qiao, et al. Research progress and trend analysis of ecological restoration of metal mine wasteland in China[J]. China Mining Magazine, 2024, 33(10): 102-118.
+
+[12]张绍良, 张黎明, 侯湖平, 等. 生态自然修复及其研究综述[J]. 干旱区资源与环境, 2017, 31(01): 160-166.
+
+ZHANG Shaoliang, ZHANG Liming, HOU Huping, et al. Research overview on natural restoration of ecosystem[J]. Journal of Arid Land Resources and Environment , 2017, 31(1): 160-166.
+
+[13] 中华人民共和国自然资源部. 矿山生态修复技术规范第1部分: 通则: TD/T 1070.1—2022[S]. 北京: 地质出版社, 2022.
+
+[14] 李青丰, 曹江营, 张树礼, 等. 准格尔煤田露天矿植被恢复的研究——排土场植被自然恢复的观察研究[J]. 中国草地, 1997, (2): 24-26+67.
+
+LI Qingfeng, CAO Jiangying, ZHANG Shuli, et al. Vegetation Restoration in Zungeer Open-cut Coal Mine —— Natural Recovery in Soil Refusal Site[J]. Grassland of China, 1997, (2): 24-26+67.
+
+[15] Bradshaw A, 1997. Restoration of mined lands—using natural processes[J]. Ecological Engineering, 1997, 8(4): 255-269.
+
+[16]郝婧, 张婕, 张沛沛, 等. 煤矸石场植被自然恢复初期草本植物生物量研究[J]. 草业学报, 2013, 22(4): 51-60.
+
+HAO Jing, ZHANG Jie, ZHANG Peipei, et al. A study on the biomass of herbs at the initial natural reclamation stage of plants in gangue fields[J]. Acta Prataculturae Sinica, 2013, 22(4): 51-60.
+
+[17] 翟正江, 杨汉宏, 张勇, 等. 矿山自然恢复中植物多样性与生物量关系研究[J]. 人民黄河, 2018, 40(3): 93-97.
+
+ZHAI Zhengjiang, YANG Hanhong, ZHANG Yong, et al. Study on Relationship Between Plant Species Diversity and Above Ground Biomass During Mine Natural Rehabilitation Process[J]. Yellow River, 2018, 40(3): 93-97.
+
+[18] Mrunalini K, Behera B, Jayaraman S, et al, 2022. Nature-based solutions in soil restoration for improving agricultural productivity[J]. Land Degradation & Development, 2022, 33(8): 1269-1289.
+
+[19] Nairn RW, Dorman DM, McCann JI, et al. Nature-based solutions for mine water challenges: Linking mining reclamation, environmental remediation, ecological restoration, and sustainable resource extraction[C]. //West Virginia Mine Drainage Task Force Symposium & 15th International Mine Water Association Congress 2024, Morgantown, WV: 2024.
+
+[20] 郭迟辉, 张茂省, 王尧, 等. 基于自然解决方案的黄河中游国土空间生态修复——以陕西榆林国土空间生态修复为例[J]. 地质通报, 2023, 42(10): 1745-1756.
+
+GUO Chihui, ZHANG Maosheng, WANG Yao, et al. Ecological restoration of China's territorial space in Yulin section of the Yellow River Basin through nature-based solutions[J]. Geological Bulletin of China, 2023, 42(10): 1745-1756.
+
+[21] 贾梦旋, 王金满, 李禹凝, 等. 基于自然解决方案的矿山生态修复研究进展[J]. 煤炭科学技术, 2024, 52(8): 209-221.
+
+JIA Mengxuan, WANG Jinman, LI Yuning, et al. Ecological restoration of mines based on Nature-based Solution: a review[J]. Coal Science and Technology, 2024, 52(8): 209-221.
+
+[22] Cohen-Shacham E, Walters G, Janzen C, et al. Nature-based solutions to address global societal challenges[M]. Gland, Switzerland: IUCN, 2016.
+
+[23] 雷少刚, 夏嘉南, 卞正富, 等. 论露天矿区近自然生态修复[J]. 煤炭学报, 2024, 49(4): 2021-2030.
+
+LEI Shaogang, XIA Jianan, BIAN Zhengfu, et al. Near-natural ecological restoration in open-pit mine area[J]. Journal of China Coal Society, 2024, 49(4): 2021-2030.
+
+[24] 刘伟, 尹勤瑞, 刘祥宏. 煤矿区生态自然修复及其人工促进模式探讨[J]. 煤田地质与勘探, 2023, 51(4): 110-124.
+
+LIU Wei, YIN Qinrui, LIU Xianghong. Ecological natural restoration and its artificial promotion mode in coal mining area[J]. Coal Geology & Exploration, 2023, 51(4): 110-124.
+
+[25] 王光禹, 黄德将, 宋怡明, 等. 矿山自然恢复制度之完善进路[J]. 中国国土资源经济, 2024, 37(11): 45-53.
+
+WANG Guangyu, HUANG Dejiang, SONG Yiming, et al. The Improvement Approach Natural Restoration System of Mines[J]. Natural Resource Economics of China, 2024, 37(11): 45-53.
+
+[26] 王明君, 白晓峰, 邓燕, 等. 内蒙古历史遗留矿山废弃地自然恢复判定标准及技术路径研究[J]. 西部资源, 2025, (5): 93-96.
+
+WANG Mingjun, BAI Xiaofeng, DENG Yan, et al. Research on the Judgment Criteria for Natural Restoration and Technical Paths of Abandoned Lands from Historically Abandoned Mines in Inner Mongolia[J]. Western Resources, 2025, (5): 93-96.
+
+[27] 徐画, 程维明, 宋珂钰, 等. 地貌空间分异对植被分布的影响研究综述[J]. 生态学报, 2026, 46(1): 593-603.
+
+XU Hua, CHENG Weiming, SONG Keyu, et al. A review of the impact of geomorphic spatial differentiation on vegetation distribution.Acta Ecologica Sinica, 2026, 46(1): 593-603.
+
+[28] Caracciolo D, Noto LV, Istanbulluoglu E, et al, 2014. Climate change and Ecotone boundaries: Insights from a cellular automata ecohydrology model in a Mediterranean catchment with topography controlled vegetation patterns[J]. Advances in Water Resources, 2014, 73: 159-175.
+
+[29] 刘增力, 郑成洋, 方精云. 河北小五台山主要植被类型的分布与地形的关系: 基于遥感信息的分析[J]. 生物多样性, 2004, (1): 146-154.
+
+LIU Zengli, ZHENG Chengyang, FANG Jingyun. Relationship between the vegetation type and topography in Mt.Xiaowutai,Hebei Province:a remote sensing analysis[J]. Biodiversity Science, 2004, 12(1): 146-154.
+
+[30] 王雄, 张翀, 李强. 黄土高原植被覆盖与水热时空通径分析[J]. 生态学报, 2023, 43(2): 719-730.
+
+WANG Xiong, ZHANG Chong, LI Qiang. Path analysis between vegetation coverage and climate factors in the Loess Plateau[J].Acta Ecologica Sinica, 2023, 43(2): 719-730.
+
+[31] 黄伟根, 倪浩为, 黄瑞林, 等. 不同气候条件下土壤有机碳水热响应驱动机制研究[J]. 土壤学报, 2024, 61(5): 1260-1270.
+
+HUANG Weigen, NI Haowei, HUANG Ruilin, et al. Driving Mechanism of Soil Organic Carbon Responseto Increase Hydrothermal Conditions in Different Climatic Regimes[J]. Acta Pedologica Sinica, 2024, 61(5): 1260-1270.
+
+[32] 杨倩, 张伟, 梁月明, 等. 土地利用类型和水热条件影响喀斯特地区土壤无机磷和生物有效磷组分的特征[J]. 广西植物, 2025, 45(6): 1006-1018.
+
+YANG Qian, ZHANG Wei, LIANG Yueming, et al. Characteristics of soil inorganic phosphorus and bioavailable phosphorusfractions in karst regions, influenced by land use types and hydrothermal conditions [J]. Guihaia, 2025, 45(6): 1006-1018.
+
+[33] 皇彦, 宋海清, 胡琦, 等. 2000-2020年内蒙古NDVI时空动态及其对水热条件的响应[J]. 水土保持研究, 2024, 31(4): 197-204,213.
+
+Huang Yan, Song Haiqing, Hu Qi, et al.Spatial-temporal Dynamics of NDVI and Its Response to Hydrothermal Conditions in Inner Mongolia from 2000 to 2020[J]. Research of Soil and Water Conservation, 2024, 31(4): 197-204,213.
+
+[34] 刘维福,蔺楠,苏显静,等.矿区生态修复工程实施期植被状况与土壤质量变化评估: 以陕北三道沟煤矿首采区为例[J]. 中国矿业, 2025, 34(3): 327-336.
+
+LIU Weifu, LIN Nan, SU Xianjing, et al. Assessment of vegetation status and soil quality changes during the implementation period of ecological restoration project in mining areas: a case study of the first mining area of Sandaogou Coal Mine in Northern Shaanxi[J]. China Mining Magazine, 2025, 34(3): 327-336.
+
+[35] Bradshaw A, 2000. The use of natural processes in reclamation — advantages and difficulties[J]. Landscape and Urban Planning, 2000, 51(2): 89-100.
+
+[36] 宋百敏, 刘建, 张玉虎, 等. 废弃采石场自然恢复过程中土壤和植被特征[J]. 山东大学学报(理学版), 2022, 57(1): 8-19.
+
+SONG Baimin, LIU Jian, ZHANG Yuhu, et al. Characteristics of soil and vegetation during natural restoration process in abandoned quarry[J]. Journal of Shandong University (Natural Science), 2022, 57(1): 8-19.
+
+[37] 曾伟, 谢韶宜, 王观石, 等. 基于AHP层次分析法的离子型稀土矿原地浸出边坡稳定评价研究[J]. 中国矿业, 2023, 32(4): 72-80.
+
+ZENG Wei, XIE Shaoyi, WANG Guanshi,et al. Study on slope stability evaluation system for ionic rare earth ore in-situ leaching process based on AHP[J]. China Mining Magazine, 2023, 32(4): 72-80.
+
+[38] 于帅. 基于层次分析-模糊综合模型的露天矿山微地形生态修复技术评价研究[J]. 中国矿业, 2024, 33(11): 39-48.
+
+YU Shuai. Evaluation of micro-topography ecological restoration technology for open-pit mines based on analytic hierarchy process-fuzzy comprehensive evaluation[J]. China Mining Magazine. 2024, 33(11): 39-48.
+
+[39] 曹有勋, 史卫平, 刘志钧, 等. 基于层次分析-模糊综合评判的煤矿企业风险评估研究[J]. 中国矿业, 2024, 33(7): 16-25.
+
+CAO Youxun, SHI Weiping, LIU Zhijun, et al. Research on risk assessment of coal mine enterprises based on AHP-FCE method[J]. China MiningMagazine, 2024, 33(7): 16-25.
+
+[40] 江雷, 娄嘉慧, 史冲. 基于UAV勘察与层次分析法的安阳许家沟露天矿山地质风险评价[J]. 中国矿业, 2024, 33(3): 177-186.
+
+JIANG Lei, LOU Jiahuik SHI Chong. Geological risk evaluation of open-pit mines of Xujiagou in Anyang based on UAV survey and analytic hierarchyprocess[J]. China Mining Magazine, 2024, 33(3): 177-186.

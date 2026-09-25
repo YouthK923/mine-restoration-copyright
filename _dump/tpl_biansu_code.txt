@@ -1,0 +1,271 @@
+### PDF: 变压器抗短路能力评估系统V1.0-代码(1).pdf pages=5
+
+===== PAGE 1 =====
+变压器抗短路能力评估系统V1.0
+1
+from flask import render_template, flash, redirect, url_for, request
+1
+from app import app, db
+2
+from forms import LoginForm, ParamsForm
+3
+from models import User, Transformer
+4
+from flask_login import current_user, login_user, logout_user, login_required
+5
+from werkzeug.urls import url_parse
+6
+7
+@app.route('/login', methods=['GET', 'POST'])
+8
+def login():
+9
+if current_user.is_authenticated:
+10
+return redirect(url_for('index'))
+11
+form = LoginForm()
+12
+if form.validate_on_submit():
+13
+user = User.query.filter_by(username=form.username.data).first()
+14
+if user is None or not user.check_password(form.password.data):
+15
+flash('无效的用户名或密码')
+16
+return redirect(url_for('login'))
+17
+login_user(user, remember=form.remember_me.data)
+18
+next_page = request.args.get('next')
+19
+if not next_page or url_parse(next_page).netloc != '':
+20
+next_page = url_for('index')
+21
+return redirect(next_page)
+22
+return render_template('login.html', title='登录', form=form)
+23
+24
+@app.route('/logout')
+25
+def logout():
+26
+logout_user()
+27
+return redirect(url_for('index'))
+28
+29
+@app.route('/input_params', methods=['GET', 'POST'])
+30
+@login_required
+31
+def input_params():
+32
+form = ParamsForm()
+33
+if form.validate_on_submit():
+34
+transformer = Transformer(
+35
+rated_current=form.rated_current.data,
+36
+rated_voltage=form.rated_voltage.data,
+37
+short_circuit_impedance=form.short_circuit_impedance.data,
+38
+rated_power=form.rated_power.data,
+39
+transformer_type=form.transformer_type.data,
+40
+voltage_adjustment=form.voltage_adjustment.data
+41
+)
+42
+db.session.add(transformer)
+43
+db.session.commit()
+44
+
+===== PAGE 2 =====
+变压器抗短路能力评估系统V1.0
+2
+flash('参数已提交')
+45
+return redirect(url_for('network_model'))
+46
+elif request.method == 'POST' and 'reset' in request.form:
+47
+form.rated_current.data = ''
+48
+form.rated_voltage.data = ''
+49
+form.short_circuit_impedance.data = ''
+50
+form.rated_power.data = ''
+51
+form.transformer_type.data = ''
+52
+form.voltage_adjustment.data = ''
+53
+flash('参数已重置')
+54
+return render_template('input_params.html', title='参数输入', form=form)
+55
+return render_template('input_params.html', title='参数输入', form=form)
+56
+from flask_wtf import FlaskForm
+57
+from wtforms import FloatField, SelectField, SubmitField
+58
+from wtforms.validators import DataRequired
+59
+class ParamsForm(FlaskForm):
+60
+rated_current = FloatField('额定电流（A）', validators=[DataRequired()])
+61
+rated_voltage = FloatField('额定电
+压（KV）', validators=[DataRequired()])
+62
+short_circuit_impedance = FloatField('短路阻抗（pu）', validators=[DataRequired()])
+63
+rated_power = FloatField('额定功率（MVA）', validators=[DataRequired()])
+64
+transformer_type = SelectField('变压器类型', choices=[('油浸式变压器', '油浸式变压
+65
+器'),('干式变压器', '干式变压器'), ('隔离变压器', '隔离变压器'),('自耦变压器', '自耦变压器'),('
+66
+分配变压器', '分配变压器'),('三相变压器', '三相变压器'), ('动态变压器', '动态变压器'),('共变
+67
+压器', '共变压器')],
+68
+validators=[DataRequired()])
+69
+voltage_adjustment = FloatField('调整端头电压值（%）', validators=[DataRequired()])
+70
+submit = SubmitField('完成输入')
+71
+reset = SubmitField('重置数据')
+72
+73
+# 更新路由，处理POST 请求并获取用户选择的连接方式
+74
+@app.route('/network_model', methods=['GET', 'POST'])
+75
+@login_required
+76
+def network_model():
+77
+if request.method == 'POST':
+78
+connection_type = request.form.get('connection_type')
+79
+transformer = Transformer.query.order_by(Transformer.id.desc()).first()
+80
+transformer.connection_type = connection_type
+81
+db.session.commit()
+82
+flash('电气网络模型建立')
+83
+84
+# 重置模型
+85
+return redirect(url_for('assessment'))
+86
+connection_type = SelectField('连接方式', choices=[('star', '星形连接'), ('triangle', '三角形
+87
+连接')], validators=[DataRequired()])
+88
+
+===== PAGE 3 =====
+变压器抗短路能力评估系统V1.0
+3
+89
+# 在network_model 路由中保存用户选择的连接方式
+90
+@app.route('/network_model', methods=['GET', 'POST'])
+91
+@login_required
+92
+def network_model():
+93
+form = ParamsForm()
+94
+if request.method == 'POST' and form.validate_on_submit():
+95
+connection_type = form.connection_type.data
+96
+transformer = Transformer.query.order_by(Transformer.id.desc()).first()
+97
+transformer.connection_type = connection_type
+98
+db.session.commit()
+99
+flash('电气网络模型已创建')
+100
+return redirect(url_for('assessment'))
+101
+return render_template('network_model.html', title='电气网络建模', form=form)
+102
+103
+@app.route('/assessment', methods=['GET', 'POST'
+])
+104
+@login_required
+105
+def assessment():
+106
+if request.method == 'POST':
+107
+short_circuit_condition = request.form.get('short_circuit_condition')
+108
+short_circuit_current = calculate_short_circuit_current()
+109
+stability = evaluate_stability()
+110
+safety = evaluate_safety()
+111
+calculation_method = request.form.get('calculation_method')
+112
+# 根据短路条件和计算方式执行相应的操作
+113
+if short_circuit_condition == '单相短路':
+114
+# 执行单相短路计算
+115
+result = calculate_single_phase_short_circuit(calculation_method)
+116
+elif short_circuit_condition == '两相短路':
+117
+# 执行两相短路计算
+118
+result = calculate_two_phase_short_circuit(calculation_method)
+119
+# 其他短路条件类似
+120
+121
+# 处理完后返回相应的响应或重定向到结果页面
+122
+return render_template('assessment_result.html', result=result)
+123
+124
+# 根据短路条件和计算方式执行相应的操作
+125
+if short_circuit_condition and calculation_method:
+126
+# 根据选择的计算方法进行相应的短路电流计算
+127
+if calculation_method == '等效电路模型计算':
+128
+short_circuit_current=
+129
+calculate_short_circuit_equivalent(short_circuit_condition)
+130
+elif calculation_method == '短路阻抗法计算':
+131
+short_circuit_current=
+132
+... [truncated at page 3]
