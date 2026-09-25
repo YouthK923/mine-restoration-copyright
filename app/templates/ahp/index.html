@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}AHP 权重计算{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>AHP 权重计算 · 选择指标层级</h2>
+  <form method="post">
+    {{ form.hidden_tag() }}
+    <table style="width:auto;">
+      <tr>
+        <td style="text-align:left;">微地质单元类型</td>
+        <td>{{ form.unit_type() }}</td>
+      </tr>
+      <tr>
+        <td style="text-align:left;">指标层级</td>
+        <td>{{ form.level() }}</td>
+      </tr>
+      <tr>
+        <td style="text-align:left;">一级指标（层级为"二级指标"时选择）</td>
+        <td>{{ form.l1() }}</td>
+      </tr>
+    </table>
+    <p>{{ form.submit(class_="btn") }}</p>
+  </form>
+  <p class="muted">
+    说明：选择单元类型与指标层级后，系统按论文表 3 确定判断矩阵规模。
+    岩质边坡不设土壤指标，平台不设地形指标。
+  </p>
+</div>
+{% endblock %}
