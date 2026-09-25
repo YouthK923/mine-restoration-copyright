@@ -15,33 +15,40 @@
       display: flex; align-items: center; justify-content: space-between;
     }
     .topbar h1 { font-size: 18px; font-weight: 600; }
-    .topbar .ver { font-size: 12px; opacity: .85; }
+    .topbar .right { font-size: 13px; }
+    .topbar .right a { color: #cfe0f5; text-decoration: none; margin-left: 12px; }
+    .topbar .right a:hover { color: #fff; text-decoration: underline; }
     .nav {
       background: #fff; border-bottom: 1px solid #dcdde0;
       padding: 0 24px; display: flex; flex-wrap: wrap;
     }
     .nav a {
-      display: inline-block; padding: 10px 16px; text-decoration: none;
+      display: inline-block; padding: 10px 14px; text-decoration: none;
       color: #444; border-bottom: 2px solid transparent;
     }
-    .nav a:hover, .nav a.active { color: #1f3a5f; border-bottom-color: #1f3a5f; }
+    .nav a:hover { color: #1f3a5f; border-bottom-color: #1f3a5f; }
     .container { max-width: 1080px; margin: 24px auto; padding: 0 24px; }
     .card {
       background: #fff; border: 1px solid #e3e4e6; border-radius: 6px;
       padding: 24px; margin-bottom: 20px;
     }
     .card h2 { font-size: 16px; margin-bottom: 16px; color: #1f3a5f; }
+    h3 { font-weight: 600; }
     table { border-collapse: collapse; width: 100%; margin: 8px 0 16px; }
     th, td { border: 1px solid #dcdde0; padding: 8px 12px; text-align: center; }
     th { background: #eef1f5; font-weight: 600; }
     input[type="text"], input[type="number"], input[type="password"],
-    select { padding: 6px 8px; border: 1px solid #c9ccd1; border-radius: 4px; }
-    input[type="number"] { width: 80px; text-align: center; }
+    select, textarea { padding: 6px 8px; border: 1px solid #c9ccd1; border-radius: 4px; font-family: inherit; }
+    input[type="number"] { width: 100px; text-align: center; }
+    textarea { width: 100%; min-height: 60px; }
     .btn {
       display: inline-block; padding: 8px 20px; border: none; border-radius: 4px;
       background: #1f3a5f; color: #fff; cursor: pointer; font-size: 14px;
+      text-decoration: none;
     }
     .btn:hover { background: #2a4d7c; }
+    .btn.gray { background: #8896a8; }
+    .btn.small { padding: 4px 12px; font-size: 13px; }
     .flash { padding: 10px 16px; border-radius: 4px; margin-bottom: 16px; }
     .flash.error { background: #fdecea; color: #c0392b; border: 1px solid #f5c6cb; }
     .flash.ok { background: #eafaf1; color: #1e8449; border: 1px solid #b2dfdb; }
@@ -49,20 +56,42 @@
     .mono { font-family: Consolas, monospace; }
     .warn { color: #c0392b; font-weight: 600; }
     .ok { color: #1e8449; font-weight: 600; }
+    .login-box { max-width: 380px; margin: 80px auto; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .tile {
+      background: #fff; border: 1px solid #e3e4e6; border-radius: 6px;
+      padding: 18px; text-decoration: none; color: #333; display: block;
+    }
+    .tile:hover { border-color: #1f3a5f; }
+    .tile .t { font-weight: 600; color: #1f3a5f; margin-bottom: 6px; }
+    .tile .d { font-size: 12px; color: #777; }
   </style>
 </head>
 <body>
   <div class="topbar">
     <h1>历史遗留废弃矿山自然恢复适宜性评价系统</h1>
-    <span class="ver">V1.0</span>
+    <span class="right">
+      V1.0
+      {% if current_user.is_authenticated %}
+        &nbsp;|&nbsp; {{ current_user.username }}（{{ current_user.role }}）
+        <a href="/logout">退出</a>
+      {% endif %}
+    </span>
   </div>
+  {% if current_user.is_authenticated %}
   <div class="nav">
     <a href="/">首页</a>
-    <a href="/ahp/">AHP 权重计算</a>
+    <a href="/project/">项目与档案</a>
+    <a href="/constraint/">限制性判定</a>
+    <a href="/standard/">标准知识库</a>
+    <a href="/ahp/">AHP 权重</a>
     <a href="/indicator/">指标数据</a>
     <a href="/evaluate/">适宜性评价</a>
     <a href="/report/">报告输出</a>
+    <a href="/users">用户管理</a>
   </div>
+  {% endif %}
   <div class="container">
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% for category, message in messages %}

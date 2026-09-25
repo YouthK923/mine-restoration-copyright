@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}登录{% endblock %}
+{% block content %}
+<div class="login-box">
+  <div class="card">
+    <h2>用户登录</h2>
+    <form method="post">
+      {{ form.hidden_tag() }}
+      <table style="width:100%;">
+        <tr>
+          <td style="text-align:left;width:80px;">用户名</td>
+          <td>{{ form.username(style="width:100%;") }}</td>
+        </tr>
+        <tr>
+          <td style="text-align:left;">密码</td>
+          <td>{{ form.password(style="width:100%;") }}</td>
+        </tr>
+        <tr>
+          <td style="text-align:left;">记住我</td>
+          <td style="text-align:left;">{{ form.remember() }}</td>
+        </tr>
+      </table>
+      <p style="margin-top:14px;">{{ form.submit(class_="btn", style="width:100%;") }}</p>
+    </form>
+    <p class="muted">演示账号：admin / admin123</p>
+  </div>
+</div>
+{% endblock %}

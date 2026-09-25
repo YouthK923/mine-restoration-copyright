@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}标准知识库{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>政策与标准知识库</h2>
+  <p style="margin-bottom:12px;">
+    <a href="/standard/add" class="btn small">添加标准</a>
+    <a href="/standard/compare" class="btn small gray">省际口径比对</a>
+  </p>
+
+  <h3 style="font-size:14px;color:#1f3a5f;margin:16px 0 8px;">地方标准</h3>
+  <table>
+    <tr><th>省份</th><th>名称</th><th>编号</th><th>规则数</th><th>操作</th></tr>
+    {% for s in local %}
+    <tr>
+      <td>{{ s.province }}</td>
+      <td style="text-align:left;">{{ s.name }}</td>
+      <td class="mono">{{ s.doc_number or "—" }}</td>
+      <td>{{ s.rules|length }}</td>
+      <td><a href="/standard/{{ s.id }}/rules">规则</a> | <a href="/standard/{{ s.id }}/edit">编辑</a></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5" class="muted">暂无，运行 seed_demo.py 可载入论文表 1 的 11 项标准与政策文件</td></tr>
+    {% endfor %}
+  </table>
+
+  <h3 style="font-size:14px;color:#1f3a5f;margin:16px 0 8px;">政策文件</h3>
+  <table>
+    <tr><th>省份</th><th>名称</th><th>文号</th><th>规则数</th><th>操作</th></tr>
+    {% for s in policy %}
+    <tr>
+      <td>{{ s.province }}</td>
+      <td style="text-align:left;">{{ s.name }}</td>
+      <td class="mono">{{ s.doc_number or "—" }}</td>
+      <td>{{ s.rules|length }}</td>
+      <td><a href="/standard/{{ s.id }}/rules">规则</a> | <a href="/standard/{{ s.id }}/edit">编辑</a></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5" class="muted">暂无</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

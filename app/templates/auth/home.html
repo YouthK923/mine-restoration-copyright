@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}首页{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>系统功能</h2>
+  <div class="grid3">
+    <a class="tile" href="/project/">
+      <div class="t">M2 项目与矿山档案</div>
+      <div class="d">建立评价项目、录入矿山图斑、设置参照生态系统</div>
+    </a>
+    <a class="tile" href="/constraint/">
+      <div class="t">M4 限制性指标判定</div>
+      <div class="d">政策、区位约束、土壤污染、地质灾害、耕地属性一票否决</div>
+    </a>
+    <a class="tile" href="/standard/">
+      <div class="t">M3 政策与标准知识库</div>
+      <div class="d">11 项地方标准与政策文件、省际口径比对</div>
+    </a>
+    <a class="tile" href="/ahp/">
+      <div class="t">M6 指标体系与 AHP 权重</div>
+      <div class="d">判断矩阵录入、权重计算、一致性检验</div>
+    </a>
+    <a class="tile" href="/indicator/">
+      <div class="t">M7 指标数据采集</div>
+      <div class="d">按微地质单元录入土壤、植被、地形指标</div>
+    </a>
+    <a class="tile" href="/evaluate/">
+      <div class="t">M8 适宜性定量评价</div>
+      <div class="d">标准化、分单元赋分、面积加权、等级判定</div>
+    </a>
+    <a class="tile" href="/report/">
+      <div class="t">M9 报告与结果输出</div>
+      <div class="d">得分明细、Word 评价报告导出</div>
+    </a>
+    <a class="tile" href="/users">
+      <div class="t">M1 用户与权限管理</div>
+      <div class="d">用户维护与角色权限</div>
+    </a>
+  </div>
+</div>
+{% endblock %}

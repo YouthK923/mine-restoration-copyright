@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}矿山图斑{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>矿山图斑 · {{ project.name }}</h2>
+  <p style="margin-bottom:12px;">
+    <a href="/project/{{ project.id }}/patch/add" class="btn small">新建图斑</a>
+    <a href="/project/" class="btn small gray">返回项目列表</a>
+  </p>
+  {% if not project.patches.count() %}
+  <p class="muted">暂无图斑。</p>
+  {% else %}
+  <table>
+    <tr><th>图斑名称</th><th>行政区</th><th>面积(公顷)</th><th>矿种</th><th>微地质单元</th><th>操作</th></tr>
+    {% for p in project.patches %}
+    <tr>
+      <td>{{ p.name }}</td>
+      <td>{{ p.admin_region or "—" }}</td>
+      <td>{{ p.area_ha if p.area_ha is not none else "—" }}</td>
+      <td>{{ p.mineral_type or "—" }}</td>
+      <td>{{ p.units.count() }}</td>
+      <td>
+        <a href="/unit/{{ p.id }}">微地质单元</a>
+        &nbsp;|&nbsp;<a href="/constraint/{{ p.id }}">限制性判定</a>
+        &nbsp;|&nbsp;<a href="/project/patch/{{ p.id }}/edit">编辑</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+</div>
+{% endblock %}

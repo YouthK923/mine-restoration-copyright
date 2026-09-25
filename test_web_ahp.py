@@ -19,6 +19,18 @@ class TestConfig:
 app = create_app(TestConfig)
 client = app.test_client()
 
+# 建立表并创建测试用户，登录后再访问业务页面
+with app.app_context():
+    from app.models import db, User
+    from werkzeug.security import generate_password_hash
+    db.create_all()
+    if not User.query.filter_by(username="admin").first():
+        db.session.add(User(username="admin",
+                            password_hash=generate_password_hash("admin123"),
+                            role="admin"))
+        db.session.commit()
+client.post("/login", data={"username": "admin", "password": "admin123"})
+
 print(LINE)
 print("测试 1  首页与 AHP 入口")
 print(LINE)

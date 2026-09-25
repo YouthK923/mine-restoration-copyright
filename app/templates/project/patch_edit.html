@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ "编辑图斑" if patch else "新建图斑" }}{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>{{ "编辑图斑" if patch else "新建图斑" }} · {{ project.name }}</h2>
+  <form method="post">
+    {{ form.hidden_tag() }}
+    {% set ref = patch.reference if False else None %}
+    <table style="width:auto;">
+      <tr><td style="text-align:left;">图斑名称</td>
+          <td><input type="text" name="name" style="width:320px;" value="{{ patch.name if patch else '' }}" required></td></tr>
+      <tr><td style="text-align:left;">所在行政区</td>
+          <td><input type="text" name="admin_region" style="width:320px;" value="{{ patch.admin_region or '' if patch else '' }}"></td></tr>
+      <tr><td style="text-align:left;">图斑面积（公顷）</td>
+          <td><input type="number" step="any" name="area_ha" value="{{ patch.area_ha if patch and patch.area_ha is not none else '' }}"></td></tr>
+      <tr><td style="text-align:left;">开采矿种</td>
+          <td><input type="text" name="mineral_type" value="{{ patch.mineral_type or '' if patch else '' }}"></td></tr>
+      <tr><td style="text-align:left;">开采方式</td>
+          <td><input type="text" name="mining_method" value="{{ patch.mining_method or '' if patch else '' }}"></td></tr>
+      <tr><td style="text-align:left;">停产年限</td>
+          <td><input type="number" step="any" name="stop_years" value="{{ patch.stop_years if patch and patch.stop_years is not none else '' }}"></td></tr>
+      <tr><td style="text-align:left;">责任主体缺失</td>
+          <td style="text-align:left;">
+            <input type="checkbox" name="responsible_entity_missing" value="1"
+                   {% if not patch or patch.responsible_entity_missing %}checked{% endif %}>
+          </td></tr>
+    </table>
+
+    <h3 style="font-size:14px;color:#1f3a5f;margin:16px 0 8px;">参照生态系统（标准化基准）</h3>
+    <table style="width:auto;">
+      <tr><td style="text-align:left;">植被覆盖度基准（%）</td>
+          <td><input type="number" step="any" name="coverage_benchmark" value="75"></td></tr>
+      <tr><td style="text-align:left;">Shannon-Wiener 基准</td>
+          <td><input type="number" step="any" name="shannon_benchmark" value="0.7"></td></tr>
+      <tr><td style="text-align:left;">建群种</td>
+          <td><input type="text" name="dominant_species" style="width:320px;"></td></tr>
+    </table>
+    <p class="muted">参照生态系统取论文 4.2.2 节值：植被覆盖度 75%、Shannon-Wiener 0.7。</p>
+
+    <p style="margin-top:14px;">
+      <button type="submit" class="btn">保存</button>
+      <a href="/project/{{ project.id }}/patches" class="btn gray">返回</a>
+    </p>
+  </form>
+</div>
+{% endblock %}

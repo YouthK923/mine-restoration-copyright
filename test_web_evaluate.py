@@ -21,6 +21,9 @@ class TestConfig:
 app = create_app(TestConfig)
 client = app.test_client()
 
+# 登录（案例种子已创建 admin 用户）
+client.post("/login", data={"username": "admin", "password": "admin123"})
+
 print(LINE)
 print("测试 1  M7 指标数据列表")
 print(LINE)

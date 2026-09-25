@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}项目与档案{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>评价项目</h2>
+  <p style="margin-bottom:12px;"><a href="/project/add" class="btn small">新建项目</a></p>
+  {% if not projects %}
+  <p class="muted">暂无项目。点击「新建项目」开始，或运行 <span class="mono">python seed_demo.py</span> 载入案例。</p>
+  {% else %}
+  <table>
+    <tr><th>项目名称</th><th>编号</th><th>状态</th><th>图斑数</th><th>操作</th></tr>
+    {% for p in projects %}
+    <tr>
+      <td>{{ p.name }}</td>
+      <td class="mono">{{ p.code or "—" }}</td>
+      <td>{{ p.status }}</td>
+      <td>{{ p.patches.count() }}</td>
+      <td>
+        <a href="/project/{{ p.id }}/patches">矿山图斑</a>
+        &nbsp;|&nbsp;<a href="/project/{{ p.id }}/edit">编辑</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+</div>
+{% endblock %}

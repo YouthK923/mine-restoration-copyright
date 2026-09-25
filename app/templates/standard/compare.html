@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}省际口径比对{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>省际口径比对</h2>
+  <p class="muted">
+    同一判定项在不同省份的阈值横向对比，避免人工翻阅多份标准文件。
+  </p>
+
+  {% if not groups %}
+  <p class="muted">暂无规则数据。请先为标准录入规则，或运行 seed_demo.py 载入论文表 1 数据。</p>
+  {% else %}
+  {% for item, rs in groups.items() %}
+  <h3 style="font-size:14px;color:#1f3a5f;margin:16px 0 8px;">{{ item }}</h3>
+  <table>
+    <tr><th>省份</th><th>标准/文件</th><th>条件</th><th>条件类型</th><th>备注</th></tr>
+    {% for r in rs %}
+    <tr>
+      <td>{{ r.standard.province }}</td>
+      <td style="text-align:left;">{{ r.standard.name }}</td>
+      <td class="mono">{{ r.operator }} {{ r.threshold or "" }}</td>
+      <td>{{ r.condition_type }}</td>
+      <td style="text-align:left;">{{ r.note or "—" }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endfor %}
+  {% endif %}
+
+  <p style="margin-top:12px;"><a href="/standard/" class="btn gray">返回</a></p>
+</div>
+{% endblock %}

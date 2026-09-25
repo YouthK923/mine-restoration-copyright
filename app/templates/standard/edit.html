@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{{ "编辑标准" if standard else "添加标准" }}{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>{{ "编辑标准" if standard else "添加标准" }}</h2>
+  <form method="post">
+    {{ form.hidden_tag() }}
+    <table style="width:auto;">
+      <tr><td style="text-align:left;">省份</td>
+          <td><input type="text" name="province" value="{{ standard.province if standard else '' }}" required></td></tr>
+      <tr><td style="text-align:left;">名称</td>
+          <td><input type="text" name="name" style="width:420px;" value="{{ standard.name if standard else '' }}" required></td></tr>
+      <tr><td style="text-align:left;">标准编号/文号</td>
+          <td><input type="text" name="doc_number" style="width:300px;" value="{{ standard.doc_number or '' if standard else '' }}"></td></tr>
+      <tr><td style="text-align:left;">类别</td>
+          <td>
+            <select name="category">
+              {% for c in ["地方标准", "政策文件"] %}
+              <option value="{{ c }}" {% if standard and standard.category == c %}selected{% endif %}>{{ c }}</option>
+              {% endfor %}
+            </select>
+          </td></tr>
+      <tr><td style="text-align:left;">发布时间</td>
+          <td><input type="text" name="publish_date" value="{{ standard.publish_date or '' if standard else '' }}"></td></tr>
+      <tr><td style="text-align:left;">实施时间</td>
+          <td><input type="text" name="implement_date" value="{{ standard.implement_date or '' if standard else '' }}"></td></tr>
+      <tr><td style="text-align:left;vertical-align:top;">特点/判定标准</td>
+          <td><textarea name="summary" style="width:420px;">{{ standard.summary or '' if standard else '' }}</textarea></td></tr>
+    </table>
+    <p style="margin-top:14px;">
+      <button type="submit" class="btn">保存</button>
+      <a href="/standard/" class="btn gray">返回</a>
+    </p>
+  </form>
+</div>
+{% endblock %}

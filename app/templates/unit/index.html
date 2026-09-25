@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}微地质单元{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>微地质单元 · {{ patch.name }}</h2>
+  <p class="muted">
+    按论文 4.1 节划分岩质边坡、碎石边坡、平台三类微地质单元。
+    面积占比由面积自动计算，即式(9) 中的权重系数 Sᵢ。
+  </p>
+
+  {% if units %}
+  <table>
+    <tr><th>微地质单元</th><th>面积</th><th>面积占比</th><th>说明</th><th>操作</th></tr>
+    {% for u in units %}
+    <tr>
+      <form method="post" action="/unit/edit/{{ u.id }}">
+        {{ form.hidden_tag() }}
+        <td>
+          <select name="unit_type">
+            {% for t in unit_types %}
+            <option value="{{ t }}" {% if u.unit_type == t %}selected{% endif %}>{{ t }}</option>
+            {% endfor %}
+          </select>
+        </td>
+        <td><input type="number" step="any" name="area" value="{{ u.area if u.area is not none else '' }}"></td>
+        <td class="mono">{% if u.ratio is not none %}{{ "%.2f%%"|format(u.ratio*100) }}{% else %}—{% endif %}</td>
+        <td><input type="text" name="description" value="{{ u.description or '' }}"></td>
+        <td>
+          <button type="submit" class="btn small">保存</button>
+        </td>
+      </form>
+    </tr>
+    {% endfor %}
+  </table>
+  <p class="muted">
+    面积合计：{{ "%.4f"|format(total_area) }}；
+    占比合计：{{ "%.2f%%"|format(ratio_sum*100) }}
+    {% if ratio_sum and (ratio_sum < 0.999 or ratio_sum > 1.001) %}
+    <span class="warn">（占比合计不等于 100%，请检查面积录入）</span>
+    {% endif %}
+  </p>
+  {% else %}
+  <p class="muted">暂无微地质单元。</p>
+  {% endif %}
+
+  <h3 style="font-size:14px;color:#1f3a5f;margin:20px 0 8px;">添加微地质单元</h3>
+  <form method="post" action="/unit/{{ patch.id }}/add">
+    {{ form.hidden_tag() }}
+    <table style="width:auto;">
+      <tr>
+        <td style="text-align:left;">单元类型</td>
+        <td>
+          <select name="unit_type">
+            {% for t in unit_types %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
+          </select>
+        </td>
+        <td style="text-align:left;">面积</td>
+        <td><input type="number" step="any" name="area"></td>
+        <td style="text-align:left;">说明</td>
+        <td><input type="text" name="description" style="width:220px;"></td>
+        <td><button type="submit" class="btn small">添加</button></td>
+      </tr>
+    </table>
+  </form>
+
+  <p style="margin-top:16px;">
+    <a href="/project/{{ patch.project_id }}/patches" class="btn gray">返回图斑列表</a>
+    <a href="/indicator/" class="btn gray">去录入指标数据</a>
+  </p>
+</div>
+{% endblock %}

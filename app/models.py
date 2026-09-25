@@ -7,12 +7,13 @@
 import json
 from datetime import datetime
 
+from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     """用户（M1 用户与权限管理）。"""
     __tablename__ = "users"
 
@@ -104,6 +105,9 @@ class Standard(db.Model):
     # 类别：地方标准 / 政策文件
     category = db.Column(db.String(32), nullable=False, default="地方标准")
     summary = db.Column(db.Text, nullable=True)                 # 特点概述
+
+    rules = db.relationship("StandardRule", backref="standard",
+                            cascade="all, delete-orphan")
 
 
 class StandardRule(db.Model):

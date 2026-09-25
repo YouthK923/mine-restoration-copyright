@@ -20,6 +20,9 @@ class TestConfig:
 app = create_app(TestConfig)
 client = app.test_client()
 
+# 登录（案例种子已创建 admin 用户）
+client.post("/login", data={"username": "admin", "password": "admin123"})
+
 from app.models import MinePatch
 with app.app_context():
     patch = MinePatch.query.first()

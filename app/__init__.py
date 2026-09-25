@@ -1,9 +1,19 @@
 # -*- coding: utf-8 -*-
 """Flask 应用工厂。"""
 from flask import Flask
+from flask_login import LoginManager
 
 from app.config import Config
-from app.models import db
+from app.models import db, User
+
+login_manager = LoginManager()
+login_manager.login_view = "auth.login"
+login_manager.login_message = "请先登录"
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return db.session.get(User, int(user_id))
 
 
 def create_app(config_class=Config):
@@ -11,13 +21,33 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
 
     db.init_app(app)
+    login_manager.init_app(app)
 
-    # 注册视图（各模块路由，后续逐步接入）
-    from app.views import auth, ahp, indicator, evaluate, report
+    # 注册视图（各模块路由）
+    from app.views import auth, project, unit, standard, constraint, \
+        ahp, indicator, evaluate, report
     app.register_blueprint(auth.bp)
+    app.register_blueprint(project.bp)
+    app.register_blueprint(unit.bp)
+    app.register_blueprint(standard.bp)
+    app.register_blueprint(constraint.bp)
     app.register_blueprint(ahp.bp)
     app.register_blueprint(indicator.bp)
     app.register_blueprint(evaluate.bp)
     app.register_blueprint(report.bp)
+
+    # 全局登录保护：除登录页与静态资源外，均需登录
+    from flask import request, redirect, url_for
+    from flask_login import current_user
+
+    PUBLIC_ENDPOINTS = {"auth.login", "static"}
+
+    @app.before_request
+    def require_login():
+        if request.endpoint in PUBLIC_ENDPOINTS or request.endpoint is None:
+            return None
+        if not current_user.is_authenticated:
+            return redirect(url_for("auth.login"))
+        return None
 
     return app
