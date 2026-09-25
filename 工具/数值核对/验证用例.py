@@ -97,6 +97,7 @@ CASES = [
         rows=[row("碎石边坡", soil=(0.8, 20, 7, 30), metals=NO_METAL,
                   cover=75, shannon=0.7, slope=25, aspect="阴坡")],
         expect_f=1.0000, expect_grade="适宜",
+        expect_units={"碎石边坡": 1.0000},
         calc=[
             "土壤：土石比 0.8/0.8=1，厚度 20/20=1，pH 7∈[5,9]=1，有机质 30/30=1，",
             "      污染 8 种重金属均为 0 → 各自 1-0/限值=1 → 污染=1",
@@ -116,6 +117,7 @@ CASES = [
         rows=[row("平台", soil=(0, 0, 0, 0), metals=AT_LIMIT,
                   cover=0, shannon=0, slope=None, aspect=None)],
         expect_f=0.0000, expect_grade="不适宜",
+        expect_units={"平台": 0.0000},
         calc=[
             "土壤：土石比 0/0.8=0，厚度 0/20=0，",
             "      pH 0<5 → max(0-4, 0)=0，有机质 0/30=0，",
@@ -140,6 +142,8 @@ CASES = [
                 cover=0, shannon=0, slope=None, aspect=None),
         ],
         expect_f=0.4366, expect_grade="基本适宜",
+        expect_units={"岩质边坡": 0.3916, "碎石边坡": 0.3925,
+                      "平台": 0.5400},
         calc=[
             "面积占比：岩质 2/10=20%，碎石 5/10=50%，平台 3/10=30%",
             "岩质边坡：植被 0 → 0；地形 = 0.64×1(坡度25) + 0.36×0.2(阳坡) = 0.712",
@@ -162,6 +166,7 @@ CASES = [
         rows=[row("碎石边坡", soil=(0.8, 20, 7, 30), metals=AT_LIMIT,
                   cover=75, shannon=0.7, slope=25, aspect="阴坡")],
         expect_f=0.9259, expect_grade="适宜",
+        expect_units={"碎石边坡": 0.925941},
         calc=[
             "除污染外全部取最优，故土壤一级只剩污染项被拉低：",
             "  污染 = 0（8 种均取限值，各自 1-1=0）",
@@ -182,6 +187,7 @@ CASES = [
         rows=[row("岩质边坡", soil=(0.8, 20, 7, 30), metals=NO_METAL,
                   cover=75, shannon=0.7, slope=90, aspect="阳坡")],
         expect_f=0.4896, expect_grade="基本适宜",
+        expect_units={"岩质边坡": 0.4896},
         calc=[
             "岩质边坡按论文表 3 不设土壤指标，故上面填的土石比/厚度/pH/有机质/",
             "重金属全部不参与计算，期望值与「完全不填土壤数据」时相同。",
@@ -204,6 +210,7 @@ CASES = [
         rows=[row("平台", soil=(0.8, 20, 7, 30), metals=NO_METAL,
                   cover=75, shannon=0.7, slope=90, aspect="阳坡")],
         expect_f=1.0000, expect_grade="适宜",
+        expect_units={"平台": 1.0000},
         calc=[
             "平台按论文表 3 不设地形指标，故坡度 90 与坡向 阳坡不参与计算。",
             "土壤 = 1.0000（五项全取最优）",
@@ -225,6 +232,7 @@ CASES = [
         rows=[row("岩质边坡", cover=75, shannon=0.7, slope=57.5,
                   aspect="阴阳坡")],
         expect_f=0.7448, expect_grade="适宜",
+        expect_units={"岩质边坡": 0.7448},
         calc=[
             "植被 = 1.0000（覆盖度与多样性均取参照值）",
             "坡度 57.5 > 25 → (90-57.5)/(90-25) = 32.5/65 = 0.5000",
@@ -444,6 +452,19 @@ def main():
             print("    判定｜%s" % ("[一致] ✓" if ok else "[不一致] ✗"))
             if not ok:
                 fails.append(case["key"])
+
+            # 单元得分逐个核对（总分对不代表每个单元都对，可能互相抵消）
+            want_units = case.get("expect_units") or {}
+            got_units = {u["unit_type"]: u["unit_score"] for u in r["units"]}
+            for ut, want_u in sorted(want_units.items()):
+                got_u = got_units.get(ut)
+                ok_u = got_u is not None and abs(got_u - want_u) < 5e-5
+                print("    单元｜%-6s 期望 F′ = %.4f   实际 F′ = %s   %s"
+                      % (ut, want_u,
+                         "%.4f" % got_u if got_u is not None else "无",
+                         "[一致] ✓" if ok_u else "[不一致] ✗"))
+                if not ok_u:
+                    fails.append("%s单元%s" % (case["key"], ut))
 
         # 孪生对照：去掉多余指标后，结果必须完全相同
         twin = case.get("twin")
