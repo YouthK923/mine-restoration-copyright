@@ -59,22 +59,29 @@ def create_app(config_class=Config):
             return redirect(url_for("auth.login"))
         return None
 
-    # 侧边栏导航项：集中定义，模板只负责渲染；active 用于高亮当前页
+    # 侧边栏导航：按论文评价流程的顺序编排，分为「评价流程」与「系统管理」两组。
+    # 不使用模块编号，避免出现与实际流程不一致的代号。
     @app.context_processor
     def inject_nav():
         path = request.path or "/"
-        items = [
-            ("首页", "/", path == "/"),
-            ("项目与档案", "/project/", path.startswith("/project")),
-            ("限制性判定", "/constraint/", path.startswith("/constraint")),
-            ("标准知识库", "/standard/", path.startswith("/standard")),
-            ("AHP 权重", "/ahp/", path.startswith("/ahp")),
-            ("指标数据", "/indicator/", path.startswith("/indicator")),
-            ("适宜性评价", "/evaluate/", path.startswith("/evaluate")),
-            ("报告输出", "/report/", path.startswith("/report")),
-            ("用户与日志", "/users", path.startswith(("/users", "/logs"))),
+        flow = [
+            ("项目与矿山档案", "/project/", path.startswith("/project")),
+            ("政策与标准知识库", "/standard/", path.startswith("/standard")),
+            ("限制性指标判定", "/constraint/", path.startswith("/constraint")),
+            ("微地质单元", "/unit/", path.startswith("/unit")),
+            ("指标体系与权重", "/ahp/", path.startswith("/ahp")),
+            ("指标数据采集", "/indicator/", path.startswith("/indicator")),
+            ("适宜性定量评价", "/evaluate/", path.startswith("/evaluate")),
+            ("报告与结果输出", "/report/", path.startswith("/report")),
         ]
-        return {"nav_items": items}
+        admin = [
+            ("用户与操作日志", "/users", path.startswith(("/users", "/logs"))),
+        ]
+        groups = [
+            {"title": "评价流程", "links": flow},
+            {"title": "系统管理", "links": admin},
+        ]
+        return {"nav_groups": groups, "home_active": path == "/"}
 
     # 操作审计：统一在响应阶段记录成功的写操作（M1 操作日志）
     from app.services import audit

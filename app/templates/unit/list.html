@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}微地质单元{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>微地质单元</h2>
+  <p class="muted">
+    按论文 4.1 节将矿山图斑划分为岩质边坡、碎石边坡、平台三类微地质单元。
+    面积占比由面积自动计算，即论文式(9) 中决定各单元权重的系数。
+  </p>
+
+  {% if not rows %}
+  <p class="muted">
+    暂无矿山图斑。请先到「项目与矿山档案」建立图斑。
+  </p>
+  {% else %}
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">矿山图斑</th>
+        <th scope="col">已划分单元</th>
+        <th scope="col">占比合计</th>
+        <th scope="col">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td style="text-align:left;">{{ r.patch.name }}</td>
+        <td class="num">{{ r.count }} 个</td>
+        <td class="num">
+          {% if r.count %}
+            {{ "%.2f%%"|format(r.ratio_sum * 100) }}
+            {% if r.ratio_sum < 0.999 or r.ratio_sum > 1.001 %}
+            <span class="warn">（不等于 100%）</span>
+            {% endif %}
+          {% else %}—{% endif %}
+        </td>
+        <td class="nowrap">
+          <a href="/unit/{{ r.patch.id }}">划分与维护</a>
+          &nbsp;|&nbsp;<a href="/indicator/">录入指标数据</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endblock %}

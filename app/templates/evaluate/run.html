@@ -1,19 +1,67 @@
 {% extends "base.html" %}
+{% import "_macros.html" as ui %}
 {% block title %}执行评价 · {{ patch.name }}{% endblock %}
 {% block content %}
-<div class="card" style="max-width:640px;">
+<div class="card" style="max-width:880px;">
   <h2>执行适宜性评价 · {{ patch.name }}</h2>
   <p class="muted">
-    系统将对图斑内各微地质单元做指标标准化、分单元赋分、面积加权合成，
-    并判定适宜性等级。评价结果会保存，可随时回看。
+    系统按论文式(8) 对各项指标做标准化，按式(9) 分单元赋分并按面积占比加权合成，
+    最后按论文表 4 判定适宜性等级。评价结果会保存，可随时回看。
   </p>
 
+  {{ ui.workflow_steps(progress) }}
+  {{ ui.workflow_blocking(progress) }}
+
+  {% if progress.ready %}
   <form method="post">
     {{ form.hidden_tag() }}
-    <p class="actions" style="margin-top:16px;">
+    <p class="actions">
       <button type="submit" class="btn">开始评价</button>
       <a class="btn btn--ghost" href="/evaluate/">返回</a>
     </p>
   </form>
+  {% else %}
+  <p class="actions">
+    <button type="button" class="btn" disabled>开始评价</button>
+    <a class="btn btn--ghost" href="/evaluate/">返回</a>
+  </p>
+  <p class="muted">前置步骤全部完成后，该按钮才可用。</p>
+  {% endif %}
+</div>
+
+<div class="card" style="max-width:880px;">
+  <h2>当前流程状态</h2>
+  <table>
+    <thead>
+      <tr><th scope="col">步骤</th><th scope="col">状态</th><th scope="col">说明</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>划分微地质单元</td>
+        <td>
+          {% if progress.units.done %}<span class="tag tag--ok">已完成</span>
+          {% else %}<span class="tag tag--muted">待完成</span>{% endif %}
+        </td>
+        <td style="text-align:left;">{{ progress.units.detail }}</td>
+      </tr>
+      <tr>
+        <td>限制性条件判定</td>
+        <td>
+          {% if progress.constraint.passed %}<span class="tag tag--ok">已通过</span>
+          {% elif progress.constraint.done %}<span class="tag tag--warn">未通过</span>
+          {% else %}<span class="tag tag--muted">待完成</span>{% endif %}
+        </td>
+        <td style="text-align:left;">{{ progress.constraint.detail }}</td>
+      </tr>
+      <tr>
+        <td>录入指标数据</td>
+        <td>
+          {% if progress.data.ready %}<span class="tag tag--ok">已完成</span>
+          {% else %}<span class="tag tag--muted">待完成</span>{% endif %}
+        </td>
+        <td style="text-align:left;">{{ progress.data.detail }}</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 {% endblock %}

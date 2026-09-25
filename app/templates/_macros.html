@@ -1,0 +1,68 @@
+{# 共用宏：流程状态面板 #}
+
+{# 评价流程步骤条：显示各前置步骤的完成情况 #}
+{% macro workflow_steps(progress) %}
+<div class="steps">
+  <div class="step {% if progress.units.done %}step--done{% else %}step--todo{% endif %}">
+    <span class="step__no">1</span>
+    <span class="step__name">划分微地质单元</span>
+    <span class="step__state">
+      {% if progress.units.done %}已完成{% else %}待完成{% endif %}
+    </span>
+  </div>
+  <div class="step {% if progress.constraint.passed %}step--done{% elif progress.constraint.done %}step--fail{% else %}step--todo{% endif %}">
+    <span class="step__no">2</span>
+    <span class="step__name">限制性条件判定</span>
+    <span class="step__state">
+      {% if progress.constraint.passed %}已通过
+      {% elif progress.constraint.done %}未通过
+      {% else %}待完成{% endif %}
+    </span>
+  </div>
+  <div class="step {% if progress.data.ready %}step--done{% else %}step--todo{% endif %}">
+    <span class="step__no">3</span>
+    <span class="step__name">录入指标数据</span>
+    <span class="step__state">
+      {% if progress.data.ready %}已完成{% else %}待完成{% endif %}
+    </span>
+  </div>
+  <div class="step step--next">
+    <span class="step__no">4</span>
+    <span class="step__name">执行适宜性评价</span>
+    <span class="step__state">当前步骤</span>
+  </div>
+</div>
+{% endmacro %}
+
+
+{# 前置条件未满足时的提示块，逐条给出原因与去处理入口 #}
+{% macro workflow_blocking(progress) %}
+{% if progress.blocking %}
+<div class="notice notice--warn">
+  <p class="notice__title">尚不能执行本步骤，请先完成以下前置工作：</p>
+  <ol class="notice__list">
+    {% for b in progress.blocking %}
+    <li>
+      <strong>{{ b.label }}</strong> —— {{ b.reason }}
+      <a href="{{ b.fix_url }}">{{ b.fix_label }}</a>
+    </li>
+    {% endfor %}
+  </ol>
+  <p class="notice__hint">
+    说明：本系统按论文 4.1 节的评价流程设置前置检查，
+    避免在前置条件不具备时产出不合理的评价结论。
+  </p>
+</div>
+{% endif %}
+{% endmacro %}
+
+
+{# 一行式状态摘要，用于列表页 #}
+{% macro workflow_badge(progress) %}
+{% if progress.ready %}
+<span class="tag tag--ok">可执行评价</span>
+{% elif progress.blocking %}
+<span class="tag tag--warn">{{ progress.blocking[0].label }}</span>
+<span class="muted">{{ progress.blocking[0].reason }}</span>
+{% endif %}
+{% endmacro %}

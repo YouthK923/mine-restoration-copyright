@@ -350,6 +350,46 @@
     .stat__label { font-size: 12.5px; color: var(--ink-soft); }
     .stat__value { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
 
+    /* ---------- 流程步骤条 ---------- */
+    .steps { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 18px; }
+    .step {
+      display: flex; align-items: center; gap: 7px;
+      padding: 8px 12px; font-size: 13px;
+      background: #fff; border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+    .step__no {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: #eef1f5; color: var(--ink-soft);
+      font-size: 12px; font-variant-numeric: tabular-nums;
+    }
+    .step__name { font-weight: 600; }
+    .step__state { font-size: 12.5px; color: var(--ink-soft); }
+    .step--done { border-color: #b8ddc6; background: var(--ok-soft); }
+    .step--done .step__no { background: var(--ok); color: #fff; }
+    .step--done .step__state { color: var(--ok); }
+    .step--fail { border-color: #eec4c0; background: var(--danger-soft); }
+    .step--fail .step__no { background: var(--danger); color: #fff; }
+    .step--fail .step__state { color: var(--danger); font-weight: 600; }
+    .step--next { border-color: var(--accent); }
+    .step--next .step__no { background: var(--accent); color: #fff; }
+
+    /* ---------- 提示块 ---------- */
+    .notice {
+      padding: 14px 16px; margin: 0 0 16px;
+      border-radius: var(--radius); border-left: 4px solid;
+    }
+    .notice--warn {
+      background: var(--danger-soft);
+      border-left-color: var(--danger);
+      color: #7a1c17;
+    }
+    .notice__title { margin: 0 0 8px; font-weight: 600; }
+    .notice__list { margin: 0; padding-left: 20px; line-height: 1.9; }
+    .notice__list a { color: var(--accent); }
+    .notice__hint { margin: 8px 0 0; font-size: 12.5px; color: var(--ink-soft); }
+
     /* ---------- 窄屏适配 ---------- */
     @media (max-width: 860px) {
       .app-body { flex-direction: column; }
@@ -390,14 +430,21 @@
   <div class="app-body">
     {% if current_user.is_authenticated %}
     <nav class="app-nav" aria-label="功能导航">
-      <p class="app-nav__group">功能模块</p>
       <ul>
-        {% for label, href, active in nav_items %}
+        <li>
+          <a href="/"{% if home_active %} aria-current="page"{% endif %}>首页</a>
+        </li>
+      </ul>
+      {% for g in nav_groups %}
+      <p class="app-nav__group">{{ g.title }}</p>
+      <ul>
+        {% for label, href, active in g.links %}
         <li>
           <a href="{{ href }}"{% if active %} aria-current="page"{% endif %}>{{ label }}</a>
         </li>
         {% endfor %}
       </ul>
+      {% endfor %}
     </nav>
     {% endif %}
 

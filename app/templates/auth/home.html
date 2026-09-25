@@ -5,41 +5,55 @@
   <h2>系统功能</h2>
   <p class="muted">
     本系统以论文《历史遗留废弃矿山自然恢复适宜性评价指标体系建设及典型案例》
-    建立的评价方法为算法内核，覆盖从基础档案到评价报告输出的完整流程。
+    建立的评价方法为算法内核。下方按论文 4.1 节的评价流程顺序排列，建议依序使用；
+    系统会在每一步检查前置条件，前置步骤未完成时不会放行后续计算。
   </p>
+</div>
 
-  <div class="tile-grid" style="margin-top:16px;">
+<div class="card">
+  <h2>评价流程</h2>
+  <div class="tile-grid">
     <a class="tile" href="/project/">
-      <div class="tile__title">M2 项目与矿山档案</div>
-      <div class="tile__desc">建立评价项目、录入矿山图斑、设置参照生态系统</div>
-    </a>
-    <a class="tile" href="/constraint/">
-      <div class="tile__title">M4 限制性指标判定</div>
-      <div class="tile__desc">政策、区位约束、土壤污染、地质灾害、耕地属性一票否决</div>
+      <div class="tile__title">项目与矿山档案</div>
+      <div class="tile__desc">建立评价项目、录入矿山图斑、挂接遥感影像、设置参照生态系统</div>
     </a>
     <a class="tile" href="/standard/">
-      <div class="tile__title">M3 政策与标准知识库</div>
-      <div class="tile__desc">11 项地方标准与政策文件、省际口径比对</div>
+      <div class="tile__title">政策与标准知识库</div>
+      <div class="tile__desc">收录 11 项地方标准与政策文件，结构化判定规则，支持省际口径比对</div>
+    </a>
+    <a class="tile" href="/constraint/">
+      <div class="tile__title">限制性指标判定</div>
+      <div class="tile__desc">政策、区位约束、土壤污染、地质灾害、耕地属性五项一票否决</div>
+    </a>
+    <a class="tile" href="/unit/">
+      <div class="tile__title">微地质单元</div>
+      <div class="tile__desc">划分岩质边坡、碎石边坡、平台三类单元，自动计算面积占比</div>
     </a>
     <a class="tile" href="/ahp/">
-      <div class="tile__title">M6 指标体系与 AHP 权重</div>
-      <div class="tile__desc">判断矩阵录入、权重计算、一致性检验</div>
+      <div class="tile__title">指标体系与权重</div>
+      <div class="tile__desc">指标定义维护、判断矩阵录入、权重计算与一致性检验、多专家汇总</div>
     </a>
     <a class="tile" href="/indicator/">
-      <div class="tile__title">M7 指标数据采集</div>
-      <div class="tile__desc">按微地质单元录入土壤、植被、地形指标</div>
+      <div class="tile__title">指标数据采集</div>
+      <div class="tile__desc">按微地质单元录入土壤、植被、地形指标，支持 CSV / Excel 批量导入</div>
     </a>
     <a class="tile" href="/evaluate/">
-      <div class="tile__title">M8 适宜性定量评价</div>
-      <div class="tile__desc">标准化、分单元赋分、面积加权、等级判定</div>
+      <div class="tile__title">适宜性定量评价</div>
+      <div class="tile__desc">指标标准化、分单元赋分、面积加权合成、适宜性等级判定</div>
     </a>
     <a class="tile" href="/report/">
-      <div class="tile__title">M9 报告与结果输出</div>
-      <div class="tile__desc">得分明细、Word 评价报告导出</div>
+      <div class="tile__title">报告与结果输出</div>
+      <div class="tile__desc">结果图表、逐层得分明细，导出 PDF 与 Word 评价报告</div>
     </a>
+  </div>
+</div>
+
+<div class="card">
+  <h2>系统管理</h2>
+  <div class="tile-grid">
     <a class="tile" href="/users">
-      <div class="tile__title">M1 用户与权限管理</div>
-      <div class="tile__desc">用户维护与角色权限</div>
+      <div class="tile__title">用户与操作日志</div>
+      <div class="tile__desc">用户维护与角色权限；全部写操作自动留痕，可查询追溯</div>
     </a>
   </div>
 </div>

@@ -3,12 +3,18 @@
 
 从数据库加载某图斑的微地质单元与指标数据，调用评价引擎计算，
 展示各单元得分、最终评价因子 F、适宜性等级与推荐措施。
+
+入口处按论文 4.1 节的流程顺序检查前置条件（见 app/services/workflow.py），
+前置步骤未完成时不予计算，避免在条件不具备时产出评价结论。
 """
+import json
+
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 
 from app.forms import EmptyForm
 from app.models import db, MinePatch, MicroUnit, IndicatorData, EvaluationResult
 from app.services import evaluation_service as ev
+from app.services import workflow as wf
 
 bp = Blueprint("evaluate", __name__, url_prefix="/evaluate")
 
@@ -38,32 +44,38 @@ def load_patch_input(patch_id):
     return result
 
 
+def block_reasons(progress):
+    """把未满足的前置条件转成可读的拦截原因。"""
+    return ["%s：%s" % (b["label"], b["reason"]) for b in progress["blocking"]]
+
+
 @bp.route("/")
 def index():
     patches = MinePatch.query.order_by(MinePatch.id.desc()).all()
-    # 每图斑是否已有评价结果
     latest = {}
+    progress = {}
     for p in patches:
-        r = EvaluationResult.query.filter_by(patch_id=p.id) \
-                .order_by(EvaluationResult.id.desc()).first()
-        latest[p.id] = r
-    return render_template("evaluate/index.html", patches=patches, latest=latest)
+        latest[p.id] = EvaluationResult.query.filter_by(patch_id=p.id) \
+            .order_by(EvaluationResult.id.desc()).first()
+        progress[p.id] = wf.patch_progress(p.id)
+    return render_template("evaluate/index.html", patches=patches,
+                           latest=latest, progress=progress)
 
 
 @bp.route("/<int:patch_id>", methods=["GET", "POST"])
 def run(patch_id):
     patch = db.get_or_404(MinePatch, patch_id)
     form = EmptyForm()
-    result = None
+    progress = wf.patch_progress(patch_id)
 
     if request.method == "POST" and form.validate_on_submit():
+        if not progress["ready"]:
+            for reason in block_reasons(progress):
+                flash("无法执行评价 —— " + reason, "error")
+            return redirect(url_for("evaluate.run", patch_id=patch_id))
+
         units = load_patch_input(patch_id)
-        if not units:
-            flash("该图斑尚无微地质单元，请先划分微地质单元", "error")
-            return redirect(url_for("evaluate.index"))
-        # 计算并入库
         res = ev.score_mine(units)
-        import json
         saved = EvaluationResult(
             patch_id=patch.id,
             final_score=round(res["final_score"], 4),
@@ -79,14 +91,14 @@ def run(patch_id):
         db.session.commit()
         return redirect(url_for("evaluate.result", result_id=saved.id))
 
-    return render_template("evaluate/run.html", patch=patch, form=form, result=result)
+    return render_template("evaluate/run.html", patch=patch, form=form,
+                           progress=progress)
 
 
 @bp.route("/result/<int:result_id>")
 def result(result_id):
     r = db.get_or_404(EvaluationResult, result_id)
     patch = db.session.get(MinePatch, r.patch_id)
-    import json
     unit_scores = json.loads(r.unit_scores) if r.unit_scores else []
     return render_template("evaluate/result.html", r=r, patch=patch,
                            unit_scores=unit_scores)

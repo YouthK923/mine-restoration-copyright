@@ -20,6 +20,22 @@ def recalc_ratio(patch_id):
     return total
 
 
+@bp.route("/")
+@login_required
+def list_patches():
+    """微地质单元入口：列出各图斑及其单元划分情况。"""
+    patches = MinePatch.query.order_by(MinePatch.id.desc()).all()
+    rows = []
+    for p in patches:
+        units = MicroUnit.query.filter_by(patch_id=p.id).all()
+        rows.append({
+            "patch": p,
+            "count": len(units),
+            "ratio_sum": sum(u.ratio or 0.0 for u in units),
+        })
+    return render_template("unit/list.html", rows=rows)
+
+
 @bp.route("/<int:patch_id>")
 @login_required
 def index(patch_id):

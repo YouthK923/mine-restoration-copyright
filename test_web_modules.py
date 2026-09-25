@@ -119,6 +119,13 @@ print("  一项不通过后显示「不通过」:", "不通过" in body)
 print("  含失败项「区位约束」:", "区位约束" in body)
 assert "不通过" in body
 
+# 恢复为全部通过，避免把演示数据留在「不通过」状态影响后续步骤
+client.post("/constraint/%d" % pid, data={
+    "policy_pass": "1", "location_pass": "1", "pollution_pass": "1",
+    "geo_pass": "1", "farmland_pass": "1"})
+r = client.get("/constraint/%d" % pid)
+print("  已恢复为全部通过:", "可进入定量评价" in r.get_data(as_text=True))
+
 print()
 print(LINE)
 print("M1–M5 全部测试通过 ✓")

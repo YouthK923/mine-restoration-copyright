@@ -10,7 +10,8 @@ sys.stdout.reconfigure(encoding="utf-8")
 
 from app import create_app
 from app.models import (db, User, Project, MinePatch, ReferenceEcosystem,
-                        MicroUnit, IndicatorData, Standard, StandardRule)
+                        MicroUnit, IndicatorData, Standard, StandardRule,
+                        ConstraintCheck)
 
 app = create_app()
 
@@ -195,6 +196,14 @@ def seed():
                 aspect=d.get("aspect"),
             )
             db.session.add(ind)
+
+        # 限制性条件判定记录：演示案例按论文第 5 节描述属「无地质灾害隐患点」、
+        # 具备自然恢复条件，故五项全部通过。缺此记录会使后续评价被流程门禁拦住。
+        db.session.add(ConstraintCheck(
+            patch_id=patch.id,
+            policy_pass=True, location_pass=True, pollution_pass=True,
+            geo_pass=True, farmland_pass=True,
+            passed=True, reason="全部通过"))
 
         db.session.commit()
         print("已写入案例：", CASE["name"])

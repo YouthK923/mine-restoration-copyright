@@ -1,28 +1,39 @@
 {% extends "base.html" %}
-{% block title %}适宜性评价{% endblock %}
+{% block title %}适宜性定量评价{% endblock %}
 {% block content %}
 <div class="card">
   <h2>适宜性定量评价</h2>
   <p class="muted">
     系统按论文式(8) 对各项指标做标准化，按式(9) 分单元赋分并按面积占比加权合成，
-    最后按论文表 4 判定适宜性等级。
+    最后按论文表 4 判定适宜性等级。未满足前置条件的图斑不能执行评价，
+    下表会列出所缺步骤。
   </p>
 
   {% if not patches %}
-  <p class="muted">暂无矿山图斑。请先在「项目与档案」中建立图斑并录入指标数据。</p>
+  <p class="muted">暂无矿山图斑。请先到「项目与矿山档案」建立图斑。</p>
   {% else %}
   <table>
     <thead>
       <tr>
         <th scope="col">矿山图斑</th>
+        <th scope="col">前置条件</th>
         <th scope="col">最近评价结果</th>
         <th scope="col">操作</th>
       </tr>
     </thead>
     <tbody>
       {% for p in patches %}
+      {% set pr = progress.get(p.id) %}
       <tr>
         <td style="text-align:left;">{{ p.name }}</td>
+        <td style="text-align:left;">
+          {% if pr and pr.ready %}
+          <span class="tag tag--ok">已具备</span>
+          {% elif pr %}
+          <span class="tag tag--warn">缺：{{ pr.blocking[0].label }}</span>
+          <span class="muted">{{ pr.blocking[0].reason }}</span>
+          {% endif %}
+        </td>
         <td>
           {% if latest.get(p.id) %}
           F = <span class="mono num">{{ latest[p.id].final_score }}</span>，
