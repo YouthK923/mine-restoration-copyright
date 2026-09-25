@@ -67,7 +67,8 @@ print(LINE)
 print("测试 3  执行评价")
 print(LINE)
 with app.app_context():
-    patch = MinePatch.query.first()
+    import seed_demo
+    patch = seed_demo.demo_patch()
 r = client.post("/evaluate/%d" % patch.id, data={}, follow_redirects=True)
 body = r.get_data(as_text=True)
 print("  跳转至结果页:", "适宜性评价结果" in body)

@@ -46,12 +46,9 @@ with app.app_context():
     ensure_schema(db)
     ExpertMatrix.query.delete()
     db.session.commit()
-    # 固定取内置演示案例的图斑，避免受库中用户自建项目的影响
-    demo = Project.query.filter_by(code="DEMO-001").first()
-    if demo is not None:
-        patch_id = MinePatch.query.filter_by(project_id=demo.id).first().id
-    else:
-        patch_id = MinePatch.query.first().id
+    # 固定取内置演示案例的图斑，避免受库中用户自建项目 / 验证算例的影响
+    import seed_demo
+    patch_id = seed_demo.demo_patch().id
 
 c = app.test_client()
 c.post("/login", data={"username": "admin", "password": "admin123"})

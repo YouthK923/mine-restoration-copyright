@@ -194,6 +194,21 @@ def clean_case(reset=False):
     return len(demo_ids)
 
 
+def demo_patch():
+    """取内置演示案例的图斑。
+
+    库中可能存在用户自建项目或验证算例（编号 VERIFY-），
+    故不能简单用 MinePatch.query.first()，否则取到的对象不确定。
+    没有演示案例时才退回第一个图斑。
+    """
+    proj = Project.query.filter_by(code=DEMO_CODE).first()
+    if proj is not None:
+        m = MinePatch.query.filter_by(project_id=proj.id).first()
+        if m is not None:
+            return m
+    return MinePatch.query.first()
+
+
 def _purge_orphan_details():
     """清理指向已不存在评价记录的孤儿得分明细。
 

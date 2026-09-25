@@ -94,7 +94,8 @@ assert "confirm(" in html
 # 图斑列表
 with app.app_context():
     from app.models import MinePatch, Project
-    patch = MinePatch.query.first()
+    import seed_demo
+    patch = seed_demo.demo_patch()
     patch_id = patch.id
 html = client.get("/project/%d/patches" % patch_id).get_data(as_text=True)
 print("  %s 图斑列表含删除按钮" % ("[符合]" if "/project/patch/" in html and "btn--danger" in html else "[不符合]"))

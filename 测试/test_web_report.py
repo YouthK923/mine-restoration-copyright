@@ -31,7 +31,8 @@ client.post("/login", data={"username": "admin", "password": "admin123"})
 
 from app.models import MinePatch, EvaluationResult
 with app.app_context():
-    patch = MinePatch.query.first()
+    import seed_demo
+    patch = seed_demo.demo_patch()
     pid = patch.id
 
 # 报告取自已保存的评价记录，因此先按网页路径真实执行一次评价

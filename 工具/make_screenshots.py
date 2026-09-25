@@ -45,7 +45,8 @@ class ShotConfig(Config):
 def prepare_data(app):
     """确保案例与评价结果存在，供截图使用。"""
     with app.app_context():
-        patch = MinePatch.query.first()
+        import seed_demo
+        patch = seed_demo.demo_patch()      # 固定取演示案例，不取库中任意图斑
         if patch is None:
             print("  [警告] 数据库无图斑，请先运行 seed_demo.py")
             return None, None
