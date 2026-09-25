@@ -1,0 +1,425 @@
+# -*- coding: utf-8 -*-
+"""生成软著申请用的《软件说明书（用户手册）》PDF。
+
+按登记要求：
+- A4 纵向、单面
+- 页眉标注软件名称与版本号（与申请表一致）
+- 页码自目录起由第 1 页编号，标于右上角
+- 图文并茂，覆盖各主要功能模块，文档描述与源程序功能一一对应
+
+用法：
+    python make_manual.py
+输出：
+    软著材料/说明书_历史遗留废弃矿山自然恢复适宜性评价系统V1.0.pdf
+"""
+import os
+import sys
+
+import fitz
+
+sys.stdout.reconfigure(encoding="utf-8")
+
+SOFTWARE_NAME = "历史遗留废弃矿山自然恢复适宜性评价系统V1.0"
+FONT = "china-s"
+FONT_BOLD = "china-s"          # 内置字体，用字号区分层级
+PAGE_W, PAGE_H = 595.28, 841.89
+MARGIN_L, MARGIN_R = 56, 56
+MARGIN_T, MARGIN_B = 62, 56
+BODY_W = PAGE_W - MARGIN_L - MARGIN_R
+HEADER_Y = 34
+RULE_Y = 44
+CONTENT_TOP = 60
+CONTENT_BOTTOM = PAGE_H - MARGIN_B
+
+IMG_TARGET_W = 1000          # 截图嵌入前的下采样宽度
+IMG_QUALITY = 80             # JPEG 压缩质量
+
+BASE = os.path.dirname(os.path.abspath(__file__))
+SHOT_DIR = os.path.join(BASE, "软著材料", "截图")
+OUT_DIR = os.path.join(BASE, "软著材料")
+
+# ---------------------------------------------------------------------------
+# 说明书正文内容
+# ---------------------------------------------------------------------------
+CONTENT = [
+    ("h1", "一、引言"),
+    ("h2", "1.1 编写目的"),
+    ("p", "本文档是《历史遗留废弃矿山自然恢复适宜性评价系统 V1.0》的软件说明书（用户手册），"
+          "用于说明系统的功能构成、操作流程与使用方法，供软件使用人员、维护人员及软件著作权"
+          "登记审查使用。"),
+    ("p", "文档按系统实际的九个功能模块逐项说明，每一功能均配有界面截图，"
+          "文中描述的功能与源程序实现一一对应。"),
+
+    ("h2", "1.2 背景"),
+    ("p", "历史遗留废弃矿山责任主体缺失，政府主导的单一投入修复模式难以为继，"
+          "自然恢复成为解决该问题的有效途径。但自然恢复适宜性的定量评价及其指标体系建设尚不完善。"
+          "本系统以《历史遗留废弃矿山自然恢复适宜性评价指标体系建设及典型案例》所建立的"
+          "评价方法为算法内核，将评价流程软件化，实现评价工作的规范化、自动化与可追溯。"),
+    ("p", "评价工作本身环节多、计算链长：涉及四项限制性指标与三类评价指标；"
+          "采用层次分析法（AHP）需构造判断矩阵并反复校验一致性；评价须按岩质边坡、"
+          "碎石土边坡、平台三类微地质单元分别定权、分别计算，再加权合成。"
+          "借助本系统可将整套流程自动化，保证计算口径统一、过程可复核。"),
+
+    ("h1", "二、系统介绍"),
+    ("h2", "2.1 系统概述"),
+    ("p", "本系统是一款面向生态环境与自然资源领域的应用软件，用于历史遗留废弃矿山"
+          "自然恢复适宜性的定量评价。系统以论文建立的指标体系、层次分析法（AHP）定权方法、"
+          "指标标准化方法与微地质单元面积加权合成方法为核心算法，"
+          "覆盖从基础档案建立、限制性条件判定、微地质单元划分、指标权重确定、"
+          "指标数据采集，到定量评价计算、适宜性等级判定、评价报告输出的完整闭环。"),
+    ("p", "系统共九个功能模块：用户与权限管理、项目与矿山档案、政策与标准知识库、"
+          "限制性指标判定、微地质单元管理、指标体系与 AHP 权重、指标数据采集与管理、"
+          "适宜性定量评价引擎、报告与结果输出。"),
+
+    ("h2", "2.2 界面框架"),
+    ("p", "系统采用浏览器访问方式，界面由顶部标题栏、功能导航栏与内容区三部分组成。"
+          "顶部标题栏左侧显示软件名称，右侧显示版本号、当前登录用户及其角色，并提供退出入口；"
+          "功能导航栏按九个功能模块排列，点击可进入对应页面；内容区显示当前功能的具体内容。"),
+    ("img", "02_系统首页.png", "系统首页：功能导航与九个功能模块入口"),
+
+    ("h2", "2.3 系统功能特点与技术特征"),
+    ("p", "功能特点："),
+    ("li", "评价流程全覆盖：从项目建立到报告输出，评价全过程在系统内完成，无需借助外部工具。"),
+    ("li", "计算自动化：AHP 权重计算、一致性检验、指标标准化、分单元赋分、面积加权合成、"
+           "等级判定全部由系统自动完成。"),
+    ("li", "过程可追溯：完整记录每一层指标的权重、标准化值与加权贡献，评价结果可逐格复核。"),
+    ("li", "按微地质单元差异化评价：系统按单元类型自动启用相应指标与权重，"
+           "岩质边坡不评价土壤指标、平台不评价地形指标。"),
+    ("li", "标准知识库：收录十一项地方标准与政策文件，并将其判定条件结构化为可执行规则，"
+           "支持同一指标在不同省份的阈值横向比对。"),
+    ("li", "参数可配置：指标标准化的理想极值、坡度分界、坡向赋值等参数均可在系统中调整，"
+           "以适应不同区域的实际条件。"),
+    ("p", "技术特征："),
+    ("li", "采用层次分析法（AHP）确定指标权重：以 1—9 标度构造判断矩阵，"
+           "用特征根法计算权重，并计算最大特征值、一致性指标与一致性比例完成检验。"),
+    ("li", "按微地质单元分别定权：岩质边坡、碎石土边坡、平台三类单元各持一套权重方案。"),
+    ("li", "四类指标标准化：按指标性质分为越大越优、越小越优、适中型与离散赋值四类分别处理。"),
+    ("li", "面积加权合成：按各微地质单元面积占比加权求得整个矿山的评价因子。"),
+    ("li", "数据存储采用关系型数据库，保证数据的一致性与可追溯性。"),
+
+    ("h1", "三、系统流程说明"),
+    ("p", "以下按实际操作顺序逐项说明系统各功能的用法。"),
+
+    ("h2", "3.1 登录"),
+    ("p", "打开浏览器访问系统地址，进入登录界面。输入用户名与密码，点击「登录」按钮进入系统。"
+          "系统设置了管理员、评价员、查看者三种角色，不同角色具有不同的操作权限。"
+          "未登录状态下访问其他功能页面，系统会自动跳转至登录界面。"),
+    ("img", "01_登录.png", "登录界面"),
+
+    ("h2", "3.2 系统首页"),
+    ("p", "登录成功后进入系统首页。首页以卡片形式列出系统的九个功能模块，"
+          "点击任一卡片即可进入对应功能。顶部导航栏可在各功能之间快速切换。"),
+    ("img", "02_系统首页.png", "系统首页"),
+
+    ("h2", "3.3 项目与矿山档案"),
+    ("p", "点击导航栏「项目与档案」，进入项目管理页面，可查看已有评价项目并新建项目。"
+          "新建项目时填写项目名称、项目编号与项目说明。"),
+    ("img", "03_项目与档案.png", "项目管理"),
+    ("p", "在项目下建立矿山图斑。点击项目右侧的「矿山图斑」进入图斑列表，"
+          "可新建图斑并填写图斑名称、所在行政区、图斑面积、开采矿种、开采方式、"
+          "停产年限以及责任主体是否缺失等信息。"),
+    ("img", "04_矿山图斑.png", "矿山图斑管理"),
+    ("p", "每个图斑同时设置参照生态系统，包括植被覆盖度基准与 Shannon-Wiener 多样性指数基准。"
+          "参照生态系统是植被指标标准化的基准值，论文给定的取值为植被覆盖度 75%、"
+          "多样性指数 0.7。系统中该基准与图斑绑定管理，可按不同参照生态系统分别设定。"),
+
+    ("h2", "3.4 微地质单元划分"),
+    ("p", "点击图斑右侧的「微地质单元」，进入微地质单元管理页面。"
+          "按论文方法将矿山图斑划分为岩质边坡、碎石土边坡、平台三类微地质单元，"
+          "逐项录入各单元面积。系统自动计算各单元面积占比并校验合计是否为 100%，"
+          "占比即后续定量评价中的面积权重系数。"),
+    ("img", "05_微地质单元.png", "微地质单元划分与面积占比计算"),
+
+    ("h2", "3.5 限制性指标判定"),
+    ("p", "点击导航栏「限制性判定」，进入限制性指标判定页面。"
+          "系统对政策约束、区位约束、土壤污染、地质灾害、耕地属性五项限制性条件逐项判定。"
+          "任一项不通过，系统即给出「建议生态重建或人工辅助」的结论，不再进入后续定量评价。"),
+    ("img", "06_限制性判定.png", "限制性指标判定与一票否决结论"),
+    ("p", "说明：土壤污染指标在论文中同时承担限制性指标与评价指标双重角色，"
+          "因此该系统既在此处参与一票否决判定，也在指标数据采集中参与定量打分。"),
+
+    ("h2", "3.6 政策与标准知识库"),
+    ("p", "点击导航栏「标准知识库」，进入政策与标准知识库页面。"
+          "系统收录论文梳理的十一项地方标准与政策文件，分为地方标准与政策文件两类展示，"
+          "每条标准可维护其判定条件。"),
+    ("img", "07_标准知识库.png", "政策与标准知识库"),
+    ("p", "点击某条标准的「规则」，进入结构化规则维护页面，"
+          "将标准条文拆解为「判定项 + 比较符 + 阈值 + 条件类型」的可执行规则。"),
+    ("img", "07b_标准规则.png", "结构化规则维护"),
+    ("p", "点击「省际口径比对」，系统将同一判定项在不同省份的阈值横向列出，"
+          "便于评价人员了解各省口径差异，无需人工翻阅多份标准文件。"
+          "例如植被覆盖度指标，辽宁要求不低于 50%、湖南要求高于 75%、"
+          "新疆要求达到周边的 30%。"),
+    ("img", "08_省际口径比对.png", "省际口径比对"),
+
+    ("h2", "3.7 AHP 指标权重计算"),
+    ("p", "点击导航栏「AHP 权重」，进入权重计算功能。首先选择微地质单元类型与指标层级，"
+          "系统按论文表 3 确定判断矩阵的规模。岩质边坡不设土壤指标、平台不设地形指标，"
+          "系统会相应调整矩阵所包含的指标。"),
+    ("img", "09_AHP权重选择.png", "选择微地质单元类型与指标层级"),
+    ("p", "进入判断矩阵录入页面。系统采用 1—9 标度法，"
+          "1、3、5、7、9 分别表示同等重要、稍微重要、明显重要、强烈重要、极端重要，"
+          "2、4、6、8 为相邻判断的中间值。只需录入矩阵上三角，对角线固定为 1，"
+          "下三角自动取倒数。系统默认按论文表 3 的权重预填一致的判断矩阵。"),
+    ("img", "10_判断矩阵录入.png", "判断矩阵录入"),
+    ("p", "点击「计算权重」，系统用特征根法计算各指标权重，"
+          "并给出最大特征值、一致性指标与一致性比例，判定是否满足一致性要求。"
+          "当一致性比例不小于 0.1 时，系统提示检验不通过，并自动定位最不一致的一对比较，"
+          "提示优先调整位置，避免手工反复试算。"),
+    ("img", "10b_权重计算结果.png", "权重计算结果与一致性检验"),
+
+    ("h2", "3.8 指标数据采集"),
+    ("p", "点击导航栏「指标数据」，进入指标数据采集页面。页面按矿山图斑列出各微地质单元"
+          "及其数据录入状态，点击「录入/编辑」进入录入界面。"),
+    ("img", "11_指标数据列表.png", "指标数据列表"),
+    ("p", "录入界面按单元类型自动显示应录入的指标：岩质边坡不显示土壤指标，"
+          "平台不显示地形指标。土壤指标包括土石比、土层厚度、pH、有机质与八种重金属含量；"
+          "植被指标包括植被覆盖度与 Shannon-Wiener 多样性指数；地形指标包括坡度与坡向。"),
+    ("img", "12_指标数据录入.png", "指标数据录入（按单元类型动态显示）"),
+    ("p", "说明：输入框留空表示该指标「不适用」，与「实测值为 0」含义不同，"
+          "系统在计算时会跳过不适用项，不会当作低分计入。"),
+
+    ("h2", "3.9 适宜性定量评价"),
+    ("p", "点击导航栏「适宜性评价」，进入评价页面。页面列出各矿山图斑及其最近一次评价结果，"
+          "点击「执行评价」按钮，系统按论文式(8)、式(9) 与表 3 权重，"
+          "对图斑内各微地质单元做指标标准化、分单元赋分、面积加权合成，"
+          "得到整个矿山的评价因子，并判定适宜性等级。"),
+    ("img", "13_适宜性评价.png", "适宜性评价入口"),
+    ("p", "评价结果页面显示最终评价因子、适宜性等级、推荐措施，以及各微地质单元的得分"
+          "与加权贡献。适宜性等级按论文表 4 划分为不适宜、基本适宜、适宜三级："
+          "评价因子小于 0.3 为不适宜，介于 0.3 与 0.7 之间为基本适宜，不小于 0.7 为适宜。"),
+    ("img", "14_评价结果.png", "评价结果：评价因子、适宜性等级与推荐措施"),
+
+    ("h2", "3.10 报告与结果输出"),
+    ("p", "点击导航栏「报告输出」，进入报告页面。点击「查看得分明细」，"
+          "系统按微地质单元逐层列出各一级指标、二级指标的实测值、标准化值、权重与加权贡献，"
+          "评价过程完全可复核。"),
+    ("img", "15_得分明细.png", "得分明细（逐层展示权重、标准化值与贡献）"),
+    ("p", "点击「导出 Word 报告」，系统按图斑信息、评价结论、各微地质单元得分、"
+          "得分明细四个部分生成规范的评价报告文档，可直接下载保存。"),
+
+    ("h2", "3.11 用户管理"),
+    ("p", "点击导航栏「用户管理」，进入用户管理页面，可查看系统用户及其角色。"
+          "管理员可点击「新增用户」添加用户，并为其指定查看者、评价员或管理员角色。"),
+    ("img", "16_用户管理.png", "用户管理"),
+
+    ("h2", "3.12 退出系统"),
+    ("p", "使用完毕后，点击界面右上角的「退出」链接，退出当前登录状态，返回登录界面。"),
+]
+
+
+# ---------------------------------------------------------------------------
+# 排版引擎
+# ---------------------------------------------------------------------------
+
+def wrap_text(text, size, max_w, font=FONT):
+    """按渲染宽度折行，兼容中英文混排。"""
+    lines, cur = [], ""
+    for ch in text:
+        if fitz.get_text_length(cur + ch, fontname=font, fontsize=size) <= max_w:
+            cur += ch
+        else:
+            # 英文尽量按空格断行
+            if ch.isascii() and not ch.isspace():
+                sp = cur.rfind(" ")
+                if sp > len(cur) * 0.5:
+                    lines.append(cur[:sp])
+                    cur = cur[sp + 1:] + ch
+                    continue
+            lines.append(cur)
+            cur = ch
+    if cur:
+        lines.append(cur)
+    return lines
+
+
+class Manual:
+    def __init__(self):
+        self.doc = fitz.open()
+        self.page = None
+        self.y = 0
+        self.page_no = 0        # 编号页码（目录起算）
+        self.cover = True
+
+    # ---- 页面管理 ----
+    def new_page(self, numbered=True):
+        self.page = self.doc.new_page(width=PAGE_W, height=PAGE_H)
+        if numbered:
+            self.page_no += 1
+            self._header(self.page_no)
+        self.y = CONTENT_TOP
+
+    def _header(self, no):
+        self.page.insert_text((MARGIN_L, HEADER_Y), SOFTWARE_NAME,
+                              fontname=FONT, fontsize=9)
+        s = "第 %d 页" % no
+        w = fitz.get_text_length(s, fontname=FONT, fontsize=9)
+        self.page.insert_text((PAGE_W - MARGIN_R - w, HEADER_Y), s,
+                              fontname=FONT, fontsize=9)
+        self.page.draw_line(fitz.Point(MARGIN_L, RULE_Y),
+                            fitz.Point(PAGE_W - MARGIN_R, RULE_Y),
+                            color=(0, 0, 0), width=0.6)
+
+    def ensure(self, need):
+        if self.y + need > CONTENT_BOTTOM:
+            self.new_page()
+
+    # ---- 内容块 ----
+    def heading(self, text, level):
+        size = {1: 14, 2: 12}[level]
+        before = {1: 20, 2: 16}[level]
+        after = {1: 20, 2: 16}[level]
+        self.ensure(before + size + after + 17)
+        self.y += before
+        base = self.y
+        self.page.insert_text((MARGIN_L, base), text,
+                              fontname=FONT, fontsize=size)
+        if level == 1:
+            self.page.draw_line(fitz.Point(MARGIN_L, base + 6),
+                                fitz.Point(PAGE_W - MARGIN_R, base + 6),
+                                color=(0.7, 0.7, 0.7), width=0.5)
+        self.y = base + after
+
+    def para(self, text):
+        size = 10.5
+        lh = 17
+        for ln in wrap_text(text, size, BODY_W):
+            self.ensure(lh)
+            self.page.insert_text((MARGIN_L, self.y), ln,
+                                  fontname=FONT, fontsize=size)
+            self.y += lh
+        self.y += 6
+
+    def bullet(self, text):
+        size = 10.5
+        lh = 17
+        indent = 14
+        first = True
+        for ln in wrap_text(text, size, BODY_W - indent):
+            self.ensure(lh)
+            if first:
+                self.page.insert_text((MARGIN_L, self.y), "·",
+                                      fontname=FONT, fontsize=size)
+                first = False
+            self.page.insert_text((MARGIN_L + indent, self.y), ln,
+                                  fontname=FONT, fontsize=size)
+            self.y += lh
+        self.y += 4
+
+    def image(self, fname, caption):
+        path = os.path.join(SHOT_DIR, fname)
+        if not os.path.exists(path):
+            return
+        # 下采样并转 JPEG，避免 PDF 体积过大（原始位图直嵌可达数十 MB）
+        src = fitz.open(path)
+        sw, sh = src[0].rect.width, src[0].rect.height
+        zoom = IMG_TARGET_W / sw
+        pix = src[0].get_pixmap(matrix=fitz.Matrix(zoom, zoom))
+        jpg = pix.tobytes("jpeg", jpg_quality=IMG_QUALITY)
+        src.close()
+
+        scale = min(1.0, BODY_W / pix.width)
+        w, h = pix.width * scale, pix.height * scale
+        cap_h = 20
+        avail = CONTENT_BOTTOM - CONTENT_TOP - cap_h
+        if h > avail:
+            h = avail
+            w = pix.width * (h / pix.height)
+        self.ensure(h + cap_h + 8)
+        rect = fitz.Rect(MARGIN_L + (BODY_W - w) / 2, self.y,
+                         MARGIN_L + (BODY_W - w) / 2 + w, self.y + h)
+        self.page.insert_image(rect, stream=jpg)
+        self.y += h + 4
+        cw = fitz.get_text_length(caption, fontname=FONT, fontsize=9)
+        self.page.insert_text((MARGIN_L + (BODY_W - cw) / 2, self.y + 10),
+                              caption, fontname=FONT, fontsize=9)
+        self.y += cap_h + 8
+
+    # ---- 封面 ----
+    def cover_page(self):
+        p = self.doc.new_page(width=PAGE_W, height=PAGE_H)
+        self.page = p
+        y = 200
+        title = "历史遗留废弃矿山自然恢复适宜性评价系统"
+        tw = fitz.get_text_length(title, fontname=FONT, fontsize=22)
+        p.insert_text(((PAGE_W - tw) / 2, y), title,
+                      fontname=FONT, fontsize=22)
+        y += 46
+        v = "V1.0"
+        vw = fitz.get_text_length(v, fontname=FONT, fontsize=16)
+        p.insert_text(((PAGE_W - vw) / 2, y), v, fontname=FONT, fontsize=16)
+        y += 90
+        sub = "软件说明书（用户手册）"
+        sw = fitz.get_text_length(sub, fontname=FONT, fontsize=18)
+        p.insert_text(((PAGE_W - sw) / 2, y), sub, fontname=FONT, fontsize=18)
+        y += 120
+        info = [
+            "软件全称：历史遗留废弃矿山自然恢复适宜性评价系统",
+            "版本号：V1.0",
+            "文档类型：软件说明书（用户手册）",
+        ]
+        for t in info:
+            p.insert_text((MARGIN_L + 60, y), t, fontname=FONT, fontsize=11)
+            y += 24
+
+    # ---- 目录 ----
+    def toc(self):
+        self.new_page(numbered=True)      # 目录作为第 1 页
+        self.heading("目　录", 1)
+        entries = [
+            ("一、引言", 0), ("1.1 编写目的", 1), ("1.2 背景", 1),
+            ("二、系统介绍", 0), ("2.1 系统概述", 1), ("2.2 界面框架", 1),
+            ("2.3 系统功能特点与技术特征", 1),
+            ("三、系统流程说明", 0),
+            ("3.1 登录", 1), ("3.2 系统首页", 1), ("3.3 项目与矿山档案", 1),
+            ("3.4 微地质单元划分", 1), ("3.5 限制性指标判定", 1),
+            ("3.6 政策与标准知识库", 1), ("3.7 AHP 指标权重计算", 1),
+            ("3.8 指标数据采集", 1), ("3.9 适宜性定量评价", 1),
+            ("3.10 报告与结果输出", 1), ("3.11 用户管理", 1),
+            ("3.12 退出系统", 1),
+        ]
+        for text, lvl in entries:
+            size = 11 if lvl == 0 else 10.5
+            self.ensure(20)
+            self.page.insert_text((MARGIN_L + lvl * 20, self.y), text,
+                                  fontname=FONT, fontsize=size)
+            self.y += 20
+
+    # ---- 主流程 ----
+    def build(self, blocks):
+        self.cover_page()
+        self.toc()
+        self.new_page()
+        for kind, *rest in blocks:
+            if kind == "h1":
+                self.heading(rest[0], 1)
+            elif kind == "h2":
+                self.heading(rest[0], 2)
+            elif kind == "p":
+                self.para(rest[0])
+            elif kind == "li":
+                self.bullet(rest[0])
+            elif kind == "img":
+                self.image(rest[0], rest[1])
+        out = os.path.join(
+            OUT_DIR,
+            "说明书_历史遗留废弃矿山自然恢复适宜性评价系统V1.0.pdf")
+        self.doc.save(out)
+        pages = self.doc.page_count
+        self.doc.close()
+        return out, pages
+
+
+def main():
+    os.makedirs(OUT_DIR, exist_ok=True)
+    m = Manual()
+    out, pages = m.build(CONTENT)
+    print("已生成说明书：%s" % os.path.relpath(out, BASE))
+    print("  总页数：%d（含封面 1 页）" % pages)
+    print("  正文字数：约 %d 字"
+          % sum(len(b[1]) for b in CONTENT if b[0] in ("p", "li")))
+    print("  插图：%d 张" % sum(1 for b in CONTENT if b[0] == "img"))
+
+
+if __name__ == "__main__":
+    main()

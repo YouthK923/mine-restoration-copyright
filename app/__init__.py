@@ -38,12 +38,21 @@ def create_app(config_class=Config):
 
     # 全局登录保护：除登录页与静态资源外，均需登录
     from flask import request, redirect, url_for
-    from flask_login import current_user
+    from flask_login import current_user, login_user
 
     PUBLIC_ENDPOINTS = {"auth.login", "static"}
 
     @app.before_request
     def require_login():
+        # 截图模式（仅用于生成说明书配图）：自动以管理员身份登录
+        if app.config.get("SCREENSHOT_MODE"):
+            if (request.endpoint not in ("auth.login", "static")
+                    and not current_user.is_authenticated):
+                admin = User.query.filter_by(role="admin").first()
+                if admin:
+                    login_user(admin)
+            return None
+
         if request.endpoint in PUBLIC_ENDPOINTS or request.endpoint is None:
             return None
         if not current_user.is_authenticated:

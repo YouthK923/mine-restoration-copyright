@@ -64,31 +64,35 @@ def matrix():
     n = len(names)
     form = EmptyForm()
 
-    result = None
-    if request.method == "POST" and form.validate_on_submit():
-        # 读取上三角输入
-        upper = []
-        try:
-            for i in range(n):
-                for j in range(i + 1, n):
-                    upper.append(float(request.form.get("m_%d_%d" % (i, j), "1")))
-            A = ahp.matrix_from_upper(upper)
-            r = ahp.weights_and_consistency(A)
-            bad = ahp.find_most_inconsistent(A)
-            result = {
-                "weights": [round(v, 4) for v in r["weights"]],
-                "lambda_max": round(r["lambda_max"], 4),
-                "ci": r["ci"],
-                "cr": r["cr"],
-                "consistent": r["consistent"],
-                "matrix": [[round(A[i, j], 4) for j in range(n)] for i in range(n)],
-                "most_inconsistent": bad,
-            }
-        except (ValueError, ZeroDivisionError):
-            flash("矩阵输入有误：请填入正数（对角线自动为 1，下三角自动取倒数）", "error")
-
     # 预填默认值：论文表 3 权重对应的完全一致矩阵 a_ij = w_i / w_j
     default = [[round(vec[i] / vec[j], 4) for j in range(n)] for i in range(n)]
+
+    def compute(upper):
+        A = ahp.matrix_from_upper(upper)
+        r = ahp.weights_and_consistency(A)
+        bad = ahp.find_most_inconsistent(A)
+        return {
+            "weights": [round(v, 4) for v in r["weights"]],
+            "lambda_max": round(r["lambda_max"], 4),
+            "ci": r["ci"],
+            "cr": r["cr"],
+            "consistent": r["consistent"],
+            "matrix": [[round(A[i, j], 4) for j in range(n)] for i in range(n)],
+            "most_inconsistent": bad,
+        }
+
+    result = None
+    if request.method == "POST" and form.validate_on_submit():
+        try:
+            upper = [float(request.form.get("m_%d_%d" % (i, j), "1"))
+                     for i in range(n) for j in range(i + 1, n)]
+            result = compute(upper)
+        except (ValueError, ZeroDivisionError):
+            flash("矩阵输入有误：请填入正数（对角线自动为 1，下三角自动取倒数）", "error")
+    elif request.values.get("calc") == "1":
+        # 按默认（论文表 3）矩阵直接试算，便于一键查看权重与一致性
+        result = compute([default[i][j] for i in range(n) for j in range(i + 1, n)])
+
     return render_template(
         "ahp/matrix.html",
         form=form, unit_type=unit_type, level=level, l1=l1,

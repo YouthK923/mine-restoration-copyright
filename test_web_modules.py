@@ -54,6 +54,14 @@ r = client.get("/project/")
 print("  新建项目后含「测试项目A」:", "测试项目A" in r.get_data(as_text=True))
 assert "测试项目A" in r.get_data(as_text=True)
 
+# 清理测试数据，避免污染演示库
+with app.app_context():
+    from app.models import db, Project
+    for p in Project.query.filter_by(name="测试项目A").all():
+        db.session.delete(p)
+    db.session.commit()
+print("  已清理测试项目")
+
 print()
 print(LINE)
 print("测试 4  M5 微地质单元（面积占比自动计算）")
