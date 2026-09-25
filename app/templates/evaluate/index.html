@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}适宜性评价{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>适宜性定量评价</h2>
+  {% if not patches %}
+  <p class="muted">暂无矿山图斑。请先运行 <span class="mono">python seed_demo.py</span> 载入案例。</p>
+  {% else %}
+  <table>
+    <tr><th>矿山图斑</th><th>最近评价结果</th><th>操作</th></tr>
+    {% for p in patches %}
+    <tr>
+      <td>{{ p.name }}</td>
+      <td>
+        {% if latest.get(p.id) %}
+          F = {{ latest[p.id].final_score }}，{{ latest[p.id].grade }}
+        {% else %}
+          <span class="muted">未评价</span>
+        {% endif %}
+      </td>
+      <td>
+        <a href="/evaluate/{{ p.id }}">执行评价</a>
+        {% if latest.get(p.id) %}
+        &nbsp;|&nbsp;<a href="/evaluate/result/{{ latest[p.id].id }}">查看结果</a>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+</div>
+{% endblock %}

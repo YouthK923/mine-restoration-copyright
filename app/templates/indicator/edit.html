@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}指标数据录入{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>指标数据录入 · {{ unit.unit_type }}</h2>
+  <p class="muted">
+    说明：留空表示"不适用"（与"实测为 0"含义不同，计算时跳过）。
+    岩质边坡无土壤指标、平台无地形指标，系统已按单元类型隐藏不相关字段。
+  </p>
+
+  <form method="post">
+    {{ form.hidden_tag() }}
+
+    {% for group_name, fields, has_hm in groups %}
+    <h3 style="font-size:14px;color:#1f3a5f;margin:16px 0 8px;">{{ group_name }}</h3>
+    <table style="width:auto;">
+      {% for fname, cname, unit_ in fields %}
+      <tr>
+        <td style="text-align:left;">{{ cname }}{% if unit_ %}（{{ unit_ }}）{% endif %}</td>
+        {% if fname == "aspect" %}
+        <td>
+          <select name="aspect">
+            <option value="">— 不适用 —</option>
+            {% for a in aspect_types %}
+            <option value="{{ a }}" {% if current.get("aspect") == a %}selected{% endif %}>{{ a }}</option>
+            {% endfor %}
+          </select>
+        </td>
+        {% else %}
+        <td><input type="number" step="any" name="{{ fname }}"
+                   value="{{ current.get(fname) if current.get(fname) is not none else '' }}"></td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </table>
+    {% endfor %}
+
+    {% for group_name, fields, has_hm in groups %}
+      {% if has_hm %}
+      <h3 style="font-size:14px;color:#1f3a5f;margin:16px 0 8px;">重金属含量（mg/kg）</h3>
+      <table style="width:auto;">
+        <tr>
+          {% for m in heavy_metals %}
+          <th>{{ m }}</th>
+          {% endfor %}
+        </tr>
+        <tr>
+          {% for m in heavy_metals %}
+          <td><input type="number" step="any" name="hm_{{ m }}"
+                     value="{{ current.get('heavy', {}).get(m) if current.get('heavy', {}).get(m) is not none else '' }}"></td>
+          {% endfor %}
+        </tr>
+      </table>
+      {% endif %}
+    {% endfor %}
+
+    <p style="margin-top:16px;">
+      <button type="submit" class="btn">保存</button>
+      <a href="/indicator/" class="btn" style="background:#8896a8;">返回</a>
+    </p>
+  </form>
+</div>
+{% endblock %}

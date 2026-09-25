@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}指标数据采集{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>指标数据采集与管理</h2>
+  {% if not patches %}
+  <p class="muted">暂无矿山图斑。请先运行 <span class="mono">python seed_demo.py</span> 载入案例，或由乙建立项目与图斑。</p>
+  {% else %}
+  {% for p in patches %}
+  <div style="margin-bottom:20px;">
+    <h3 style="font-size:15px;color:#1f3a5f;">{{ p.name }}（图斑：{{ p.name }}）</h3>
+    <table>
+      <tr><th>微地质单元</th><th>面积占比</th><th>数据状态</th><th>操作</th></tr>
+      {% for u in p.units %}
+      <tr>
+        <td>{{ u.unit_type }}</td>
+        <td>{% if u.ratio is not none %}{{ "%.2f%%"|format(u.ratio*100) }}{% else %}—{% endif %}</td>
+        <td>
+          {% set has_data = u.indicator_data %}
+          {% if has_data %}<span class="ok">已录入</span>{% else %}<span class="muted">未录入</span>{% endif %}
+        </td>
+        <td><a href="/indicator/{{ u.id }}">录入/编辑</a></td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  {% endfor %}
+  {% endif %}
+</div>
+{% endblock %}
