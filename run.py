@@ -8,6 +8,10 @@
 from app import create_app
 from app.models import db
 
+import sys
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")   # 控制台中文正常显示
+
 app = create_app()
 
 if __name__ == "__main__":
