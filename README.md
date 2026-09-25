@@ -22,12 +22,51 @@
 |---|---|
 | `软著功能计划.md` / `.docx` | **软著功能计划（当前最新版）**，md 为源文件，docx 为交付/送阅版本 |
 | `软著登记申请材料形式要求_联网核实报告.md` | 软著登记材料形式要求的联网核实报告（页数、行数、页眉、补正原因等） |
+| `制作步骤与分工.md` / `.docx` | 系统制作步骤与双人分工 |
+| `make_source_doc.py` | **源程序鉴别材料生成工具**（见下） |
+| `软著材料/` | 生成的源程序 PDF（提交用） |
 | `read_output.md` | 论文全文文本（便于检索，比读 PDF 方便） |
 | `_extract.py` | 从论文/模板中提取全文文本到 `_dump/` |
 | `_mkref.py` | 生成 Word 中文排版模板（黑体标题、纯黑配色，用于导出 docx） |
 | `_fix_heading_color.py` | 修正 docx 标题颜色（Word 另存后样式 ID 会变，需重跑） |
 | `_ls.py` | 目录列表小工具 |
 | `recalc.py` | 按论文 4.2 节方法复算案例得分的个人记录 |
+
+## 系统代码结构
+
+```
+run.py                    启动入口
+app/
+├── config.py             配置
+├── models.py             数据模型（16 张表）
+├── forms.py              表单定义
+├── utils/constants.py    论文全部算法常量（理想极值、RI、坡向赋值、表3权重）
+├── services/             ahp_service（AHP权重引擎）
+│                         standardization（四类标准化）
+│                         evaluation_service（分单元赋分/面积加权/等级判定）
+│                         report_service（Word 报告生成）
+├── views/                auth/project/unit/standard/constraint
+│                         ahp/indicator/evaluate/report
+└── templates/            各功能页面模板
+seed_demo.py              内置玉田县案例 + 论文表1的 11 项标准与 32 条规则
+```
+
+启动：
+```bash
+pip install -r requirements.txt
+python seed_demo.py     # 载入演示案例（含管理员 admin/admin123）
+python run.py           # 打开 http://127.0.0.1:5000
+```
+
+## 源程序鉴别材料生成
+
+```bash
+python make_source_doc.py
+```
+
+按软著登记要求生成源程序 PDF：A4 纵向、页眉为软件名称与版本号、页码右上角、
+每页固定 50 行、去除空行保证每页均为有效代码行、末页为程序结束页。
+程序超过 60 页时，同时生成「前 30 页 + 后 30 页」的提交版。
 
 ## 约定
 
