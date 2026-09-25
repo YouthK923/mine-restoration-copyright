@@ -1,0 +1,42 @@
+# ============================================================
+# 统一行尾，避免协作时整文件 diff 噪音
+# 背景：Windows 默认 CRLF，Linux/macOS 用 LF。
+#       两人来回提交会把整个文件的行尾翻一遍，diff 里全是改动，看不到真实修改。
+# 策略：文本文件一律以 LF 存入仓库；二进制文件不做任何转换。
+# ============================================================
+
+# 默认：自动识别文本，仓库内统一为 LF
+* text=auto eol=lf
+
+# ---- 明确按文本处理 ----
+*.md      text eol=lf
+*.py      text eol=lf
+*.txt     text eol=lf
+*.json    text eol=lf
+*.yaml    text eol=lf
+*.yml     text eol=lf
+*.html    text eol=lf
+*.css     text eol=lf
+*.js      text eol=lf
+*.sql     text eol=lf
+*.csv     text eol=lf
+.gitignore    text eol=lf
+.gitattributes text eol=lf
+
+# ---- 明确按二进制处理（禁止行尾转换，否则文件会损坏）----
+*.pdf     binary
+*.docx    binary
+*.doc     binary
+*.xlsx    binary
+*.xls     binary
+*.pptx    binary
+*.png     binary
+*.jpg     binary
+*.jpeg    binary
+*.gif     binary
+*.zip     binary
+*.7z      binary
+
+# ---- 让 git 正确识别语言，改善 GitHub 上的显示 ----
+*.py      diff=python
+*.md      diff=markdown
