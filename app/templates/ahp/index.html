@@ -1,29 +1,36 @@
 {% extends "base.html" %}
 {% block title %}AHP 权重计算{% endblock %}
 {% block content %}
-<div class="card">
+<div class="card" style="max-width:720px;">
   <h2>AHP 权重计算 · 选择指标层级</h2>
+  <p class="muted">
+    选择微地质单元类型与指标层级后，系统按论文表 3 确定判断矩阵的规模。
+    岩质边坡不设土壤指标、平台不设地形指标，系统会相应调整矩阵所包含的指标。
+  </p>
+
   <form method="post">
     {{ form.hidden_tag() }}
-    <table style="width:auto;">
-      <tr>
-        <td style="text-align:left;">微地质单元类型</td>
-        <td>{{ form.unit_type() }}</td>
-      </tr>
-      <tr>
-        <td style="text-align:left;">指标层级</td>
-        <td>{{ form.level() }}</td>
-      </tr>
-      <tr>
-        <td style="text-align:left;">一级指标（层级为"二级指标"时选择）</td>
-        <td>{{ form.l1() }}</td>
-      </tr>
-    </table>
-    <p>{{ form.submit(class_="btn") }}</p>
+
+    <div class="field">
+      <label class="field__label" for="{{ form.unit_type.id }}">微地质单元类型</label>
+      {{ form.unit_type(id=form.unit_type.id) }}
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="{{ form.level.id }}">指标层级</label>
+      {{ form.level(id=form.level.id) }}
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="{{ form.l1.id }}">
+        一级指标（层级选「二级指标」时需选择）
+      </label>
+      {{ form.l1(id=form.l1.id) }}
+    </div>
+
+    <p class="actions" style="margin-top:16px;">
+      {{ form.submit(class_="btn") }}
+    </p>
   </form>
-  <p class="muted">
-    说明：选择单元类型与指标层级后，系统按论文表 3 确定判断矩阵规模。
-    岩质边坡不设土壤指标，平台不设地形指标。
-  </p>
 </div>
 {% endblock %}

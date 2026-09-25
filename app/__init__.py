@@ -59,4 +59,21 @@ def create_app(config_class=Config):
             return redirect(url_for("auth.login"))
         return None
 
+    # 侧边栏导航项：集中定义，模板只负责渲染；active 用于高亮当前页
+    @app.context_processor
+    def inject_nav():
+        path = request.path or "/"
+        items = [
+            ("首页", "/", path == "/"),
+            ("项目与档案", "/project/", path.startswith("/project")),
+            ("限制性判定", "/constraint/", path.startswith("/constraint")),
+            ("标准知识库", "/standard/", path.startswith("/standard")),
+            ("AHP 权重", "/ahp/", path.startswith("/ahp")),
+            ("指标数据", "/indicator/", path.startswith("/indicator")),
+            ("适宜性评价", "/evaluate/", path.startswith("/evaluate")),
+            ("报告输出", "/report/", path.startswith("/report")),
+            ("用户管理", "/users", path.startswith("/users")),
+        ]
+        return {"nav_items": items}
+
     return app

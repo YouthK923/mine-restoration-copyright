@@ -1,71 +1,80 @@
 {% extends "base.html" %}
-{% block title %}微地质单元{% endblock %}
+{% block title %}微地质单元 · {{ patch.name }}{% endblock %}
 {% block content %}
 <div class="card">
   <h2>微地质单元 · {{ patch.name }}</h2>
   <p class="muted">
-    按论文 4.1 节划分岩质边坡、碎石边坡、平台三类微地质单元。
-    面积占比由面积自动计算，即式(9) 中的权重系数 Sᵢ。
+    按论文 4.1 节将矿山图斑划分为岩质边坡、碎石边坡、平台三类微地质单元。
+    面积占比由面积自动计算，即论文式(9) 中的权重系数。
   </p>
 
   {% if units %}
   <table>
-    <tr><th>微地质单元</th><th>面积</th><th>面积占比</th><th>说明</th><th>操作</th></tr>
-    {% for u in units %}
-    <tr>
-      <form method="post" action="/unit/edit/{{ u.id }}">
-        {{ form.hidden_tag() }}
-        <td>
-          <select name="unit_type">
-            {% for t in unit_types %}
-            <option value="{{ t }}" {% if u.unit_type == t %}selected{% endif %}>{{ t }}</option>
-            {% endfor %}
-          </select>
+    <caption class="muted">
+      共 {{ units|length }} 个单元；
+      面积合计 <span class="num">{{ "%.4f"|format(total_area) }}</span>；
+      占比合计 <span class="num">{{ "%.2f%%"|format(ratio_sum * 100) }}</span>
+      {% if ratio_sum and (ratio_sum < 0.999 or ratio_sum > 1.001) %}
+      <span class="warn">（占比合计不等于 100%，请检查面积录入）</span>
+      {% endif %}
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col">微地质单元</th>
+        <th scope="col">面积</th>
+        <th scope="col">面积占比</th>
+        <th scope="col">说明</th>
+        <th scope="col">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in units %}
+      <tr>
+        <td>{{ u.unit_type }}</td>
+        <td class="num">{{ u.area if u.area is not none else "—" }}</td>
+        <td class="num">
+          {% if u.ratio is not none %}{{ "%.2f%%"|format(u.ratio * 100) }}{% else %}—{% endif %}
         </td>
-        <td><input type="number" step="any" name="area" value="{{ u.area if u.area is not none else '' }}"></td>
-        <td class="mono">{% if u.ratio is not none %}{{ "%.2f%%"|format(u.ratio*100) }}{% else %}—{% endif %}</td>
-        <td><input type="text" name="description" value="{{ u.description or '' }}"></td>
-        <td>
-          <button type="submit" class="btn small">保存</button>
+        <td style="text-align:left;">{{ u.description or "—" }}</td>
+        <td class="nowrap">
+          <a href="/unit/edit/{{ u.id }}">编辑</a>
+          &nbsp;|&nbsp;
+          <form method="post" action="/unit/delete/{{ u.id }}"
+                onsubmit="return confirm('确定删除微地质单元「{{ u.unit_type }}」吗？\n该单元已录入的指标数据将一并删除，且无法恢复。');">
+            {{ form.hidden_tag() }}
+            <button type="submit" class="btn btn--sm btn--danger">删除</button>
+          </form>
         </td>
-      </form>
-    </tr>
-    {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
   </table>
-  <p class="muted">
-    面积合计：{{ "%.4f"|format(total_area) }}；
-    占比合计：{{ "%.2f%%"|format(ratio_sum*100) }}
-    {% if ratio_sum and (ratio_sum < 0.999 or ratio_sum > 1.001) %}
-    <span class="warn">（占比合计不等于 100%，请检查面积录入）</span>
-    {% endif %}
-  </p>
   {% else %}
-  <p class="muted">暂无微地质单元。</p>
+  <p class="muted">尚未划分微地质单元。请在下方添加。</p>
   {% endif %}
 
-  <h3 style="font-size:14px;color:#1f3a5f;margin:20px 0 8px;">添加微地质单元</h3>
+  <h3>添加微地质单元</h3>
   <form method="post" action="/unit/{{ patch.id }}/add">
     {{ form.hidden_tag() }}
-    <table style="width:auto;">
-      <tr>
-        <td style="text-align:left;">单元类型</td>
-        <td>
-          <select name="unit_type">
-            {% for t in unit_types %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
-          </select>
-        </td>
-        <td style="text-align:left;">面积</td>
-        <td><input type="number" step="any" name="area"></td>
-        <td style="text-align:left;">说明</td>
-        <td><input type="text" name="description" style="width:220px;"></td>
-        <td><button type="submit" class="btn small">添加</button></td>
-      </tr>
-    </table>
+    <div class="actions">
+      <label class="field__label" for="add-unit-type" style="margin:0;">类型</label>
+      <select id="add-unit-type" name="unit_type">
+        {% for t in unit_types %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
+      </select>
+
+      <label class="field__label" for="add-unit-area" style="margin:0;">面积</label>
+      <input id="add-unit-area" type="number" step="any" name="area">
+
+      <label class="field__label" for="add-unit-desc" style="margin:0;">说明</label>
+      <input id="add-unit-desc" type="text" name="description" style="width:220px;">
+
+      <button type="submit" class="btn btn--sm">添加</button>
+    </div>
   </form>
 
-  <p style="margin-top:16px;">
-    <a href="/project/{{ patch.project_id }}/patches" class="btn gray">返回图斑列表</a>
-    <a href="/indicator/" class="btn gray">去录入指标数据</a>
+  <p class="actions" style="margin-top:20px;">
+    <a class="btn btn--sm btn--ghost" href="/project/{{ patch.project_id }}/patches">返回图斑列表</a>
+    <a class="btn btn--sm btn--ghost" href="/indicator/">去录入指标数据</a>
   </p>
 </div>
 {% endblock %}

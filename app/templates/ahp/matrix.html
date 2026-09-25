@@ -9,83 +9,98 @@
   </h2>
   <p class="muted">
     采用 1–9 标度：1 同等重要、3 稍微重要、5 明显重要、7 强烈重要、9 极端重要，
-    2/4/6/8 为中间值。对角线为 1，下三角自动取倒数。下方已按论文表 3 权重预填。
+    2、4、6、8 为相邻判断的中间值。只需录入上三角，对角线为 1，下三角自动取倒数。
+    矩阵已按论文表 3 的权重预填。
   </p>
 
   <form method="post">
     {{ form.hidden_tag() }}
-    <table>
-      <tr>
-        <th></th>
-        {% for name in names %}<th>{{ name }}</th>{% endfor %}
-      </tr>
-      {% for i in range(names|length) %}
-      <tr>
-        <th>{{ names[i] }}</th>
-        {% for j in range(names|length) %}
-          {% if i == j %}
-          <td class="muted">1</td>
-          {% elif i < j %}
-          <td><input type="number" step="0.01" min="0.01"
-                     name="m_{{ i }}_{{ j }}" value="{{ default[i][j] }}"></td>
-          {% else %}
-          <td class="muted">{{ default[i][j] }}</td>
-          {% endif %}
+    <table style="width:auto;">
+      <thead>
+        <tr>
+          <th></th>
+          {% for name in names %}<th scope="col">{{ name }}</th>{% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in range(names|length) %}
+        <tr>
+          <th scope="row">{{ names[i] }}</th>
+          {% for j in range(names|length) %}
+            {% if i == j %}
+            <td class="muted num">1</td>
+            {% elif i < j %}
+            <td>
+              <label class="muted" style="position:absolute;left:-9999px;"
+                     for="m-{{ i }}-{{ j }}">{{ names[i] }} 相对 {{ names[j] }} 的重要性</label>
+              <input id="m-{{ i }}-{{ j }}" type="number" step="0.01" min="0.01"
+                     name="m_{{ i }}_{{ j }}" value="{{ default[i][j] }}">
+            </td>
+            {% else %}
+            <td class="muted num">{{ default[i][j] }}</td>
+            {% endif %}
+          {% endfor %}
+        </tr>
         {% endfor %}
-      </tr>
-      {% endfor %}
+      </tbody>
     </table>
-    <p>
+
+    <p class="actions">
       <button type="submit" class="btn">计算权重</button>
-      <a href="/ahp/" class="btn" style="background:#8896a8;">重新选择</a>
+      <a class="btn btn--ghost" href="/ahp/">重新选择</a>
     </p>
   </form>
 
   {% if result %}
-  <hr style="margin:20px 0;border:none;border-top:1px solid #e3e4e6;">
-  <h2>计算结果</h2>
+  <hr style="margin:22px 0;border:none;border-top:1px solid var(--line);">
+  <h3>计算结果</h3>
+
   <table style="width:auto;">
-    <tr><th>指标</th>{% for name in names %}<th>{{ name }}</th>{% endfor %}</tr>
-    <tr>
-      <th>权重</th>
-      {% for w in result.weights %}<td class="mono">{{ w }}</td>{% endfor %}
-    </tr>
+    <thead>
+      <tr>
+        <th scope="col">指标</th>
+        {% for name in names %}<th scope="col">{{ name }}</th>{% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">权重</th>
+        {% for w in result.weights %}<td class="mono">{{ w }}</td>{% endfor %}
+      </tr>
+    </tbody>
   </table>
-  <table style="width:auto;">
-    <tr>
-      <th style="text-align:left;">最大特征值 λmax</th>
-      <td class="mono">{{ result.lambda_max }}</td>
-    </tr>
-    <tr>
-      <th style="text-align:left;">一致性指标 CI</th>
-      <td class="mono">{{ "%.4f"|format(result.ci) }}</td>
-    </tr>
-    <tr>
-      <th style="text-align:left;">一致性比例 CR</th>
-      <td class="mono">{{ "%.4f"|format(result.cr) }}</td>
-    </tr>
-    <tr>
-      <th style="text-align:left;">一致性检验</th>
-      <td>
-        {% if result.consistent %}
-        <span class="ok">通过（CR &lt; 0.1）</span>
-        {% else %}
-        <span class="warn">不通过（CR ≥ 0.1）</span>
-        {% endif %}
-      </td>
-    </tr>
-    {% if not result.consistent and result.most_inconsistent %}
-    <tr>
-      <th style="text-align:left;">建议优先调整</th>
-      <td>
-        第 {{ result.most_inconsistent.i + 1 }} 行、
-        第 {{ result.most_inconsistent.j + 1 }} 列的比较
-        （当前 {{ result.most_inconsistent.value|round(3) }}，
-        理想约 {{ result.most_inconsistent.expected|round(3) }}）
-      </td>
-    </tr>
-    {% endif %}
-  </table>
+
+  <div class="stat-row">
+    <div>
+      <div class="stat__label">最大特征值 λmax</div>
+      <div class="stat__value mono">{{ result.lambda_max }}</div>
+    </div>
+    <div>
+      <div class="stat__label">一致性指标 CI</div>
+      <div class="stat__value mono">{{ "%.4f"|format(result.ci) }}</div>
+    </div>
+    <div>
+      <div class="stat__label">一致性比例 CR</div>
+      <div class="stat__value mono">{{ "%.4f"|format(result.cr) }}</div>
+    </div>
+    <div>
+      <div class="stat__label">一致性检验（要求 CR &lt; 0.1）</div>
+      <div class="stat__value">
+        {% if result.consistent %}<span class="ok">通过</span>
+        {% else %}<span class="warn">不通过</span>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  {% if not result.consistent and result.most_inconsistent %}
+  <p style="margin-top:14px;padding:12px;border-radius:6px;background:var(--danger-soft);
+            border-left:4px solid var(--danger);">
+    <strong class="warn">建议优先调整：</strong>
+    第 {{ result.most_inconsistent.i + 1 }} 行、第 {{ result.most_inconsistent.j + 1 }} 列的比较
+    （当前 <span class="mono num">{{ result.most_inconsistent.value|round(3) }}</span>，
+    理想约 <span class="mono num">{{ result.most_inconsistent.expected|round(3) }}</span>）
+  </p>
+  {% endif %}
   {% endif %}
 </div>
 {% endblock %}

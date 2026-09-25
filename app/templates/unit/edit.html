@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}编辑微地质单元{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>编辑微地质单元 · {{ patch.name }}</h2>
+  <p class="muted">修改面积后，系统会自动重算本图斑各单元的面积占比。</p>
+
+  <form method="post">
+    {{ form.hidden_tag() }}
+
+    <div class="field">
+      <label class="field__label" for="unit-type">微地质单元类型</label>
+      <select id="unit-type" name="unit_type">
+        {% for t in unit_types %}
+        <option value="{{ t }}" {% if unit.unit_type == t %}selected{% endif %}>{{ t }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="unit-area">面积</label>
+      <input id="unit-area" type="number" step="any" name="area"
+             value="{{ unit.area if unit.area is not none else '' }}">
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="unit-desc">说明</label>
+      <input id="unit-desc" type="text" name="description" style="width:420px;"
+             value="{{ unit.description or '' }}">
+    </div>
+
+    <p class="actions" style="margin-top:16px;">
+      <button type="submit" class="btn">保存</button>
+      <a class="btn btn--ghost" href="/unit/{{ unit.patch_id }}">返回</a>
+    </p>
+  </form>
+</div>
+{% endblock %}

@@ -1,26 +1,35 @@
 {% extends "base.html" %}
 {% block title %}新增用户{% endblock %}
 {% block content %}
-<div class="card">
+<div class="card" style="max-width:560px;">
   <h2>新增用户</h2>
   <form method="post">
-    <table style="width:auto;">
-      <tr><td style="text-align:left;">用户名</td><td><input type="text" name="username" required></td></tr>
-      <tr><td style="text-align:left;">密码</td><td><input type="password" name="password" required></td></tr>
-      <tr>
-        <td style="text-align:left;">角色</td>
-        <td>
-          <select name="role">
-            <option value="viewer">查看者</option>
-            <option value="evaluator">评价员</option>
-            <option value="admin">管理员</option>
-          </select>
-        </td>
-      </tr>
-    </table>
-    <p style="margin-top:14px;">
+    {{ form.hidden_tag() }}
+
+    <div class="field">
+      <label class="field__label" for="username">用户名</label>
+      <input id="username" type="text" name="username" required
+             autocomplete="off" style="width:280px;">
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="password">密码</label>
+      <input id="password" type="password" name="password" required
+             autocomplete="new-password" style="width:280px;">
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="role">角色</label>
+      <select id="role" name="role">
+        <option value="viewer">查看者（仅可查阅）</option>
+        <option value="evaluator">评价员（可建项目、录数据、执行评价）</option>
+        <option value="admin">管理员（可维护用户与基础数据）</option>
+      </select>
+    </div>
+
+    <p class="actions" style="margin-top:18px;">
       <button type="submit" class="btn">保存</button>
-      <a href="/users" class="btn gray">返回</a>
+      <a class="btn btn--ghost" href="/users">返回</a>
     </p>
   </form>
 </div>

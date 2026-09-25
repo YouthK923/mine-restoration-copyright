@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}限制性判定{% endblock %}
+{% block title %}限制性指标判定{% endblock %}
 {% block content %}
 <div class="card">
   <h2>限制性指标判定</h2>
@@ -7,26 +7,39 @@
     按论文表 2 与 4.1 节流程，对每项限制性条件逐项判定。
     任一项不通过即判定为「人工辅助或生态重建」，不再进入定量评价。
   </p>
+
   {% if not patches %}
-  <p class="muted">暂无矿山图斑。</p>
+  <p class="muted">暂无矿山图斑。请先在「项目与档案」中建立图斑。</p>
   {% else %}
   <table>
-    <tr><th>矿山图斑</th><th>判定结果</th><th>操作</th></tr>
-    {% for p in patches %}
-    <tr>
-      <td>{{ p.name }}</td>
-      <td>
-        {% set r = latest.get(p.id) %}
-        {% if r %}
-          {% if r.passed %}<span class="ok">通过</span>{% else %}<span class="warn">不通过</span>{% endif %}
-          <span class="muted">（{{ r.reason }}）</span>
-        {% else %}
-          <span class="muted">未判定</span>
-        {% endif %}
-      </td>
-      <td><a href="/constraint/{{ p.id }}">执行判定</a></td>
-    </tr>
-    {% endfor %}
+    <thead>
+      <tr>
+        <th scope="col">矿山图斑</th>
+        <th scope="col">判定结果</th>
+        <th scope="col">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in patches %}
+      {% set r = latest.get(p.id) %}
+      <tr>
+        <td style="text-align:left;">{{ p.name }}</td>
+        <td style="text-align:left;">
+          {% if r %}
+            {% if r.passed %}
+            <span class="tag tag--ok">通过</span>
+            {% else %}
+            <span class="tag tag--warn">不通过</span>
+            {% endif %}
+            <span class="muted">{{ r.reason }}</span>
+          {% else %}
+          <span class="tag tag--muted">未判定</span>
+          {% endif %}
+        </td>
+        <td><a href="/constraint/{{ p.id }}">执行判定</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
   </table>
   {% endif %}
 </div>

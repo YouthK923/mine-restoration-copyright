@@ -1,72 +1,91 @@
 {% extends "base.html" %}
-{% block title %}结构化规则{% endblock %}
+{% block title %}结构化规则 · {{ standard.province }}{% endblock %}
 {% block content %}
 <div class="card">
   <h2>结构化规则 · {{ standard.province }} {{ standard.name }}</h2>
   <p class="muted">
-    将标准条文拆解为「判定项 + 比较符 + 阈值 + 条件类型」的可执行规则。
+    将标准条文拆解为「判定项 + 比较符 + 阈值 + 条件类型」的可执行规则，
+    使同一指标在各省的阈值差异可自动比对。
   </p>
 
   {% if rules %}
   <table>
-    <tr><th>判定项</th><th>比较符</th><th>阈值</th><th>条件类型</th><th>适用分区</th><th>备注</th><th>操作</th></tr>
-    {% for r in rules %}
-    <tr>
-      <td>{{ r.item }}</td>
-      <td class="mono">{{ r.operator }}</td>
-      <td class="mono">{{ r.threshold or "—" }}</td>
-      <td>{{ r.condition_type }}</td>
-      <td>{{ r.region or "—" }}</td>
-      <td style="text-align:left;">{{ r.note or "—" }}</td>
-      <td>
-        <form method="post" action="/standard/rule/{{ r.id }}/delete" style="display:inline;">
-          {{ form.hidden_tag() }}
-          <button type="submit" class="btn small gray">删除</button>
-        </form>
-      </td>
-    </tr>
-    {% endfor %}
+    <caption class="muted">共 {{ rules|length }} 条规则</caption>
+    <thead>
+      <tr>
+        <th scope="col">判定项</th>
+        <th scope="col">条件</th>
+        <th scope="col">条件类型</th>
+        <th scope="col">适用分区</th>
+        <th scope="col">备注</th>
+        <th scope="col">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rules %}
+      <tr>
+        <td style="text-align:left;">{{ r.item }}</td>
+        <td class="mono nowrap">{{ r.operator }} {{ r.threshold or "" }}</td>
+        <td>{{ r.condition_type }}</td>
+        <td>{{ r.region or "—" }}</td>
+        <td style="text-align:left;">{{ r.note or "—" }}</td>
+        <td>
+          <form method="post" action="/standard/rule/{{ r.id }}/delete"
+                onsubmit="return confirm('确定删除规则「{{ r.item }} {{ r.operator }} {{ r.threshold or '' }}」吗？');">
+            {{ form.hidden_tag() }}
+            <button type="submit" class="btn btn--sm btn--danger">删除</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
   </table>
   {% else %}
-  <p class="muted">暂无规则。</p>
+  <p class="muted">该标准暂无规则。请在下方添加第一条规则。</p>
   {% endif %}
 
-  <h3 style="font-size:14px;color:#1f3a5f;margin:20px 0 8px;">添加规则</h3>
+  <h3>添加规则</h3>
   <form method="post">
     {{ form.hidden_tag() }}
-    <table style="width:auto;">
-      <tr>
-        <td style="text-align:left;">判定项</td>
-        <td><input type="text" name="item" placeholder="如：植被覆盖度" required></td>
-        <td style="text-align:left;">比较符</td>
-        <td>
-          <select name="operator">
-            {% for o in [">=", ">", "<=", "<", "=="] %}<option value="{{ o }}">{{ o }}</option>{% endfor %}
-          </select>
-        </td>
-      </tr>
-      <tr>
-        <td style="text-align:left;">阈值</td>
-        <td><input type="text" name="threshold" placeholder="如：50"></td>
-        <td style="text-align:left;">条件类型</td>
-        <td>
-          <select name="condition_type">
-            <option value="必要条件">必要条件</option>
-            <option value="充分条件">充分条件</option>
-          </select>
-        </td>
-      </tr>
-      <tr>
-        <td style="text-align:left;">适用分区</td>
-        <td><input type="text" name="region" placeholder="如宁夏分区"></td>
-        <td style="text-align:left;">备注</td>
-        <td><input type="text" name="note" style="width:260px;"></td>
-      </tr>
-    </table>
-    <p style="margin-top:12px;">
-      <button type="submit" class="btn">添加规则</button>
-      <a href="/standard/" class="btn gray">返回</a>
-    </p>
+    <div class="actions">
+      <div>
+        <label class="field__label" for="r-item">判定项</label>
+        <input id="r-item" type="text" name="item" placeholder="如：植被覆盖度" required>
+      </div>
+      <div>
+        <label class="field__label" for="r-op">比较符</label>
+        <select id="r-op" name="operator">
+          {% for o in [">=", ">", "<=", "<", "=="] %}<option value="{{ o }}">{{ o }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="field__label" for="r-thr">阈值</label>
+        <input id="r-thr" type="text" name="threshold" placeholder="如：50" style="width:110px;">
+      </div>
+      <div>
+        <label class="field__label" for="r-cond">条件类型</label>
+        <select id="r-cond" name="condition_type">
+          <option value="必要条件">必要条件</option>
+          <option value="充分条件">充分条件</option>
+        </select>
+      </div>
+      <div>
+        <label class="field__label" for="r-region">适用分区</label>
+        <input id="r-region" type="text" name="region" placeholder="如宁夏分区" style="width:130px;">
+      </div>
+      <div>
+        <label class="field__label" for="r-note">备注</label>
+        <input id="r-note" type="text" name="note" style="width:220px;">
+      </div>
+      <div>
+        <button type="submit" class="btn">添加规则</button>
+      </div>
+    </div>
   </form>
+
+  <p class="actions" style="margin-top:20px;">
+    <a class="btn btn--sm btn--ghost" href="/standard/">返回标准列表</a>
+    <a class="btn btn--sm btn--ghost" href="/standard/compare">省际口径比对</a>
+  </p>
 </div>
 {% endblock %}

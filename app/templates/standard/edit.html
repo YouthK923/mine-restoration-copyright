@@ -1,35 +1,67 @@
 {% extends "base.html" %}
 {% block title %}{{ "编辑标准" if standard else "添加标准" }}{% endblock %}
 {% block content %}
-<div class="card">
+<div class="card" style="max-width:800px;">
   <h2>{{ "编辑标准" if standard else "添加标准" }}</h2>
   <form method="post">
     {{ form.hidden_tag() }}
-    <table style="width:auto;">
-      <tr><td style="text-align:left;">省份</td>
-          <td><input type="text" name="province" value="{{ standard.province if standard else '' }}" required></td></tr>
-      <tr><td style="text-align:left;">名称</td>
-          <td><input type="text" name="name" style="width:420px;" value="{{ standard.name if standard else '' }}" required></td></tr>
-      <tr><td style="text-align:left;">标准编号/文号</td>
-          <td><input type="text" name="doc_number" style="width:300px;" value="{{ standard.doc_number or '' if standard else '' }}"></td></tr>
-      <tr><td style="text-align:left;">类别</td>
-          <td>
-            <select name="category">
-              {% for c in ["地方标准", "政策文件"] %}
-              <option value="{{ c }}" {% if standard and standard.category == c %}selected{% endif %}>{{ c }}</option>
-              {% endfor %}
-            </select>
-          </td></tr>
-      <tr><td style="text-align:left;">发布时间</td>
-          <td><input type="text" name="publish_date" value="{{ standard.publish_date or '' if standard else '' }}"></td></tr>
-      <tr><td style="text-align:left;">实施时间</td>
-          <td><input type="text" name="implement_date" value="{{ standard.implement_date or '' if standard else '' }}"></td></tr>
-      <tr><td style="text-align:left;vertical-align:top;">特点/判定标准</td>
-          <td><textarea name="summary" style="width:420px;">{{ standard.summary or '' if standard else '' }}</textarea></td></tr>
-    </table>
-    <p style="margin-top:14px;">
+
+    <div class="field">
+      <label class="field__label" for="province">省份</label>
+      <input id="province" type="text" name="province" style="width:160px;" required
+             value="{{ standard.province if standard else '' }}">
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="std-name">名称</label>
+      <input id="std-name" type="text" name="name" style="width:100%;" required
+             value="{{ standard.name if standard else '' }}">
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="doc-number">标准编号 / 文号</label>
+      <input id="doc-number" type="text" name="doc_number" style="width:320px;"
+             value="{{ standard.doc_number or '' if standard else '' }}">
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="category">类别</label>
+      <select id="category" name="category">
+        {% for c in ["地方标准", "政策文件"] %}
+        <option value="{{ c }}" {% if standard and standard.category == c %}selected{% endif %}>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="publish-date">发布时间</label>
+      <input id="publish-date" type="text" name="publish_date" style="width:200px;"
+             placeholder="如 2023-03-30"
+             value="{{ standard.publish_date or '' if standard else '' }}">
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="implement-date">实施时间</label>
+      <input id="implement-date" type="text" name="implement_date" style="width:200px;"
+             placeholder="如 2023-04-30（未明确可留空）"
+             value="{{ standard.implement_date or '' if standard else '' }}">
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="summary">特点 / 判定标准</label>
+      <textarea id="summary" name="summary" style="min-height:96px;">{{ standard.summary or '' if standard else '' }}</textarea>
+    </div>
+
+    <p class="actions" style="margin-top:18px;">
       <button type="submit" class="btn">保存</button>
-      <a href="/standard/" class="btn gray">返回</a>
+      {% if standard %}
+      <form method="post" action="/standard/{{ standard.id }}/delete" style="display:inline;"
+            onsubmit="return confirm('确定删除「{{ standard.province }} {{ standard.name }}」吗？\n该标准下的规则将一并删除，且无法恢复。');">
+        {{ form.hidden_tag() }}
+        <button type="submit" class="btn btn--danger">删除该标准</button>
+      </form>
+      {% endif %}
+      <a class="btn btn--ghost" href="/standard/">返回</a>
     </p>
   </form>
 </div>

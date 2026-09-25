@@ -1,16 +1,19 @@
 {% extends "base.html" %}
-{% block title %}执行评价{% endblock %}
+{% block title %}执行评价 · {{ patch.name }}{% endblock %}
 {% block content %}
-<div class="card">
+<div class="card" style="max-width:640px;">
   <h2>执行适宜性评价 · {{ patch.name }}</h2>
   <p class="muted">
-    系统将按论文式(8)(9) 与表 3 权重，对图斑内各微地质单元做标准化、
-    分单元赋分、面积加权合成，并判定适宜性等级。
+    系统将对图斑内各微地质单元做指标标准化、分单元赋分、面积加权合成，
+    并判定适宜性等级。评价结果会保存，可随时回看。
   </p>
+
   <form method="post">
     {{ form.hidden_tag() }}
-    <button type="submit" class="btn">开始评价</button>
-    <a href="/evaluate/" class="btn" style="background:#8896a8;">返回</a>
+    <p class="actions" style="margin-top:16px;">
+      <button type="submit" class="btn">开始评价</button>
+      <a class="btn btn--ghost" href="/evaluate/">返回</a>
+    </p>
   </form>
 </div>
 {% endblock %}

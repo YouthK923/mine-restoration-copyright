@@ -8,25 +8,40 @@
   </p>
 
   {% if not groups %}
-  <p class="muted">暂无规则数据。请先为标准录入规则，或运行 seed_demo.py 载入论文表 1 数据。</p>
+  <p class="muted">
+    暂无规则数据。请先在「标准知识库」中为标准录入规则，
+    或运行 <span class="mono">python seed_demo.py</span> 载入论文表 1 数据。
+  </p>
   {% else %}
   {% for item, rs in groups.items() %}
-  <h3 style="font-size:14px;color:#1f3a5f;margin:16px 0 8px;">{{ item }}</h3>
+  <h3>{{ item }}</h3>
   <table>
-    <tr><th>省份</th><th>标准/文件</th><th>条件</th><th>条件类型</th><th>备注</th></tr>
-    {% for r in rs %}
-    <tr>
-      <td>{{ r.standard.province }}</td>
-      <td style="text-align:left;">{{ r.standard.name }}</td>
-      <td class="mono">{{ r.operator }} {{ r.threshold or "" }}</td>
-      <td>{{ r.condition_type }}</td>
-      <td style="text-align:left;">{{ r.note or "—" }}</td>
-    </tr>
-    {% endfor %}
+    <thead>
+      <tr>
+        <th scope="col">省份</th>
+        <th scope="col">标准 / 文件</th>
+        <th scope="col">条件</th>
+        <th scope="col">条件类型</th>
+        <th scope="col">备注</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rs %}
+      <tr>
+        <td>{{ r.standard.province }}</td>
+        <td style="text-align:left;">{{ r.standard.name }}</td>
+        <td class="mono nowrap">{{ r.operator }} {{ r.threshold or "" }}</td>
+        <td>{{ r.condition_type }}</td>
+        <td style="text-align:left;">{{ r.note or "—" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
   </table>
   {% endfor %}
   {% endif %}
 
-  <p style="margin-top:12px;"><a href="/standard/" class="btn gray">返回</a></p>
+  <p class="actions" style="margin-top:16px;">
+    <a class="btn btn--ghost" href="/standard/">返回标准列表</a>
+  </p>
 </div>
 {% endblock %}

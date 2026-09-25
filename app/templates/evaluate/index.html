@@ -3,29 +3,43 @@
 {% block content %}
 <div class="card">
   <h2>适宜性定量评价</h2>
+  <p class="muted">
+    系统按论文式(8) 对各项指标做标准化，按式(9) 分单元赋分并按面积占比加权合成，
+    最后按论文表 4 判定适宜性等级。
+  </p>
+
   {% if not patches %}
-  <p class="muted">暂无矿山图斑。请先运行 <span class="mono">python seed_demo.py</span> 载入案例。</p>
+  <p class="muted">暂无矿山图斑。请先在「项目与档案」中建立图斑并录入指标数据。</p>
   {% else %}
   <table>
-    <tr><th>矿山图斑</th><th>最近评价结果</th><th>操作</th></tr>
-    {% for p in patches %}
-    <tr>
-      <td>{{ p.name }}</td>
-      <td>
-        {% if latest.get(p.id) %}
-          F = {{ latest[p.id].final_score }}，{{ latest[p.id].grade }}
-        {% else %}
-          <span class="muted">未评价</span>
-        {% endif %}
-      </td>
-      <td>
-        <a href="/evaluate/{{ p.id }}">执行评价</a>
-        {% if latest.get(p.id) %}
-        &nbsp;|&nbsp;<a href="/evaluate/result/{{ latest[p.id].id }}">查看结果</a>
-        {% endif %}
-      </td>
-    </tr>
-    {% endfor %}
+    <thead>
+      <tr>
+        <th scope="col">矿山图斑</th>
+        <th scope="col">最近评价结果</th>
+        <th scope="col">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in patches %}
+      <tr>
+        <td style="text-align:left;">{{ p.name }}</td>
+        <td>
+          {% if latest.get(p.id) %}
+          F = <span class="mono num">{{ latest[p.id].final_score }}</span>，
+          <span class="tag tag--ok">{{ latest[p.id].grade }}</span>
+          {% else %}
+          <span class="tag tag--muted">未评价</span>
+          {% endif %}
+        </td>
+        <td class="nowrap">
+          <a href="/evaluate/{{ p.id }}">执行评价</a>
+          {% if latest.get(p.id) %}
+          &nbsp;|&nbsp;<a href="/evaluate/result/{{ latest[p.id].id }}">查看结果</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
   </table>
   {% endif %}
 </div>

@@ -26,6 +26,7 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 OUT_DIR = os.path.join(BASE, "软著材料", "截图")
 PORT = 5099
 HOST = "http://127.0.0.1:%d" % PORT
+WIN_W = 1360          # 侧边栏布局需要更宽的视口
 
 CHROME = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 CHROME_ARGS = [
@@ -46,14 +47,12 @@ def prepare_data(app):
         if patch is None:
             print("  [警告] 数据库无图斑，请先运行 seed_demo.py")
             return None, None
-        # 保证有一次限制性判定记录
         if ConstraintCheck.query.filter_by(patch_id=patch.id).first() is None:
             db.session.add(ConstraintCheck(
                 patch_id=patch.id, policy_pass=True, location_pass=True,
                 pollution_pass=True, geo_pass=True, farmland_pass=True,
                 passed=True, reason="全部通过"))
             db.session.commit()
-        # 保证有一次评价结果
         res = EvaluationResult.query.filter_by(patch_id=patch.id) \
             .order_by(EvaluationResult.id.desc()).first()
         if res is None:
@@ -74,25 +73,25 @@ def prepare_data(app):
 
 def build_page_list(pid, rid):
     return [
-        ("01_登录", "/login", 1000),
-        ("02_系统首页", "/", 1000),
-        ("03_项目与档案", "/project/", 900),
-        ("04_矿山图斑", "/project/%d/patches" % pid, 900),
-        ("05_微地质单元", "/unit/%d" % pid, 1200),
+        ("01_登录", "/login", 900),
+        ("02_系统首页", "/", 900),
+        ("03_项目与档案", "/project/", 820),
+        ("04_矿山图斑", "/project/%d/patches" % pid, 820),
+        ("05_微地质单元", "/unit/%d" % pid, 980),
         ("06_限制性判定", "/constraint/%d" % pid, 1100),
-        ("07_标准知识库", "/standard/", 1200),
-        ("07b_标准规则", "/standard/1/rules", 1100),
-        ("08_省际口径比对", "/standard/compare", 1400),
-        ("09_AHP权重选择", "/ahp/", 900),
-        ("10_判断矩阵录入", "/ahp/matrix?unit_type=碎石边坡&level=1", 1000),
+        ("07_标准知识库", "/standard/", 1100),
+        ("07b_标准规则", "/standard/1/rules", 1000),
+        ("08_省际口径比对", "/standard/compare", 1300),
+        ("09_AHP权重选择", "/ahp/", 780),
+        ("10_判断矩阵录入", "/ahp/matrix?unit_type=碎石边坡&level=1", 900),
         ("10b_权重计算结果",
-         "/ahp/matrix?unit_type=碎石边坡&level=1&calc=1", 1300),
+         "/ahp/matrix?unit_type=碎石边坡&level=1&calc=1", 1100),
         ("11_指标数据列表", "/indicator/", 900),
-        ("12_指标数据录入", "/indicator/2", 1300),
-        ("13_适宜性评价", "/evaluate/", 800),
-        ("14_评价结果", "/evaluate/result/%d" % rid, 1000),
-        ("15_得分明细", "/report/%d" % pid, 1600),
-        ("16_用户管理", "/users", 800),
+        ("12_指标数据录入", "/indicator/2", 1400),
+        ("13_适宜性评价", "/evaluate/", 760),
+        ("14_评价结果", "/evaluate/result/%d" % rid, 900),
+        ("15_得分明细", "/report/%d" % pid, 1500),
+        ("16_用户管理", "/users", 760),
     ]
 
 
@@ -109,7 +108,6 @@ def main():
         return
     print("图斑 ID=%s，评价结果 ID=%s" % (pid, rid))
 
-    # 后台线程启动服务
     def serve():
         app.run(host="127.0.0.1", port=PORT, debug=False, use_reloader=False)
 
@@ -125,13 +123,13 @@ def main():
         if os.path.exists(out):
             os.remove(out)
         cmd = [CHROME] + CHROME_ARGS + [
-            "--window-size=1280,%d" % height,
+            "--window-size=%d,%d" % (WIN_W, height),
             "--screenshot=%s" % out,
             HOST + url,
         ]
         try:
-            p = subprocess.run(cmd, capture_output=True, text=True,
-                               timeout=60, encoding="utf-8", errors="replace")
+            subprocess.run(cmd, capture_output=True, text=True, timeout=60,
+                           encoding="utf-8", errors="replace")
         except subprocess.TimeoutExpired:
             print("  [超时] %s" % name)
             continue

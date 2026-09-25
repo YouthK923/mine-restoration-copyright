@@ -4,7 +4,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required
 
 from app.forms import EmptyForm
-from app.models import db, MinePatch, MicroUnit
+from app.models import db, MinePatch, MicroUnit, IndicatorData
 from app.utils.constants import UNIT_TYPES
 
 bp = Blueprint("unit", __name__, url_prefix="/unit")
@@ -51,20 +51,23 @@ def add(patch_id):
     return redirect(url_for("unit.index", patch_id=patch_id))
 
 
-@bp.route("/edit/<int:unit_id>", methods=["POST"])
+@bp.route("/edit/<int:unit_id>", methods=["GET", "POST"])
 @login_required
 def edit(unit_id):
+    """单个微地质单元的编辑页。"""
     u = MicroUnit.query.get_or_404(unit_id)
     form = EmptyForm()
-    if form.validate_on_submit():
+    if request.method == "POST" and form.validate_on_submit():
         u.unit_type = request.form.get("unit_type", u.unit_type)
         area = request.form.get("area", "").strip()
         u.area = float(area) if area else None
         u.description = request.form.get("description", "").strip() or None
         recalc_ratio(u.patch_id)
         db.session.commit()
-        flash("已保存", "ok")
-    return redirect(url_for("unit.index", patch_id=u.patch_id))
+        flash("微地质单元已保存", "ok")
+        return redirect(url_for("unit.index", patch_id=u.patch_id))
+    return render_template("unit/edit.html", unit=u, patch=u.patch,
+                           unit_types=UNIT_TYPES, form=form)
 
 
 @bp.route("/delete/<int:unit_id>", methods=["POST"])
@@ -72,9 +75,12 @@ def edit(unit_id):
 def delete(unit_id):
     u = MicroUnit.query.get_or_404(unit_id)
     pid = u.patch_id
+    name = u.unit_type
+    # 一并删除该单元的指标数据，避免残留
+    IndicatorData.query.filter_by(unit_id=u.id).delete(synchronize_session=False)
     db.session.delete(u)
     db.session.flush()
     recalc_ratio(pid)
     db.session.commit()
-    flash("已删除", "ok")
+    flash("微地质单元「%s」已删除" % name, "ok")
     return redirect(url_for("unit.index", patch_id=pid))

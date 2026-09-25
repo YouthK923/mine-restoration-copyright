@@ -89,6 +89,7 @@ SOURCE_ORDER = [
     "app/templates/project/patches.html",
     "app/templates/project/patch_edit.html",
     "app/templates/unit/index.html",
+    "app/templates/unit/edit.html",
     "app/templates/standard/index.html",
     "app/templates/standard/edit.html",
     "app/templates/standard/rules.html",
@@ -111,6 +112,7 @@ SOURCE_ORDER = [
     "test_web_modules.py",
     "test_web_evaluate.py",
     "test_web_report.py",
+    "test_ui_fixes.py",
 ]
 
 

@@ -1,26 +1,50 @@
 {% extends "base.html" %}
-{% block title %}项目与档案{% endblock %}
+{% block title %}项目与矿山档案{% endblock %}
 {% block content %}
 <div class="card">
   <h2>评价项目</h2>
-  <p style="margin-bottom:12px;"><a href="/project/add" class="btn small">新建项目</a></p>
+
+  <p class="actions" style="margin-bottom:12px;">
+    <a class="btn btn--sm" href="/project/add">新建项目</a>
+  </p>
+
   {% if not projects %}
-  <p class="muted">暂无项目。点击「新建项目」开始，或运行 <span class="mono">python seed_demo.py</span> 载入案例。</p>
+  <p class="muted">
+    暂无项目。点击上方「新建项目」开始建立评价项目，
+    或运行 <span class="mono">python seed_demo.py</span> 载入论文案例。
+  </p>
   {% else %}
   <table>
-    <tr><th>项目名称</th><th>编号</th><th>状态</th><th>图斑数</th><th>操作</th></tr>
-    {% for p in projects %}
-    <tr>
-      <td>{{ p.name }}</td>
-      <td class="mono">{{ p.code or "—" }}</td>
-      <td>{{ p.status }}</td>
-      <td>{{ p.patches.count() }}</td>
-      <td>
-        <a href="/project/{{ p.id }}/patches">矿山图斑</a>
-        &nbsp;|&nbsp;<a href="/project/{{ p.id }}/edit">编辑</a>
-      </td>
-    </tr>
-    {% endfor %}
+    <caption class="muted">共 {{ projects|length }} 个项目</caption>
+    <thead>
+      <tr>
+        <th scope="col">项目名称</th>
+        <th scope="col">编号</th>
+        <th scope="col">状态</th>
+        <th scope="col">图斑数</th>
+        <th scope="col">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in projects %}
+      <tr>
+        <td style="text-align:left;">{{ p.name }}</td>
+        <td class="mono">{{ p.code or "—" }}</td>
+        <td><span class="tag tag--muted">{{ p.status }}</span></td>
+        <td class="num">{{ p.patches.count() }}</td>
+        <td class="nowrap">
+          <a href="/project/{{ p.id }}/patches">矿山图斑</a>
+          &nbsp;|&nbsp;<a href="/project/{{ p.id }}/edit">编辑</a>
+          &nbsp;|&nbsp;
+          <form method="post" action="/project/{{ p.id }}/delete"
+                onsubmit="return confirm('确定删除项目「{{ p.name }}」吗？\n该项目下的图斑、微地质单元与评价数据将一并删除，且无法恢复。');">
+            {{ form.hidden_tag() }}
+            <button type="submit" class="btn btn--sm btn--danger">删除</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
   </table>
   {% endif %}
 </div>

@@ -15,7 +15,8 @@ def index():
     standards = Standard.query.order_by(Standard.category, Standard.province).all()
     local = [s for s in standards if s.category == "地方标准"]
     policy = [s for s in standards if s.category != "地方标准"]
-    return render_template("standard/index.html", local=local, policy=policy)
+    return render_template("standard/index.html", local=local, policy=policy,
+                           form=EmptyForm())
 
 
 @bp.route("/add", methods=["GET", "POST"])

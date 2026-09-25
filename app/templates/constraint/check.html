@@ -1,42 +1,53 @@
 {% extends "base.html" %}
-{% block title %}限制性条件判定{% endblock %}
+{% block title %}限制性条件判定 · {{ patch.name }}{% endblock %}
 {% block content %}
-<div class="card">
+<div class="card" style="max-width:760px;">
   <h2>限制性条件判定 · {{ patch.name }}</h2>
-  <p class="muted">五项条件全部通过方可进入定量评价；任一项不通过即判为「人工辅助或生态重建」。</p>
+  <p class="muted">
+    五项条件全部通过方可进入定量评价；任一项不通过即判定为「人工辅助或生态重建」，
+    不再进行后续计算。
+  </p>
 
   <form method="post">
     {{ form.hidden_tag() }}
-    <table style="width:auto;">
-      {% for field, name, val in field_states %}
-      <tr>
-        <td style="text-align:left;">{{ name }}</td>
-        <td style="text-align:left;">
-          <label><input type="radio" name="{{ field }}" value="1"
-            {% if val is none or val %}checked{% endif %}> 通过</label>
-          &nbsp;&nbsp;
-          <label><input type="radio" name="{{ field }}" value="0"
-            {% if val is not none and not val %}checked{% endif %}> 不通过</label>
-        </td>
-      </tr>
-      {% endfor %}
-    </table>
-    <p style="margin-top:14px;">
+
+    {% for field, name, val in field_states %}
+    <fieldset style="border:1px solid var(--line);border-radius:6px;padding:10px 14px;margin:0 0 10px;">
+      <legend style="padding:0 6px;font-weight:600;">{{ name }}</legend>
+      <div class="actions">
+        <label class="checkbox">
+          <input type="radio" name="{{ field }}" value="1"
+                 {% if val is none or val %}checked{% endif %}>
+          <span>通过</span>
+        </label>
+        <label class="checkbox">
+          <input type="radio" name="{{ field }}" value="0"
+                 {% if val is not none and not val %}checked{% endif %}>
+          <span>不通过</span>
+        </label>
+      </div>
+    </fieldset>
+    {% endfor %}
+
+    <p class="actions" style="margin-top:16px;">
       <button type="submit" class="btn">保存判定</button>
-      <a href="/constraint/" class="btn gray">返回</a>
+      <a class="btn btn--ghost" href="/constraint/">返回</a>
     </p>
   </form>
 
   {% if record %}
-  <div style="margin-top:16px;padding:12px;border-radius:4px;
-              background:{{ '#eafaf1' if record.passed else '#fdecea' }};">
-    <strong>判定结论：</strong>
-    {% if record.passed %}
+  <div style="margin-top:18px;padding:14px;border-radius:6px;border-left:4px solid;
+              {% if record.passed %}background:var(--ok-soft);border-left-color:var(--ok);
+              {% else %}background:var(--danger-soft);border-left-color:var(--danger);{% endif %}">
+    <p style="margin:0 0 4px;font-weight:600;">
+      判定结论：
+      {% if record.passed %}
       <span class="ok">通过，可进入定量评价</span>
-    {% else %}
+      {% else %}
       <span class="warn">不通过 —— 建议生态重建或人工辅助</span>
-    {% endif %}
-    <div class="muted" style="margin-top:6px;">{{ record.reason }}</div>
+      {% endif %}
+    </p>
+    <p class="muted" style="margin:0;">{{ record.reason }}</p>
   </div>
   {% endif %}
 </div>

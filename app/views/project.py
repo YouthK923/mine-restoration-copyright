@@ -13,7 +13,8 @@ bp = Blueprint("project", __name__, url_prefix="/project")
 @login_required
 def index():
     projects = Project.query.order_by(Project.id.desc()).all()
-    return render_template("project/index.html", projects=projects)
+    return render_template("project/index.html", projects=projects,
+                           form=EmptyForm())
 
 
 @bp.route("/add", methods=["GET", "POST"])
@@ -69,7 +70,36 @@ def delete(pid):
 @login_required
 def patches(pid):
     p = Project.query.get_or_404(pid)
-    return render_template("project/patches.html", project=p)
+    return render_template("project/patches.html", project=p,
+                           form=EmptyForm())
+
+
+@bp.route("/patch/<int:patch_id>/delete", methods=["POST"])
+@login_required
+def patch_delete(patch_id):
+    """删除矿山图斑，及其微地质单元与指标数据。"""
+    from app.models import MicroUnit, IndicatorData, EvaluationResult, \
+        ScoreDetail, ConstraintCheck, ReferenceEcosystem
+    patch = MinePatch.query.get_or_404(patch_id)
+    pid = patch.project_id
+    unit_ids = [u.id for u in MicroUnit.query.filter_by(patch_id=patch.id).all()]
+    if unit_ids:
+        IndicatorData.query.filter(IndicatorData.unit_id.in_(unit_ids)).delete(
+            synchronize_session=False)
+    for r in EvaluationResult.query.filter_by(patch_id=patch.id).all():
+        ScoreDetail.query.filter_by(result_id=r.id).delete(
+            synchronize_session=False)
+    EvaluationResult.query.filter_by(patch_id=patch.id).delete(
+        synchronize_session=False)
+    ConstraintCheck.query.filter_by(patch_id=patch.id).delete(
+        synchronize_session=False)
+    MicroUnit.query.filter_by(patch_id=patch.id).delete(synchronize_session=False)
+    ReferenceEcosystem.query.filter_by(patch_id=patch.id).delete(
+        synchronize_session=False)
+    db.session.delete(patch)
+    db.session.commit()
+    flash("图斑「%s」及其数据已删除" % patch.name, "ok")
+    return redirect(url_for("project.patches", pid=pid))
 
 
 @bp.route("/<int:pid>/patch/add", methods=["GET", "POST"])

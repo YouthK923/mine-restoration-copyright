@@ -4,38 +4,48 @@
 <div class="card">
   <h2>适宜性评价结果 · {{ patch.name if patch else "" }}</h2>
 
-  <table style="width:auto;">
-    <tr>
-      <th style="text-align:left;">最终评价因子 F</th>
-      <td class="mono" style="font-size:18px;font-weight:700;">{{ r.final_score }}</td>
-    </tr>
-    <tr>
-      <th style="text-align:left;">适宜性等级</th>
-      <td class="ok" style="font-size:18px;font-weight:700;">{{ r.grade }}</td>
-    </tr>
-    <tr>
-      <th style="text-align:left;">推荐措施</th>
-      <td>{{ r.measures }}</td>
-    </tr>
-  </table>
+  <div class="stat-row">
+    <div>
+      <div class="stat__label">最终评价因子 F</div>
+      <div class="stat__value mono">{{ r.final_score }}</div>
+    </div>
+    <div>
+      <div class="stat__label">适宜性等级</div>
+      <div class="stat__value ok">{{ r.grade }}</div>
+    </div>
+    <div style="flex:1;min-width:240px;">
+      <div class="stat__label">推荐措施</div>
+      <div style="font-size:15px;">{{ r.measures }}</div>
+    </div>
+  </div>
 
   {% if unit_scores %}
-  <h3 style="font-size:14px;color:#1f3a5f;margin:16px 0 8px;">各微地质单元得分</h3>
-  <table>
-    <tr><th>微地质单元</th><th>面积占比</th><th>单元评价因子 F′</th><th>加权贡献</th></tr>
-    {% for u in unit_scores %}
-    <tr>
-      <td>{{ u.unit_type }}</td>
-      <td>{{ "%.2f%%"|format(u.ratio*100) }}</td>
-      <td class="mono">{{ u.unit_score }}</td>
-      <td class="mono">{{ "%.4f"|format(u.ratio * u.unit_score) }}</td>
-    </tr>
-    {% endfor %}
+  <h3>各微地质单元得分</h3>
+  <table style="max-width:720px;">
+    <thead>
+      <tr>
+        <th scope="col">微地质单元</th>
+        <th scope="col">面积占比</th>
+        <th scope="col">单元评价因子 F′</th>
+        <th scope="col">加权贡献</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in unit_scores %}
+      <tr>
+        <td>{{ u.unit_type }}</td>
+        <td class="num">{{ "%.2f%%"|format(u.ratio * 100) }}</td>
+        <td class="mono">{{ u.unit_score }}</td>
+        <td class="mono">{{ "%.4f"|format(u.ratio * u.unit_score) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
   </table>
   {% endif %}
 
-  <p style="margin-top:16px;">
-    <a href="/evaluate/" class="btn" style="background:#8896a8;">返回评价列表</a>
+  <p class="actions" style="margin-top:18px;">
+    <a class="btn btn--ghost" href="/report/{{ r.patch_id }}">查看得分明细</a>
+    <a class="btn btn--ghost" href="/evaluate/">返回评价列表</a>
   </p>
 </div>
 {% endblock %}

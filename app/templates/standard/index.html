@@ -1,43 +1,89 @@
 {% extends "base.html" %}
-{% block title %}标准知识库{% endblock %}
+{% block title %}政策与标准知识库{% endblock %}
 {% block content %}
 <div class="card">
   <h2>政策与标准知识库</h2>
-  <p style="margin-bottom:12px;">
-    <a href="/standard/add" class="btn small">添加标准</a>
-    <a href="/standard/compare" class="btn small gray">省际口径比对</a>
+  <p class="muted">
+    收录论文表 1 梳理的地方标准与政策文件，并将其判定条件结构化为可执行规则，
+    支持同一指标在不同省份的阈值横向比对。
+  </p>
+  <p class="actions" style="margin-bottom:14px;">
+    <a class="btn btn--sm" href="/standard/add">添加标准</a>
+    <a class="btn btn--sm btn--ghost" href="/standard/compare">省际口径比对</a>
   </p>
 
-  <h3 style="font-size:14px;color:#1f3a5f;margin:16px 0 8px;">地方标准</h3>
+  <h3>地方标准</h3>
+  {% if local %}
   <table>
-    <tr><th>省份</th><th>名称</th><th>编号</th><th>规则数</th><th>操作</th></tr>
-    {% for s in local %}
-    <tr>
-      <td>{{ s.province }}</td>
-      <td style="text-align:left;">{{ s.name }}</td>
-      <td class="mono">{{ s.doc_number or "—" }}</td>
-      <td>{{ s.rules|length }}</td>
-      <td><a href="/standard/{{ s.id }}/rules">规则</a> | <a href="/standard/{{ s.id }}/edit">编辑</a></td>
-    </tr>
-    {% else %}
-    <tr><td colspan="5" class="muted">暂无，运行 seed_demo.py 可载入论文表 1 的 11 项标准与政策文件</td></tr>
-    {% endfor %}
+    <thead>
+      <tr>
+        <th scope="col">省份</th>
+        <th scope="col">名称</th>
+        <th scope="col">编号</th>
+        <th scope="col">规则数</th>
+        <th scope="col">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in local %}
+      <tr>
+        <td>{{ s.province }}</td>
+        <td style="text-align:left;">{{ s.name }}</td>
+        <td class="mono">{{ s.doc_number or "—" }}</td>
+        <td class="num">{{ s.rules|length }}</td>
+        <td class="nowrap">
+          <a href="/standard/{{ s.id }}/rules">规则</a>
+          &nbsp;|&nbsp;<a href="/standard/{{ s.id }}/edit">编辑</a>
+          &nbsp;|&nbsp;
+          <form method="post" action="/standard/{{ s.id }}/delete"
+                onsubmit="return confirm('确定删除「{{ s.province }} {{ s.name }}」吗？\n该标准下的 {{ s.rules|length }} 条规则将一并删除，且无法恢复。');">
+            {{ form.hidden_tag() }}
+            <button type="submit" class="btn btn--sm btn--danger">删除</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
   </table>
+  {% else %}
+  <p class="muted">暂无地方标准。运行 <span class="mono">python seed_demo.py</span> 可载入论文表 1 的 11 项标准与政策文件。</p>
+  {% endif %}
 
-  <h3 style="font-size:14px;color:#1f3a5f;margin:16px 0 8px;">政策文件</h3>
+  <h3>政策文件</h3>
+  {% if policy %}
   <table>
-    <tr><th>省份</th><th>名称</th><th>文号</th><th>规则数</th><th>操作</th></tr>
-    {% for s in policy %}
-    <tr>
-      <td>{{ s.province }}</td>
-      <td style="text-align:left;">{{ s.name }}</td>
-      <td class="mono">{{ s.doc_number or "—" }}</td>
-      <td>{{ s.rules|length }}</td>
-      <td><a href="/standard/{{ s.id }}/rules">规则</a> | <a href="/standard/{{ s.id }}/edit">编辑</a></td>
-    </tr>
-    {% else %}
-    <tr><td colspan="5" class="muted">暂无</td></tr>
-    {% endfor %}
+    <thead>
+      <tr>
+        <th scope="col">省份</th>
+        <th scope="col">名称</th>
+        <th scope="col">文号</th>
+        <th scope="col">规则数</th>
+        <th scope="col">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in policy %}
+      <tr>
+        <td>{{ s.province }}</td>
+        <td style="text-align:left;">{{ s.name }}</td>
+        <td class="mono">{{ s.doc_number or "—" }}</td>
+        <td class="num">{{ s.rules|length }}</td>
+        <td class="nowrap">
+          <a href="/standard/{{ s.id }}/rules">规则</a>
+          &nbsp;|&nbsp;<a href="/standard/{{ s.id }}/edit">编辑</a>
+          &nbsp;|&nbsp;
+          <form method="post" action="/standard/{{ s.id }}/delete"
+                onsubmit="return confirm('确定删除「{{ s.province }} {{ s.name }}」吗？\n该文件下的 {{ s.rules|length }} 条规则将一并删除，且无法恢复。');">
+            {{ form.hidden_tag() }}
+            <button type="submit" class="btn btn--sm btn--danger">删除</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
   </table>
+  {% else %}
+  <p class="muted">暂无政策文件。</p>
+  {% endif %}
 </div>
 {% endblock %}

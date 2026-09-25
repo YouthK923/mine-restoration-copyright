@@ -3,19 +3,38 @@
 {% block content %}
 <div class="card">
   <h2>用户管理</h2>
+  <p class="muted">系统设有管理员、评价员、查看者三种角色，不同角色权限不同。</p>
+
   {% if current_user.role == "admin" %}
-  <p style="margin-bottom:12px;"><a href="/users/add" class="btn small">新增用户</a></p>
+  <p class="actions" style="margin-bottom:12px;">
+    <a class="btn btn--sm" href="/users/add">新增用户</a>
+  </p>
+  {% else %}
+  <p class="muted">当前角色为「{{ current_user.role }}」，仅管理员可新增用户。</p>
   {% endif %}
+
   <table>
-    <tr><th>ID</th><th>用户名</th><th>角色</th><th>状态</th></tr>
-    {% for u in users %}
-    <tr>
-      <td>{{ u.id }}</td>
-      <td>{{ u.username }}</td>
-      <td>{{ u.role }}</td>
-      <td>{% if u.active %}<span class="ok">启用</span>{% else %}<span class="muted">停用</span>{% endif %}</td>
-    </tr>
-    {% endfor %}
+    <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">用户名</th>
+        <th scope="col">角色</th>
+        <th scope="col">状态</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td class="num">{{ u.id }}</td>
+        <td>{{ u.username }}</td>
+        <td>{{ u.role }}</td>
+        <td>
+          {% if u.active %}<span class="tag tag--ok">启用</span>
+          {% else %}<span class="tag tag--muted">停用</span>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
   </table>
 </div>
 {% endblock %}

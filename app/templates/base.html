@@ -5,100 +5,412 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}历史遗留废弃矿山自然恢复适宜性评价系统{% endblock %}</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* ---------- 设计变量：单一强调色 + 中性灰阶 ---------- */
+    :root {
+      --accent: #1f3a5f;
+      --accent-hover: #2a4d7c;
+      --accent-soft: #eef2f7;
+      --danger: #b3261e;
+      --danger-soft: #fdecea;
+      --ok: #1e6b3a;
+      --ok-soft: #eaf6ef;
+      --ink: #23262b;
+      --ink-soft: #6b7280;
+      --line: #dfe3e8;
+      --surface: #ffffff;
+      --canvas: #f5f6f8;
+      --radius: 6px;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .05);
+      --header-h: 56px;
+      --nav-w: 208px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+
     body {
-      font-family: "Microsoft YaHei", "SimSun", sans-serif;
-      background: #f4f5f7; color: #333; font-size: 14px;
+      font-family: "Microsoft YaHei", "PingFang SC", "SimSun", sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--ink);
+      background: var(--canvas);
     }
-    .topbar {
-      background: #1f3a5f; color: #fff; padding: 12px 24px;
-      display: flex; align-items: center; justify-content: space-between;
+
+    /* ---------- 跳到主要内容（键盘可达性） ---------- */
+    .skip-link {
+      position: absolute;
+      left: 12px;
+      top: -60px;
+      z-index: 30;
+      padding: 8px 14px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: var(--radius);
+      text-decoration: none;
+      transition: top .15s ease-out;
     }
-    .topbar h1 { font-size: 18px; font-weight: 600; }
-    .topbar .right { font-size: 13px; }
-    .topbar .right a { color: #cfe0f5; text-decoration: none; margin-left: 12px; }
-    .topbar .right a:hover { color: #fff; text-decoration: underline; }
-    .nav {
-      background: #fff; border-bottom: 1px solid #dcdde0;
-      padding: 0 24px; display: flex; flex-wrap: wrap;
+    .skip-link:focus { top: 12px; }
+
+    /* ---------- 顶部标题栏 ---------- */
+    .app-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      height: var(--header-h);
+      padding: 0 20px;
+      background: var(--accent);
+      color: #fff;
     }
-    .nav a {
-      display: inline-block; padding: 10px 14px; text-decoration: none;
-      color: #444; border-bottom: 2px solid transparent;
+    .app-header__title {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: .2px;
     }
-    .nav a:hover { color: #1f3a5f; border-bottom-color: #1f3a5f; }
-    .container { max-width: 1080px; margin: 24px auto; padding: 0 24px; }
+    .app-header__version {
+      padding: 1px 8px;
+      font-size: 12px;
+      border: 1px solid rgba(255, 255, 255, .45);
+      border-radius: 10px;
+      font-variant-numeric: tabular-nums;
+    }
+    .app-header__spacer { flex: 1; }
+    .app-header__user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+    }
+    .app-header__user a {
+      color: #d6e3f4;
+      text-decoration: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    .app-header__user a:hover,
+    .app-header__user a:focus-visible {
+      color: #fff;
+      background: rgba(255, 255, 255, .14);
+    }
+
+    /* ---------- 主体：左侧导航 + 内容区 ---------- */
+    .app-body {
+      display: flex;
+      align-items: stretch;
+      min-height: calc(100dvh - var(--header-h));
+    }
+
+    .app-nav {
+      flex: 0 0 var(--nav-w);
+      width: var(--nav-w);
+      padding: 14px 10px;
+      background: var(--surface);
+      border-right: 1px solid var(--line);
+    }
+    .app-nav__group {
+      margin: 0 0 4px;
+      padding: 10px 10px 6px;
+      font-size: 12px;
+      color: var(--ink-soft);
+    }
+    .app-nav ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .app-nav a {
+      display: block;
+      padding: 9px 12px;
+      margin-bottom: 2px;
+      border-radius: var(--radius);
+      color: var(--ink);
+      text-decoration: none;
+      border-left: 3px solid transparent;
+    }
+    .app-nav a:hover { background: var(--accent-soft); }
+    .app-nav a:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+    }
+    .app-nav a[aria-current="page"] {
+      background: var(--accent-soft);
+      border-left-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .app-main {
+      flex: 1;
+      min-width: 0;
+      padding: 22px 26px 40px;
+    }
+    .container { max-width: 1040px; }
+
+    /* ---------- 卡片 ---------- */
     .card {
-      background: #fff; border: 1px solid #e3e4e6; border-radius: 6px;
-      padding: 24px; margin-bottom: 20px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px 24px;
+      margin-bottom: 18px;
     }
-    .card h2 { font-size: 16px; margin-bottom: 16px; color: #1f3a5f; }
-    h3 { font-weight: 600; }
-    table { border-collapse: collapse; width: 100%; margin: 8px 0 16px; }
-    th, td { border: 1px solid #dcdde0; padding: 8px 12px; text-align: center; }
-    th { background: #eef1f5; font-weight: 600; }
+    .card > h2 {
+      margin: 0 0 14px;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--accent);
+      text-wrap: balance;
+    }
+    .card > h3 {
+      margin: 20px 0 10px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    /* ---------- 表格 ---------- */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0 16px;
+      font-variant-numeric: tabular-nums;
+    }
+    caption {
+      text-align: left;
+      color: var(--ink-soft);
+      font-size: 12px;
+      padding-bottom: 6px;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 8px 12px;
+      text-align: center;
+      vertical-align: middle;
+    }
+    th {
+      background: var(--accent-soft);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    tbody tr:hover { background: #fafbfc; }
+
+    /* ---------- 表单控件 ---------- */
+    label { display: inline-block; }
+    .field { margin-bottom: 12px; }
+    .field__label {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--ink-soft);
+      font-size: 13px;
+    }
     input[type="text"], input[type="number"], input[type="password"],
-    select, textarea { padding: 6px 8px; border: 1px solid #c9ccd1; border-radius: 4px; font-family: inherit; }
-    input[type="number"] { width: 100px; text-align: center; }
-    textarea { width: 100%; min-height: 60px; }
+    select, textarea {
+      padding: 6px 9px;
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid #c6ccd4;
+      border-radius: 4px;
+      max-width: 100%;
+    }
+    input[type="number"] {
+      width: 104px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+    textarea { width: 100%; min-height: 64px; resize: vertical; }
+    input:focus-visible, select:focus-visible, textarea:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+      border-color: var(--accent);
+    }
+    .checkbox {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .checkbox input { width: 16px; height: 16px; margin: 0; cursor: pointer; }
+
+    /* ---------- 按钮 ---------- */
     .btn {
-      display: inline-block; padding: 8px 20px; border: none; border-radius: 4px;
-      background: #1f3a5f; color: #fff; cursor: pointer; font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 18px;
+      font-family: inherit;
+      font-size: 14px;
+      line-height: 1.4;
+      color: #fff;
+      background: var(--accent);
+      border: 1px solid transparent;
+      border-radius: 4px;
+      cursor: pointer;
       text-decoration: none;
     }
-    .btn:hover { background: #2a4d7c; }
-    .btn.gray { background: #8896a8; }
-    .btn.small { padding: 4px 12px; font-size: 13px; }
-    .flash { padding: 10px 16px; border-radius: 4px; margin-bottom: 16px; }
-    .flash.error { background: #fdecea; color: #c0392b; border: 1px solid #f5c6cb; }
-    .flash.ok { background: #eafaf1; color: #1e8449; border: 1px solid #b2dfdb; }
-    .muted { color: #888; font-size: 12px; }
-    .mono { font-family: Consolas, monospace; }
-    .warn { color: #c0392b; font-weight: 600; }
-    .ok { color: #1e8449; font-weight: 600; }
-    .login-box { max-width: 380px; margin: 80px auto; }
-    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-    .tile {
-      background: #fff; border: 1px solid #e3e4e6; border-radius: 6px;
-      padding: 18px; text-decoration: none; color: #333; display: block;
+    .btn:hover { background: var(--accent-hover); }
+    .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .btn--ghost {
+      color: var(--ink);
+      background: #fff;
+      border-color: #c6ccd4;
     }
-    .tile:hover { border-color: #1f3a5f; }
-    .tile .t { font-weight: 600; color: #1f3a5f; margin-bottom: 6px; }
-    .tile .d { font-size: 12px; color: #777; }
+    .btn--ghost:hover { background: #f1f3f6; }
+    .btn--danger {
+      color: var(--danger);
+      background: #fff;
+      border-color: #e6b4b0;
+    }
+    .btn--danger:hover { background: var(--danger-soft); }
+    .btn--sm { padding: 4px 12px; font-size: 13px; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .actions form { display: inline; }
+
+    /* ---------- 提示条 ---------- */
+    .flash {
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      border-radius: var(--radius);
+      border-left: 4px solid;
+    }
+    .flash.error {
+      color: var(--danger);
+      background: var(--danger-soft);
+      border-left-color: var(--danger);
+    }
+    .flash.ok {
+      color: var(--ok);
+      background: var(--ok-soft);
+      border-left-color: var(--ok);
+    }
+
+    /* ---------- 文字工具类 ---------- */
+    .muted { color: var(--ink-soft); font-size: 12.5px; }
+    .mono { font-family: Consolas, "Courier New", monospace; font-variant-numeric: tabular-nums; }
+    .num { font-variant-numeric: tabular-nums; }
+    .warn { color: var(--danger); font-weight: 600; }
+    .ok { color: var(--ok); font-weight: 600; }
+    .nowrap { white-space: nowrap; }
+    .stack { display: flex; flex-direction: column; gap: 14px; }
+
+    /* 状态标签：不依赖颜色单独表意 */
+    .tag {
+      display: inline-block;
+      padding: 1px 9px;
+      font-size: 12.5px;
+      border-radius: 10px;
+      border: 1px solid;
+      white-space: nowrap;
+    }
+    .tag--ok { color: var(--ok); background: var(--ok-soft); border-color: #b8ddc6; }
+    .tag--warn { color: var(--danger); background: var(--danger-soft); border-color: #eec4c0; }
+    .tag--muted { color: var(--ink-soft); background: #f1f3f6; border-color: #dde1e6; }
+
+    /* ---------- 登录页 ---------- */
+    .login-wrap {
+      display: flex;
+      justify-content: center;
+      padding: 64px 20px;
+    }
+    .login-card { width: 100%; max-width: 380px; }
+    .login-card .field__label { font-size: 14px; color: var(--ink); }
+
+    /* ---------- 首页功能块 ---------- */
+    .tile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
+      gap: 12px;
+    }
+    .tile {
+      display: block;
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .tile:hover { border-color: var(--accent); background: #fbfcfe; }
+    .tile:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .tile__title { font-weight: 600; color: var(--accent); margin-bottom: 5px; }
+    .tile__desc { font-size: 12.5px; color: var(--ink-soft); text-wrap: pretty; }
+
+    /* ---------- 结果摘要 ---------- */
+    .stat-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 28px;
+      margin: 4px 0 6px;
+    }
+    .stat__label { font-size: 12.5px; color: var(--ink-soft); }
+    .stat__value { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+    /* ---------- 窄屏适配 ---------- */
+    @media (max-width: 860px) {
+      .app-body { flex-direction: column; }
+      .app-nav {
+        flex: none;
+        width: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+        padding: 8px 10px;
+      }
+      .app-nav ul { display: flex; flex-wrap: wrap; gap: 4px; }
+      .app-nav a {
+        margin-bottom: 0;
+        border-left: none;
+        border-bottom: 3px solid transparent;
+      }
+      .app-nav a[aria-current="page"] { border-left: none; border-bottom-color: var(--accent); }
+      .app-nav__group { display: none; }
+      .app-main { padding: 16px 14px 32px; }
+    }
   </style>
 </head>
 <body>
-  <div class="topbar">
-    <h1>历史遗留废弃矿山自然恢复适宜性评价系统</h1>
-    <span class="right">
-      V1.0
-      {% if current_user.is_authenticated %}
-        &nbsp;|&nbsp; {{ current_user.username }}（{{ current_user.role }}）
-        <a href="/logout">退出</a>
-      {% endif %}
+  <a class="skip-link" href="#main">跳到主要内容</a>
+
+  <header class="app-header">
+    <span class="app-header__title">历史遗留废弃矿山自然恢复适宜性评价系统</span>
+    <span class="app-header__version">V1.0</span>
+    <span class="app-header__spacer"></span>
+    {% if current_user.is_authenticated %}
+    <span class="app-header__user">
+      <span>{{ current_user.username }}（{{ current_user.role }}）</span>
+      <a href="/logout">退出</a>
     </span>
-  </div>
-  {% if current_user.is_authenticated %}
-  <div class="nav">
-    <a href="/">首页</a>
-    <a href="/project/">项目与档案</a>
-    <a href="/constraint/">限制性判定</a>
-    <a href="/standard/">标准知识库</a>
-    <a href="/ahp/">AHP 权重</a>
-    <a href="/indicator/">指标数据</a>
-    <a href="/evaluate/">适宜性评价</a>
-    <a href="/report/">报告输出</a>
-    <a href="/users">用户管理</a>
-  </div>
-  {% endif %}
-  <div class="container">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% for category, message in messages %}
-        <div class="flash {{ category }}">{{ message }}</div>
-      {% endfor %}
-    {% endwith %}
-    {% block content %}{% endblock %}
+    {% endif %}
+  </header>
+
+  <div class="app-body">
+    {% if current_user.is_authenticated %}
+    <nav class="app-nav" aria-label="功能导航">
+      <p class="app-nav__group">功能模块</p>
+      <ul>
+        {% for label, href, active in nav_items %}
+        <li>
+          <a href="{{ href }}"{% if active %} aria-current="page"{% endif %}>{{ label }}</a>
+        </li>
+        {% endfor %}
+      </ul>
+    </nav>
+    {% endif %}
+
+    <main id="main" class="app-main">
+      <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% for category, message in messages %}
+          <p class="flash {{ category }}" role="status">{{ message }}</p>
+          {% endfor %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+      </div>
+    </main>
   </div>
 </body>
 </html>
