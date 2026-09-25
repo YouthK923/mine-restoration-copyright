@@ -145,6 +145,7 @@ def clean_case():
 
 def seed():
     with app.app_context():
+        db.create_all()      # 全新环境下先建表，保证本脚本可独立运行
         clean_case()
 
         admin = User.query.filter_by(username="admin").first()

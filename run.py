@@ -3,7 +3,7 @@
 
 运行：
     python run.py
-然后浏览器打开 http://127.0.0.1:5000
+然后在浏览器打开 http://127.0.0.1:5000
 """
 from app import create_app
 from app.models import db
@@ -13,4 +13,13 @@ app = create_app()
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()   # 首次运行时自动建表
+
+    print("=" * 58)
+    print("  历史遗留废弃矿山自然恢复适宜性评价系统 V1.0")
+    print("=" * 58)
+    print("  访问地址：http://127.0.0.1:5000")
+    print("  演示账号：admin    密码：admin123")
+    print("  停止运行：按 Ctrl+C")
+    print("=" * 58)
+
     app.run(host="127.0.0.1", port=5000, debug=True)
