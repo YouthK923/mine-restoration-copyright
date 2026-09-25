@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>自然恢复适宜性评价报告 · {{ patch.name }}</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; color: #23262b; background: #fff;
+    font-family: "Microsoft YaHei", "SimSun", sans-serif;
+    font-size: 10.5pt; line-height: 1.65;
+  }
+  h1 { font-size: 17pt; text-align: center; margin: 0 0 6px; }
+  h2 { font-size: 13pt; color: #1f3a5f; margin: 20px 0 8px;
+       border-bottom: 1px solid #dfe3e8; padding-bottom: 4px; }
+  h3 { font-size: 11.5pt; color: #1f3a5f; margin: 16px 0 6px; }
+  .sub { text-align: center; color: #6b7280; font-size: 9.5pt; margin-bottom: 18px; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0 14px;
+          font-variant-numeric: tabular-nums; }
+  th, td { border: 1px solid #c9ccd1; padding: 4px 8px; text-align: center; }
+  th { background: #eef2f7; font-weight: 600; }
+  .left { text-align: left; }
+  .mono { font-family: Consolas, "Courier New", monospace; }
+  .kv { width: auto; }
+  .kv th { width: 30%; text-align: left; }
+  .kv td { text-align: left; }
+  ul { margin: 6px 0 12px; padding-left: 20px; }
+  .note { color: #6b7280; font-size: 9.5pt; }
+  .chart { margin: 10px 0 16px; }
+  .sig { margin-top: 28px; font-size: 10pt; }
+  .avoid-break { break-inside: avoid; }
+  svg { max-width: 100%; }
+</style>
+</head>
+<body>
+  <h1>历史遗留废弃矿山自然恢复适宜性评价报告</h1>
+  <p class="sub">
+    {{ patch.name }}
+    {% if patch.admin_region %} · {{ patch.admin_region }}{% endif %}
+    <br>历史遗留废弃矿山自然恢复适宜性评价系统 V1.0 ·
+    生成时间 {{ generated_at }}
+  </p>
+
+  <h2>一、图斑基本信息</h2>
+  <table class="kv">
+    <tr><th>图斑名称</th><td>{{ patch.name }}</td></tr>
+    <tr><th>所在行政区</th><td>{{ patch.admin_region or "—" }}</td></tr>
+    <tr><th>图斑面积（公顷）</th><td>{{ patch.area_ha if patch.area_ha is not none else "—" }}</td></tr>
+    <tr><th>开采矿种</th><td>{{ patch.mineral_type or "—" }}</td></tr>
+    <tr><th>开采方式</th><td>{{ patch.mining_method or "—" }}</td></tr>
+    <tr><th>责任主体缺失</th><td>{{ "是" if patch.responsible_entity_missing else "否" }}</td></tr>
+    {% if reference %}
+    <tr><th>参照生态系统</th>
+        <td>植被覆盖度基准 {{ reference.coverage_benchmark }}%，
+            多样性指数基准 {{ reference.shannon_benchmark }}</td></tr>
+    {% endif %}
+  </table>
+
+  <h2>二、评价结论</h2>
+  <table class="kv">
+    <tr><th>最终评价因子 F</th><td class="mono"><strong>{{ "%.4f"|format(result.final_score) }}</strong></td></tr>
+    <tr><th>适宜性等级</th><td><strong>{{ result.grade }}</strong></td></tr>
+    <tr><th>判定依据</th><td>{{ result.grade_info.meaning }}</td></tr>
+    <tr><th>推荐措施</th><td>{{ result.grade_info.measure }}</td></tr>
+  </table>
+
+  <h2>三、各微地质单元得分</h2>
+  <table>
+    <thead>
+      <tr><th>微地质单元</th><th>面积占比</th><th>单元评价因子 F′</th><th>加权贡献</th></tr>
+    </thead>
+    <tbody>
+      {% for u in result.unit_results %}
+      <tr>
+        <td>{{ u.unit_type }}</td>
+        <td class="mono">{{ "%.2f%%"|format(u.ratio * 100) }}</td>
+        <td class="mono">{{ "%.4f"|format(u.unit_score) }}</td>
+        <td class="mono">{{ "%.4f"|format(u.weighted) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="chart">{{ chart_units|safe }}</div>
+
+  <h2>四、一级指标权重分布</h2>
+  <div class="chart">{{ chart_weight|safe }}</div>
+
+  <h2>五、得分明细</h2>
+  {% for u in result.unit_results %}
+  <h3>{{ u.unit_type }}（占比 {{ "%.2f%%"|format(u.ratio * 100) }}，单元得分 {{ "%.4f"|format(u.unit_score) }}）</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>一级指标</th><th>二级指标</th><th>实测值</th>
+        <th>标准化值</th><th>权重</th><th>贡献</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for d in u.details %}
+      <tr>
+        <td>{{ d.l1 }}</td>
+        <td class="left">{{ d.l2 }}</td>
+        <td class="mono left">{{ "—" if d.raw is none else d.raw }}</td>
+        <td class="mono">{{ "—" if d.std_value is none else "%.4f"|format(d.std_value) }}</td>
+        <td class="mono">{{ "%.4f"|format(d.weight) }}</td>
+        <td class="mono">{{ "—" if d.contribution is none else "%.4f"|format(d.contribution) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="note">
+    一级指标得分：
+    {% for k, v in u.l1_scores.items() %}{{ k }} = {{ "%.4f"|format(v) }}{% if not loop.last %}；{% endif %}{% endfor %}
+  </p>
+  {% endfor %}
+
+  <h2>六、评价依据说明</h2>
+  <ul class="note">
+    <li>指标标准化按论文式(8) 执行，按指标性质分为越大越优、越小越优、
+        适中型与离散赋值四类。</li>
+    <li>单元评价因子按论文式(9) 由二级指标权重加权求得；
+        整矿评价因子由各微地质单元按面积占比加权合成。</li>
+    <li>适宜性等级按论文表 4 划分：F&lt;0.3 不适宜、0.3≤F≤0.7 基本适宜、F≥0.7 适宜。</li>
+    <li>指标权重取自论文表 3，按岩质边坡、碎石土边坡、平台三类微地质单元分别确定。</li>
+  </ul>
+
+  <p class="sig">
+    评价人（签字）：____________________　　日期：____________
+  </p>
+</body>
+</html>

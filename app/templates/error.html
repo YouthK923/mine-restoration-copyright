@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{ code }} · {{ message }}{% endblock %}
+{% block content %}
+<div class="card" style="max-width:560px;">
+  <h2>{{ code }} · {{ message }}</h2>
+  <p class="muted">
+    请返回上一页重试；若确认该操作应当可用，请检查当前账号的角色权限。
+  </p>
+  <p class="actions" style="margin-top:16px;">
+    <a class="btn" href="/">返回首页</a>
+  </p>
+</div>
+{% endblock %}

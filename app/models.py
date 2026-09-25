@@ -74,6 +74,10 @@ class MinePatch(db.Model):
     mining_method = db.Column(db.String(64), nullable=True)   # 开采方式
     stop_years = db.Column(db.Float, nullable=True)           # 停产年限
     responsible_entity_missing = db.Column(db.Boolean, default=True)  # 责任主体是否缺失
+    # 遥感底图 / 无人机正射影像挂接（M2）
+    image_path = db.Column(db.String(256), nullable=True)     # 相对 static 的路径
+    image_note = db.Column(db.String(256), nullable=True)     # 影像说明（如来源、时相）
+    image_uploaded_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     units = db.relationship("MicroUnit", backref="patch", lazy="dynamic",
@@ -166,7 +170,13 @@ class Indicator(db.Model):
     is_evaluative = db.Column(db.Boolean, default=True)
     unit = db.Column(db.String(32), nullable=True)                # 单位
     ideal_value = db.Column(db.String(64), nullable=True)         # 理想值（可配置）
-    ideal_type = db.Column(db.String(32), nullable=True)          # 标准化类型：benefit/cost/mid/discrete
+    ideal_type = db.Column(db.String(32), nullable=True)          # benefit/cost/mid/discrete
+    # 启用该指标的微地质单元（逗号分隔）。岩质边坡不启用土壤指标、平台不启用地形指标
+    enabled_units = db.Column(db.String(128), nullable=True)
+    description = db.Column(db.Text, nullable=True)               # 取值依据说明
+
+    def units_list(self):
+        return [s for s in (self.enabled_units or "").split(",") if s]
 
 
 class WeightScheme(db.Model):
@@ -196,10 +206,14 @@ class ExpertMatrix(db.Model):
     __tablename__ = "expert_matrices"
 
     id = db.Column(db.Integer, primary_key=True)
-    scheme_id = db.Column(db.Integer, db.ForeignKey("weight_schemes.id"), nullable=False)
+    scheme_id = db.Column(db.Integer, db.ForeignKey("weight_schemes.id"), nullable=True)
+    # 直接标注适用对象，便于无需先建权重方案即可录入专家矩阵
+    unit_type = db.Column(db.String(32), nullable=True)           # 微地质单元类型
+    l1_name = db.Column(db.String(64), nullable=True)             # 所属一级指标（二级矩阵用）
     expert_name = db.Column(db.String(64), nullable=True)         # 专家姓名
     level = db.Column(db.Integer, nullable=False, default=1)      # 矩阵对应指标层级
     matrix_json = db.Column(db.Text, nullable=False)              # 判断矩阵（JSON 二维数组）
+    cr = db.Column(db.Float, nullable=True)                       # 该专家矩阵的一致性比例
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 

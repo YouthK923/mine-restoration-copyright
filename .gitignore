@@ -45,6 +45,9 @@ build/
 *.sqlite3
 instance/
 
+# ---- 用户上传文件（影像、导入数据，不入库）----
+app/static/uploads/
+
 # ---- 系统与编辑器 ----
 Thumbs.db
 ehthumbs.db

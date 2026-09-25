@@ -1,37 +1,64 @@
 {% extends "base.html" %}
-{% block title %}用户管理{% endblock %}
+{% block title %}用户与权限管理{% endblock %}
 {% block content %}
 <div class="card">
   <h2>用户管理</h2>
-  <p class="muted">系统设有管理员、评价员、查看者三种角色，不同角色权限不同。</p>
-
-  {% if current_user.role == "admin" %}
-  <p class="actions" style="margin-bottom:12px;">
-    <a class="btn btn--sm" href="/users/add">新增用户</a>
+  <p class="muted">
+    系统设有管理员、评价员、查看者三种角色：管理员可维护用户与基础数据，
+    评价员可建项目、录数据、执行评价，查看者仅可查阅。
   </p>
-  {% else %}
-  <p class="muted">当前角色为「{{ current_user.role }}」，仅管理员可新增用户。</p>
+
+  <p class="actions" style="margin-bottom:12px;">
+    {% if current_user.role == "admin" %}
+    <a class="btn btn--sm" href="/users/add">新增用户</a>
+    {% endif %}
+    <a class="btn btn--sm btn--ghost" href="/logs">查看操作日志</a>
+  </p>
+
+  {% if current_user.role != "admin" %}
+  <p class="muted">
+    当前角色为「{{ role_labels.get(current_user.role, current_user.role) }}」，
+    仅管理员可新增、编辑或删除用户。
+  </p>
   {% endif %}
 
   <table>
+    <caption class="muted">共 {{ users|length }} 个用户</caption>
     <thead>
       <tr>
         <th scope="col">ID</th>
         <th scope="col">用户名</th>
         <th scope="col">角色</th>
         <th scope="col">状态</th>
+        {% if current_user.role == "admin" %}<th scope="col">操作</th>{% endif %}
       </tr>
     </thead>
     <tbody>
       {% for u in users %}
       <tr>
         <td class="num">{{ u.id }}</td>
-        <td>{{ u.username }}</td>
-        <td>{{ u.role }}</td>
+        <td>
+          {{ u.username }}
+          {% if u.id == current_user.id %}<span class="muted">（当前登录）</span>{% endif %}
+        </td>
+        <td>{{ role_labels.get(u.role, u.role) }}</td>
         <td>
           {% if u.active %}<span class="tag tag--ok">启用</span>
           {% else %}<span class="tag tag--muted">停用</span>{% endif %}
         </td>
+        {% if current_user.role == "admin" %}
+        <td class="nowrap">
+          <a href="/users/{{ u.id }}/edit">编辑</a>
+          &nbsp;|&nbsp;
+          <form method="post" action="/users/{{ u.id }}/delete"
+                onsubmit="return confirm('确定删除用户「{{ u.username }}」吗？\n该操作无法恢复。');">
+            {{ form.hidden_tag() }}
+            <button type="submit" class="btn btn--sm btn--danger"
+                    {% if u.id == current_user.id %}disabled
+                    title="不能删除当前登录的账号"{% endif %}>删除</button>
+          </form>
+        </td>
+        {% endif %}
       </tr>
       {% endfor %}
     </tbody>

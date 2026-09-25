@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}编辑用户 · {{ user.username }}{% endblock %}
+{% block content %}
+<div class="card" style="max-width:560px;">
+  <h2>编辑用户 · {{ user.username }}</h2>
+  <form method="post">
+    {{ form.hidden_tag() }}
+
+    <div class="field">
+      <label class="field__label" for="role">角色</label>
+      <select id="role" name="role">
+        {% for code, label in role_labels.items() %}
+        <option value="{{ code }}" {% if user.role == code %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="field">
+      <label class="checkbox" for="active">
+        <input id="active" type="checkbox" name="active" value="1"
+               {% if user.active %}checked{% endif %}>
+        <span>启用该账号</span>
+      </label>
+      <p class="muted" style="margin:6px 0 0;">
+        停用后该账号无法登录，但其历史操作记录会保留。
+        系统至少需保留一名启用状态的管理员。
+      </p>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="password">重置密码（留空则不修改）</label>
+      <input id="password" type="password" name="password"
+             autocomplete="new-password" style="width:280px;"
+             placeholder="留空表示保持原密码">
+    </div>
+
+    <p class="actions" style="margin-top:18px;">
+      <button type="submit" class="btn">保存</button>
+      <a class="btn btn--ghost" href="/users">返回</a>
+    </p>
+  </form>
+</div>
+{% endblock %}

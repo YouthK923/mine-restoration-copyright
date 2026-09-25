@@ -58,19 +58,20 @@
 
     <div class="field">
       <label class="field__label" for="coverage-benchmark">植被覆盖度基准（%）</label>
-      <input id="coverage-benchmark" type="number" step="any"
-             name="coverage_benchmark" value="75">
+      <input id="coverage-benchmark" type="number" step="any" name="coverage_benchmark"
+             value="{{ reference.coverage_benchmark if reference else 75 }}">
     </div>
 
     <div class="field">
       <label class="field__label" for="shannon-benchmark">Shannon-Wiener 多样性指数基准</label>
-      <input id="shannon-benchmark" type="number" step="any"
-             name="shannon_benchmark" value="0.7">
+      <input id="shannon-benchmark" type="number" step="any" name="shannon_benchmark"
+             value="{{ reference.shannon_benchmark if reference else 0.7 }}">
     </div>
 
     <div class="field">
       <label class="field__label" for="dominant-species">建群种</label>
-      <input id="dominant-species" type="text" name="dominant_species" style="width:100%;">
+      <input id="dominant-species" type="text" name="dominant_species" style="width:100%;"
+             value="{{ reference.dominant_species or '' if reference else '' }}">
     </div>
 
     <p class="actions" style="margin-top:18px;">
@@ -79,4 +80,58 @@
     </p>
   </form>
 </div>
+
+{% if patch %}
+<div class="card" style="max-width:720px;">
+  <h2>遥感影像挂接</h2>
+  <p class="muted">
+    挂接遥感底图或无人机正射影像，用于辅助微地质单元划分与植被覆盖度判读。
+    支持 PNG、JPG、GIF、WebP、BMP、TIFF，单个文件不超过 32 MB。
+  </p>
+
+  {% if patch.image_path %}
+  <figure style="margin:0 0 16px;">
+    <img src="{{ url_for('static', filename=patch.image_path) }}"
+         alt="图斑「{{ patch.name }}」已挂接的遥感影像"
+         style="max-width:100%;border:1px solid var(--line);border-radius:6px;">
+    <figcaption class="muted" style="margin-top:6px;">
+      {{ patch.image_note or "遥感影像" }}
+      {% if patch.image_uploaded_at %}
+      · 上传于 {{ patch.image_uploaded_at.strftime("%Y-%m-%d %H:%M") }}
+      {% endif %}
+    </figcaption>
+  </figure>
+  <form method="post" action="/project/patch/{{ patch.id }}/image/delete"
+        onsubmit="return confirm('确定移除该遥感影像吗？');">
+    {{ form.hidden_tag() }}
+    <button type="submit" class="btn btn--sm btn--danger">移除影像</button>
+  </form>
+  <hr style="margin:16px 0;border:none;border-top:1px solid var(--line);">
+  {% endif %}
+
+  <form method="post" action="/project/patch/{{ patch.id }}/image"
+        enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+
+    <div class="field">
+      <label class="field__label" for="image-file">
+        {{ "替换影像文件" if patch.image_path else "选择影像文件" }}
+      </label>
+      <input id="image-file" type="file" name="image"
+             accept=".png,.jpg,.jpeg,.gif,.webp,.bmp,.tif,.tiff" required>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="image-note">影像说明（如来源、时相）</label>
+      <input id="image-note" type="text" name="image_note" style="width:100%;"
+             placeholder="如：2025 年 6 月无人机正射影像"
+             value="{{ patch.image_note or '' }}">
+    </div>
+
+    <p class="actions">
+      <button type="submit" class="btn">{{ "替换影像" if patch.image_path else "上传并挂接" }}</button>
+    </p>
+  </form>
+</div>
+{% endif %}
 {% endblock %}

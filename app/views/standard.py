@@ -46,7 +46,7 @@ def add():
 @bp.route("/<int:sid>/edit", methods=["GET", "POST"])
 @login_required
 def edit(sid):
-    s = Standard.query.get_or_404(sid)
+    s = db.get_or_404(Standard, sid)
     form = EmptyForm()
     if request.method == "POST" and form.validate_on_submit():
         s.province = request.form.get("province", "").strip()
@@ -65,7 +65,7 @@ def edit(sid):
 @bp.route("/<int:sid>/delete", methods=["POST"])
 @login_required
 def delete(sid):
-    s = Standard.query.get_or_404(sid)
+    s = db.get_or_404(Standard, sid)
     StandardRule.query.filter_by(standard_id=sid).delete()
     db.session.delete(s)
     db.session.commit()
@@ -76,7 +76,7 @@ def delete(sid):
 @bp.route("/<int:sid>/rules", methods=["GET", "POST"])
 @login_required
 def rules(sid):
-    s = Standard.query.get_or_404(sid)
+    s = db.get_or_404(Standard, sid)
     form = EmptyForm()
     if request.method == "POST" and form.validate_on_submit():
         r = StandardRule(
@@ -102,7 +102,7 @@ def rules(sid):
 @bp.route("/rule/<int:rid>/delete", methods=["POST"])
 @login_required
 def rule_delete(rid):
-    r = StandardRule.query.get_or_404(rid)
+    r = db.get_or_404(StandardRule, rid)
     sid = r.standard_id
     db.session.delete(r)
     db.session.commit()

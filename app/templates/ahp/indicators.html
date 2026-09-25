@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}指标定义维护{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>指标体系维护</h2>
+  <p class="muted">
+    按论文表 2 与表 3 建立的指标树。此处可核对指标名称、单位、标准化类型、
+    理想取值与取值依据，并按需调整启用该指标的微地质单元。
+    计算时的权威取值仍以 <span class="mono">app/utils/constants.py</span> 为准，
+    本页用于展示与核对。
+  </p>
+
+  <p class="actions" style="margin-bottom:14px;">
+    <a class="btn btn--sm btn--ghost" href="/ahp/">返回权重计算</a>
+    <a class="btn btn--sm btn--ghost" href="/ahp/experts">多专家矩阵</a>
+    <form method="post" action="/ahp/indicators/reset" style="display:inline;"
+          onsubmit="return confirm('将按论文取值重置全部指标定义，自定义修改会丢失。确定继续？');">
+      {{ form.hidden_tag() }}
+      <button type="submit" class="btn btn--sm btn--danger">按论文取值重置</button>
+    </form>
+  </p>
+
+  {% for level, title in [(1, "一级指标"), (2, "二级指标"), (3, "三级指标")] %}
+  {% set level_items = all_ind|selectattr("level", "equalto", level)|list %}
+  {% if level_items %}
+  <h3>{{ title }}（{{ level_items|length }} 项）</h3>
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">指标</th>
+        <th scope="col">上级指标</th>
+        <th scope="col">单位</th>
+        <th scope="col">标准化类型</th>
+        <th scope="col">理想取值</th>
+        <th scope="col">启用单元</th>
+        <th scope="col">限制性</th>
+        <th scope="col">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for i in level_items %}
+      <tr>
+        <td style="text-align:left;">
+          <span class="mono muted">{{ i.code }}</span><br>{{ i.name }}
+        </td>
+        <td>{{ (all_ind|selectattr("code", "equalto", i.parent_code)|list|first).name if i.parent_code else "—" }}</td>
+        <td>{{ i.unit or "—" }}</td>
+        <td>{{ type_label(i.ideal_type) }}</td>
+        <td class="mono">{{ i.ideal_value or "—" }}</td>
+        <td style="text-align:left;">{{ i.enabled_units or "—" }}</td>
+        <td>
+          {% if i.is_constraint %}<span class="tag tag--warn">是</span>
+          {% else %}<span class="tag tag--muted">否</span>{% endif %}
+        </td>
+        <td><a href="/ahp/indicators/{{ i.code }}/edit">编辑</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+  {% endfor %}
+</div>
+{% endblock %}

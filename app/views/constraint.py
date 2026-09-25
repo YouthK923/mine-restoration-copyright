@@ -37,7 +37,7 @@ def index():
 @bp.route("/<int:patch_id>", methods=["GET", "POST"])
 @login_required
 def check(patch_id):
-    patch = MinePatch.query.get_or_404(patch_id)
+    patch = db.get_or_404(MinePatch, patch_id)
     form = EmptyForm()
     record = ConstraintCheck.query.filter_by(patch_id=patch_id) \
         .order_by(ConstraintCheck.id.desc()).first()

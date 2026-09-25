@@ -17,6 +17,10 @@ app = create_app()
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()   # 首次运行时自动建表
+        from app.utils.schema import ensure_schema
+        added = ensure_schema(db)   # 旧库补齐新增字段
+        if added:
+            print("已补充字段：%s" % "、".join(added))
 
     print("=" * 58)
     print("  历史遗留废弃矿山自然恢复适宜性评价系统 V1.0")

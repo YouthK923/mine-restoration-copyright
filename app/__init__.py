@@ -72,8 +72,30 @@ def create_app(config_class=Config):
             ("指标数据", "/indicator/", path.startswith("/indicator")),
             ("适宜性评价", "/evaluate/", path.startswith("/evaluate")),
             ("报告输出", "/report/", path.startswith("/report")),
-            ("用户管理", "/users", path.startswith("/users")),
+            ("用户与日志", "/users", path.startswith(("/users", "/logs"))),
         ]
         return {"nav_items": items}
+
+    # 操作审计：统一在响应阶段记录成功的写操作（M1 操作日志）
+    from app.services import audit
+
+    @app.after_request
+    def audit_writes(response):
+        if request.method in ("POST", "PUT", "PATCH", "DELETE"):
+            audit.record(request.endpoint, response.status_code)
+        return response
+
+    # 错误页：给出可读提示，而不是默认的英文错误页
+    from flask import render_template
+
+    @app.errorhandler(403)
+    def forbidden(e):
+        return render_template("error.html", code=403,
+                               message="没有权限执行该操作"), 403
+
+    @app.errorhandler(404)
+    def not_found(e):
+        return render_template("error.html", code=404,
+                               message="请求的页面不存在"), 404
 
     return app

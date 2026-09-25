@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}编辑指标 · {{ ind.name }}{% endblock %}
+{% block content %}
+<div class="card" style="max-width:680px;">
+  <h2>编辑指标 · {{ ind.name }}</h2>
+  <p class="muted">
+    指标编码 <span class="mono">{{ ind.code }}</span>、层级 {{ ind.level }} 级，
+    由论文指标体系确定，不可修改。
+  </p>
+
+  <form method="post">
+    {{ form.hidden_tag() }}
+
+    <div class="field">
+      <label class="field__label" for="name">指标名称</label>
+      <input id="name" type="text" name="name" style="width:100%;" required
+             value="{{ ind.name }}">
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="unit">计量单位</label>
+      <input id="unit" type="text" name="unit" style="width:180px;"
+             value="{{ ind.unit or '' }}">
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="ideal-type">标准化类型</label>
+      <select id="ideal-type" name="ideal_type">
+        {% for code, label in [("benefit","越大越优"),("cost","越小越优"),("mid","适中型"),("discrete","离散赋值")] %}
+        <option value="{{ code }}" {% if ind.ideal_type == code %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="ideal-value">理想取值</label>
+      <input id="ideal-value" type="text" name="ideal_value" style="width:100%;"
+             value="{{ ind.ideal_value or '' }}">
+      <p class="muted" style="margin:4px 0 0;">
+        如土石比 0.8、土层厚度 20、pH 5~9、植被覆盖度 75。
+      </p>
+    </div>
+
+    <fieldset style="border:1px solid var(--line);border-radius:6px;padding:10px 14px;margin:0 0 12px;">
+      <legend style="padding:0 6px;font-weight:600;">启用该指标的微地质单元</legend>
+      {% for t in unit_types %}
+      <label class="checkbox" style="margin-right:18px;">
+        <input type="checkbox" name="enabled_units" value="{{ t }}"
+               {% if t in ind.units_list() %}checked{% endif %}>
+        <span>{{ t }}</span>
+      </label>
+      {% endfor %}
+      <p class="muted" style="margin:8px 0 0;">
+        论文设定：岩质边坡不启用土壤指标，平台不启用地形指标。
+      </p>
+    </fieldset>
+
+    <div class="field">
+      <label class="checkbox" for="is-constraint">
+        <input id="is-constraint" type="checkbox" name="is_constraint" value="1"
+               {% if ind.is_constraint %}checked{% endif %}>
+        <span>同时作为限制性指标（参与一票否决判定）</span>
+      </label>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="description">取值依据说明</label>
+      <textarea id="description" name="description" style="min-height:88px;">{{ ind.description or '' }}</textarea>
+    </div>
+
+    <p class="actions" style="margin-top:16px;">
+      <button type="submit" class="btn">保存</button>
+      <a class="btn btn--ghost" href="/ahp/indicators">返回指标列表</a>
+    </p>
+  </form>
+</div>
+{% endblock %}

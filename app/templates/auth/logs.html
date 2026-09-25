@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}操作日志{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>操作日志</h2>
+  <p class="muted">
+    系统自动记录所有写操作（新建、编辑、删除、导入、执行评价等），
+    便于追溯数据变更。失败的操作也会记录并标注 HTTP 状态码。
+  </p>
+
+  <p class="actions" style="margin-bottom:12px;">
+    <a class="btn btn--sm btn--ghost" href="/users">返回用户管理</a>
+  </p>
+
+  {% if not records %}
+  <p class="muted">暂无操作记录。</p>
+  {% else %}
+  <table>
+    <caption class="muted">共 {{ total }} 条记录，当前第 {{ page }} / {{ pages }} 页</caption>
+    <thead>
+      <tr>
+        <th scope="col">时间</th>
+        <th scope="col">操作人</th>
+        <th scope="col">操作</th>
+        <th scope="col">对象</th>
+        <th scope="col">说明</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in records %}
+      <tr>
+        <td class="mono nowrap">{{ r.created_at.strftime("%Y-%m-%d %H:%M:%S") if r.created_at else "—" }}</td>
+        <td>{{ users_map.get(r.user_id, "—") }}</td>
+        <td style="text-align:left;">{{ r.action }}</td>
+        <td>
+          {% if r.target_type %}{{ r.target_type }}{% if r.target_id %}#{{ r.target_id }}{% endif %}
+          {% else %}—{% endif %}
+        </td>
+        <td style="text-align:left;">{{ r.detail or "—" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if pages > 1 %}
+  <nav class="actions" aria-label="日志分页">
+    {% if page > 1 %}
+    <a class="btn btn--sm btn--ghost" href="/logs?page={{ page - 1 }}">上一页</a>
+    {% endif %}
+    <span class="muted">第 {{ page }} / {{ pages }} 页</span>
+    {% if page < pages %}
+    <a class="btn btn--sm btn--ghost" href="/logs?page={{ page + 1 }}">下一页</a>
+    {% endif %}
+  </nav>
+  {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

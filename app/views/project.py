@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
-"""M2 项目与矿山档案 —— 项目、图斑、参照生态系统。"""
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+"""M2 项目与矿山档案 —— 项目、图斑、参照生态系统、遥感影像挂接。"""
+from datetime import datetime
+
+from flask import (Blueprint, render_template, request, redirect, url_for,
+                   flash, current_app)
 from flask_login import login_required, current_user
 
 from app.forms import EmptyForm
@@ -41,7 +44,7 @@ def add():
 @bp.route("/<int:pid>/edit", methods=["GET", "POST"])
 @login_required
 def edit(pid):
-    p = Project.query.get_or_404(pid)
+    p = db.get_or_404(Project, pid)
     form = EmptyForm()
     if request.method == "POST" and form.validate_on_submit():
         p.name = request.form.get("name", "").strip()
@@ -57,7 +60,7 @@ def edit(pid):
 @bp.route("/<int:pid>/delete", methods=["POST"])
 @login_required
 def delete(pid):
-    p = Project.query.get_or_404(pid)
+    p = db.get_or_404(Project, pid)
     db.session.delete(p)
     db.session.commit()
     flash("项目已删除", "ok")
@@ -69,7 +72,7 @@ def delete(pid):
 @bp.route("/<int:pid>/patches")
 @login_required
 def patches(pid):
-    p = Project.query.get_or_404(pid)
+    p = db.get_or_404(Project, pid)
     return render_template("project/patches.html", project=p,
                            form=EmptyForm())
 
@@ -80,7 +83,7 @@ def patch_delete(patch_id):
     """删除矿山图斑，及其微地质单元与指标数据。"""
     from app.models import MicroUnit, IndicatorData, EvaluationResult, \
         ScoreDetail, ConstraintCheck, ReferenceEcosystem
-    patch = MinePatch.query.get_or_404(patch_id)
+    patch = db.get_or_404(MinePatch, patch_id)
     pid = patch.project_id
     unit_ids = [u.id for u in MicroUnit.query.filter_by(patch_id=patch.id).all()]
     if unit_ids:
@@ -105,7 +108,7 @@ def patch_delete(patch_id):
 @bp.route("/<int:pid>/patch/add", methods=["GET", "POST"])
 @login_required
 def patch_add(pid):
-    p = Project.query.get_or_404(pid)
+    p = db.get_or_404(Project, pid)
     form = EmptyForm()
     if request.method == "POST" and form.validate_on_submit():
         def fv(name, cast=str):
@@ -139,7 +142,7 @@ def patch_add(pid):
 @bp.route("/patch/<int:patch_id>/edit", methods=["GET", "POST"])
 @login_required
 def patch_edit(patch_id):
-    patch = MinePatch.query.get_or_404(patch_id)
+    patch = db.get_or_404(MinePatch, patch_id)
     form = EmptyForm()
     if request.method == "POST" and form.validate_on_submit():
         def fv(name, cast=str):
@@ -161,8 +164,59 @@ def patch_edit(patch_id):
         ref.coverage_benchmark = fv("coverage_benchmark", float) or 75.0
         ref.shannon_benchmark = fv("shannon_benchmark", float) or 0.7
         ref.dominant_species = fv("dominant_species")
+        patch.image_note = fv("image_note")
         db.session.commit()
         flash("图斑已保存", "ok")
         return redirect(url_for("project.patches", pid=patch.project_id))
     return render_template("project/patch_edit.html", form=form,
-                           project=patch.project, patch=patch)
+                           project=patch.project, patch=patch,
+                           reference=ReferenceEcosystem.query.filter_by(
+                               patch_id=patch.id).first())
+
+
+# ---------------------------- 遥感影像挂接 ----------------------------
+
+@bp.route("/patch/<int:patch_id>/image", methods=["POST"])
+@login_required
+def upload_image(patch_id):
+    """上传遥感底图 / 无人机正射影像并挂接到图斑。"""
+    from app.utils import uploads as up
+    patch = db.get_or_404(MinePatch, patch_id)
+    form = EmptyForm()
+    if not form.validate_on_submit():
+        flash("表单校验失败，请重试", "error")
+        return redirect(url_for("project.patch_edit", patch_id=patch.id))
+
+    rel, err = up.save_upload(request.files.get("image"), "patches",
+                              current_app.config["ALLOWED_IMAGE_EXT"],
+                              current_app.config["UPLOAD_FOLDER"])
+    if err:
+        flash(err, "error")
+        return redirect(url_for("project.patch_edit", patch_id=patch.id))
+
+    # 替换旧影像时清理原文件，避免残留
+    if patch.image_path:
+        up.remove_upload(patch.image_path, current_app.config["UPLOAD_FOLDER"])
+    patch.image_path = rel
+    patch.image_uploaded_at = datetime.utcnow()
+    note = request.form.get("image_note", "").strip()
+    if note:
+        patch.image_note = note
+    db.session.commit()
+    flash("遥感影像已挂接", "ok")
+    return redirect(url_for("project.patch_edit", patch_id=patch.id))
+
+
+@bp.route("/patch/<int:patch_id>/image/delete", methods=["POST"])
+@login_required
+def delete_image(patch_id):
+    from app.utils import uploads as up
+    patch = db.get_or_404(MinePatch, patch_id)
+    form = EmptyForm()
+    if form.validate_on_submit():
+        up.remove_upload(patch.image_path, current_app.config["UPLOAD_FOLDER"])
+        patch.image_path = None
+        patch.image_uploaded_at = None
+        db.session.commit()
+        flash("遥感影像已移除", "ok")
+    return redirect(url_for("project.patch_edit", patch_id=patch.id))

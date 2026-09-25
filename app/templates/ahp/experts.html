@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}多专家判断矩阵{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>多专家判断矩阵 · 录入与汇总</h2>
+  <p class="muted">
+    论文明确权重由「组织 10 位专家对各项指标权重进行打分」确定。
+    此页支持多位专家分别录入判断矩阵，再用几何平均汇总，
+    保持矩阵互反性，并重新做一致性检验。
+  </p>
+
+  <form method="get" class="actions" style="margin-bottom:14px;">
+    <div>
+      <label class="field__label" for="unit-type">微地质单元类型</label>
+      <select id="unit-type" name="unit_type" onchange="this.form.submit()">
+        {% for t in ["岩质边坡", "碎石边坡", "平台"] %}
+        <option value="{{ t }}" {% if unit_type == t %}selected{% endif %}>{{ t }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="field__label" for="level">指标层级</label>
+      <select id="level" name="level" onchange="this.form.submit()">
+        <option value="1" {% if level == 1 %}selected{% endif %}>一级指标</option>
+        <option value="2" {% if level == 2 %}selected{% endif %}>二级指标</option>
+      </select>
+    </div>
+  </form>
+
+  <p class="muted">
+    当前范围：<strong>{{ unit_type }}</strong> ·
+    {% if level == 1 %}一级指标{% else %}二级指标（{{ l1 }}）{% endif %}。
+    若选二级指标，请先到
+    <a href="/ahp/">权重计算</a> 选择一级指标后进入本页。
+  </p>
+
+  {% if rows %}
+  <table>
+    <caption class="muted">已录入 {{ rows|length }} 位专家的矩阵</caption>
+    <thead>
+      <tr>
+        <th scope="col">专家</th>
+        <th scope="col">矩阵规模</th>
+        <th scope="col">该矩阵 CR</th>
+        <th scope="col">一致性</th>
+        <th scope="col">录入时间</th>
+        <th scope="col">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r.expert_name }}</td>
+        <td class="num">{{ n }} × {{ n }}</td>
+        <td class="mono">{{ "%.4f"|format(r.cr) if r.cr is not none else "—" }}</td>
+        <td>
+          {% if r.cr is not none and r.cr < 0.1 %}<span class="tag tag--ok">通过</span>
+          {% else %}<span class="tag tag--warn">不通过</span>{% endif %}
+        </td>
+        <td class="mono nowrap">{{ r.created_at.strftime("%Y-%m-%d %H:%M") if r.created_at else "—" }}</td>
+        <td>
+          <form method="post" action="/ahp/experts/{{ r.id }}/delete"
+                onsubmit="return confirm('确定删除专家「{{ r.expert_name }}」的矩阵吗？');">
+            {{ form.hidden_tag() }}
+            <button type="submit" class="btn btn--sm btn--danger">删除</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <p class="actions" style="margin-bottom:10px;">
+    <a class="btn" href="/ahp/experts/aggregate?unit_type={{ unit_type }}&level={{ level }}{% if l1 %}&l1={{ l1 }}{% endif %}">
+      汇总计算（几何平均）
+    </a>
+  </p>
+  {% else %}
+  <p class="muted">尚未录入任何专家矩阵。请在下方录入第一位专家的判断矩阵。</p>
+  {% endif %}
+
+  <h3>录入一位专家的判断矩阵</h3>
+  <form method="post">
+    {{ form.hidden_tag() }}
+    <input type="hidden" name="action" value="add">
+    <input type="hidden" name="unit_type" value="{{ unit_type }}">
+    <input type="hidden" name="level" value="{{ level }}">
+    {% if l1 %}<input type="hidden" name="l1" value="{{ l1 }}">{% endif %}
+
+    <div class="field">
+      <label class="field__label" for="expert-name">专家姓名</label>
+      <input id="expert-name" type="text" name="expert_name"
+             style="width:220px;" placeholder="如：张工">
+    </div>
+
+    <table style="width:auto;">
+      <thead>
+        <tr>
+          <th></th>
+          {% for name in names %}<th scope="col">{{ name }}</th>{% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in range(n) %}
+        <tr>
+          <th scope="row">{{ names[i] }}</th>
+          {% for j in range(n) %}
+            {% if i == j %}
+            <td class="muted num">1</td>
+            {% elif i < j %}
+            <td>
+              <label class="muted" style="position:absolute;left:-9999px;"
+                     for="e-{{ i }}-{{ j }}">{{ names[i] }} 相对 {{ names[j] }} 的重要性</label>
+              <input id="e-{{ i }}-{{ j }}" type="number" step="0.01" min="0.01"
+                     name="m_{{ i }}_{{ j }}" value="{{ default[i][j] }}">
+            </td>
+            {% else %}
+            <td class="muted num">{{ default[i][j] }}</td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <p class="actions" style="margin-top:12px;">
+      <button type="submit" class="btn">录入该专家矩阵</button>
+      <a class="btn btn--ghost" href="/ahp/indicators">指标维护</a>
+      <a class="btn btn--ghost" href="/ahp/">返回权重计算</a>
+    </p>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}批量导入指标数据{% endblock %}
+{% block content %}
+<div class="card" style="max-width:860px;">
+  <h2>批量导入指标数据</h2>
+  <p class="muted">
+    支持 CSV 与 Excel（.xlsx/.xls）。文件每行对应一个微地质单元，
+    系统按「单元类型」匹配图斑内已划分的单元后写入数据。
+    先下载模板按格式填写，可减少出错。
+  </p>
+
+  <p class="actions" style="margin-bottom:14px;">
+    <a class="btn btn--sm btn--ghost" href="/indicator/import/template">下载导入模板（CSV）</a>
+    <a class="btn btn--sm btn--ghost" href="/indicator/">返回指标数据</a>
+  </p>
+
+  <form method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+
+    <div class="field">
+      <label class="field__label" for="patch-id">目标矿山图斑</label>
+      <select id="patch-id" name="patch_id" required>
+        <option value="">— 请选择 —</option>
+        {% for p in patches %}
+        <option value="{{ p.id }}">{{ p.name }}（{{ p.units.count() }} 个单元）</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="datafile">数据文件</label>
+      <input id="datafile" type="file" name="datafile"
+             accept=".csv,.xlsx,.xls" required>
+    </div>
+
+    <p class="actions" style="margin-top:16px;">
+      <button type="submit" class="btn">开始导入</button>
+    </p>
+  </form>
+
+  <h3>模板列说明</h3>
+  <p class="muted">
+    共 {{ headers|length }} 列。留空表示该指标「不适用」。
+    坡向须填「阳坡 / 阴阳坡 / 阴坡」之一。未检测的重金属留空即可
+    （按论文注释视为未受污染）。
+  </p>
+  <p class="mono muted" style="line-height:1.9;">{{ headers|join(" ， ") }}</p>
+
+  <h3>导入规则</h3>
+  <ul class="muted" style="padding-left:20px;line-height:1.9;">
+    <li>「单元类型」必须与图斑内已划分的单元一致，否则该行会被跳过并在结果中提示。</li>
+    <li>同一单元类型若在文件中出现多行，以最后一行为准。</li>
+    <li>已有数据的单元会被覆盖更新；没有数据的单元将新建记录。</li>
+    <li>数值列请填纯数字，不要带单位（如填 <span class="mono">10</span> 而非 <span class="mono">10cm</span>）。</li>
+  </ul>
+</div>
+
+{% if report %}
+<div class="card" style="max-width:860px;">
+  <h2>导入结果</h2>
+  <div class="stat-row">
+    <div>
+      <div class="stat__label">目标图斑</div>
+      <div style="font-size:15px;">{{ report.patch }}</div>
+    </div>
+    <div>
+      <div class="stat__label">成功导入</div>
+      <div class="stat__value ok">{{ report.saved }} 个单元</div>
+    </div>
+    <div>
+      <div class="stat__label">问题行</div>
+      <div class="stat__value {% if report.errors %}warn{% endif %}">{{ report.errors|length }}</div>
+    </div>
+  </div>
+
+  {% if report.errors %}
+  <h3>未导入的行</h3>
+  <ul class="muted" style="padding-left:20px;line-height:1.9;">
+    {% for e in report.errors %}<li>{{ e }}</li>{% endfor %}
+  </ul>
+  {% else %}
+  <p class="ok" style="margin-top:12px;">全部数据行均已成功导入。</p>
+  {% endif %}
+
+  <p class="actions" style="margin-top:16px;">
+    <a class="btn btn--ghost" href="/indicator/">查看指标数据</a>
+  </p>
+</div>
+{% endif %}
+{% endblock %}

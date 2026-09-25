@@ -52,7 +52,7 @@ def index():
 
 @bp.route("/<int:patch_id>", methods=["GET", "POST"])
 def run(patch_id):
-    patch = MinePatch.query.get_or_404(patch_id)
+    patch = db.get_or_404(MinePatch, patch_id)
     form = EmptyForm()
     result = None
 
@@ -84,8 +84,8 @@ def run(patch_id):
 
 @bp.route("/result/<int:result_id>")
 def result(result_id):
-    r = EvaluationResult.query.get_or_404(result_id)
-    patch = MinePatch.query.get(r.patch_id)
+    r = db.get_or_404(EvaluationResult, result_id)
+    patch = db.session.get(MinePatch, r.patch_id)
     import json
     unit_scores = json.loads(r.unit_scores) if r.unit_scores else []
     return render_template("evaluate/result.html", r=r, patch=patch,

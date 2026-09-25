@@ -20,9 +20,21 @@
   </div>
 
   <p class="actions" style="margin-top:16px;">
-    <a class="btn" href="/report/{{ patch.id }}/word">导出 Word 报告</a>
+    <a class="btn" href="/report/{{ patch.id }}/pdf">导出 PDF 报告</a>
+    <a class="btn btn--ghost" href="/report/{{ patch.id }}/word">导出 Word 报告</a>
     <a class="btn btn--ghost" href="/report/">返回</a>
   </p>
+</div>
+
+<div class="card">
+  <h2>结果图表</h2>
+
+  <h3>各微地质单元得分对比</h3>
+  <div>{{ chart_units|safe }}</div>
+
+  <h3>各一级指标平均得分</h3>
+  <p class="muted">反映各一级指标对评价结果的实际影响，便于识别关键控制项。</p>
+  <div>{{ chart_weight|safe }}</div>
 </div>
 
 {% for u in result.unit_results %}

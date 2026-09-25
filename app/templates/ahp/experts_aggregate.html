@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}多专家矩阵汇总{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>多专家矩阵汇总 · {{ unit_type }} · {% if level == 1 %}一级指标{% else %}二级指标（{{ l1 }}）{% endif %}</h2>
+  <p class="muted">
+    对各位专家的判断矩阵按对应元素取几何平均：
+    a<sub>ij</sub> = (a<sub>ij</sub><sup>(1)</sup> × … × a<sub>ij</sub><sup>(k)</sup>)<sup>1/k</sup>。
+    该方式可保持矩阵的互反性，汇总后重新计算权重与一致性比例。
+  </p>
+
+  {% if not result %}
+  <p class="muted">
+    该范围内尚未录入专家矩阵。
+    <a href="/ahp/experts?unit_type={{ unit_type }}&level={{ level }}{% if l1 %}&l1={{ l1 }}{% endif %}">去录入</a>
+  </p>
+  {% else %}
+  <div class="stat-row">
+    <div>
+      <div class="stat__label">参与汇总的专家</div>
+      <div class="stat__value">{{ result.count }} 位</div>
+    </div>
+    <div>
+      <div class="stat__label">λmax</div>
+      <div class="stat__value mono">{{ result.lambda_max }}</div>
+    </div>
+    <div>
+      <div class="stat__label">CI</div>
+      <div class="stat__value mono">{{ "%.4f"|format(result.ci) }}</div>
+    </div>
+    <div>
+      <div class="stat__label">CR（要求 &lt; 0.1）</div>
+      <div class="stat__value mono">{{ "%.4f"|format(result.cr) }}</div>
+    </div>
+    <div>
+      <div class="stat__label">一致性检验</div>
+      <div class="stat__value">
+        {% if result.consistent %}<span class="ok">通过</span>
+        {% else %}<span class="warn">不通过</span>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <h3>汇总后权重</h3>
+  <table style="width:auto;">
+    <thead>
+      <tr>
+        <th scope="col">指标</th>
+        {% for name in names %}<th scope="col">{{ name }}</th>{% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">权重</th>
+        {% for w in result.weights %}<td class="mono">{{ w }}</td>{% endfor %}
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>各专家矩阵的一致性</h3>
+  <table style="width:auto;">
+    <thead>
+      <tr><th scope="col">专家</th><th scope="col">该矩阵 CR</th><th scope="col">判定</th></tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r.expert_name }}</td>
+        <td class="mono">{{ "%.4f"|format(r.cr) if r.cr is not none else "—" }}</td>
+        <td>
+          {% if r.cr is not none and r.cr < 0.1 %}<span class="ok">通过</span>
+          {% else %}<span class="warn">不通过</span>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if not result.consistent and result.most_inconsistent %}
+  <p style="padding:12px;border-radius:6px;background:var(--danger-soft);
+            border-left:4px solid var(--danger);">
+    <strong class="warn">汇总矩阵一致性不通过，建议优先调整：</strong>
+    第 {{ result.most_inconsistent.i + 1 }} 行、第 {{ result.most_inconsistent.j + 1 }} 列的比较
+    （当前 <span class="mono">{{ result.most_inconsistent.value|round(3) }}</span>，
+    理想约 <span class="mono">{{ result.most_inconsistent.expected|round(3) }}</span>）。
+    该偏差通常来自个别专家打分，可先核对一致性较差的专家矩阵。
+  </p>
+  {% endif %}
+  {% endif %}
+
+  <p class="actions" style="margin-top:16px;">
+    <a class="btn btn--ghost" href="/ahp/experts?unit_type={{ unit_type }}&level={{ level }}{% if l1 %}&l1={{ l1 }}{% endif %}">返回录入</a>
+    <a class="btn btn--ghost" href="/ahp/">返回权重计算</a>
+  </p>
+</div>
+{% endblock %}

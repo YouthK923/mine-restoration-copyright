@@ -23,7 +23,7 @@ def recalc_ratio(patch_id):
 @bp.route("/<int:patch_id>")
 @login_required
 def index(patch_id):
-    patch = MinePatch.query.get_or_404(patch_id)
+    patch = db.get_or_404(MinePatch, patch_id)
     units = MicroUnit.query.filter_by(patch_id=patch_id).all()
     total = sum(u.area or 0.0 for u in units)
     ratio_sum = sum(u.ratio or 0.0 for u in units)
@@ -35,7 +35,7 @@ def index(patch_id):
 @bp.route("/<int:patch_id>/add", methods=["POST"])
 @login_required
 def add(patch_id):
-    patch = MinePatch.query.get_or_404(patch_id)
+    patch = db.get_or_404(MinePatch, patch_id)
     form = EmptyForm()
     if form.validate_on_submit():
         unit_type = request.form.get("unit_type")
@@ -55,7 +55,7 @@ def add(patch_id):
 @login_required
 def edit(unit_id):
     """单个微地质单元的编辑页。"""
-    u = MicroUnit.query.get_or_404(unit_id)
+    u = db.get_or_404(MicroUnit, unit_id)
     form = EmptyForm()
     if request.method == "POST" and form.validate_on_submit():
         u.unit_type = request.form.get("unit_type", u.unit_type)
@@ -73,7 +73,7 @@ def edit(unit_id):
 @bp.route("/delete/<int:unit_id>", methods=["POST"])
 @login_required
 def delete(unit_id):
-    u = MicroUnit.query.get_or_404(unit_id)
+    u = db.get_or_404(MicroUnit, unit_id)
     pid = u.patch_id
     name = u.unit_type
     # 一并删除该单元的指标数据，避免残留

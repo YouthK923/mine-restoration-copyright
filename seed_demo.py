@@ -203,6 +203,10 @@ def seed():
         print("  管理员账号：admin / admin123")
 
         seed_standards()
+        # 指标定义（M6 指标体系维护）
+        from app.services.indicator_service import seed_indicators
+        n = seed_indicators()
+        print("已写入指标定义：%d 项" % n)
 
 
 def seed_standards():

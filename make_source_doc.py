@@ -113,6 +113,7 @@ SOURCE_ORDER = [
     "test_web_evaluate.py",
     "test_web_report.py",
     "test_ui_fixes.py",
+    "test_new_features.py",
 ]
 
 
@@ -144,9 +145,27 @@ def wrap_line(line):
 
 
 def collect_lines():
-    """收集全部源码行（去除空行，保证每页均为有效行）。"""
+    """收集全部源码行（去除空行，保证每页均为有效行）。
+
+    SOURCE_ORDER 决定文件顺序；未被列出的 .py/.html 自动补在末尾，
+    避免新增文件漏收（漏收会导致材料与实际代码不一致）。
+    """
+    listed = [p for p in SOURCE_ORDER if os.path.exists(os.path.join(BASE, p))]
+    seen = set(listed)
+    extra = []
+    # 只在 app/ 下自动补齐：根目录多为文档生成与核对工具，不属于软件本体，
+    # 需要收录的根目录脚本已在 SOURCE_ORDER 中显式列出。
+    for root, dirs, files in os.walk(os.path.join(BASE, "app")):
+        dirs[:] = [d for d in dirs if d != "__pycache__"]
+        for f in sorted(files):
+            if not f.endswith((".py", ".html")):
+                continue
+            rel = os.path.relpath(os.path.join(root, f), BASE).replace("\\", "/")
+            if rel not in seen:
+                extra.append(rel); seen.add(rel)
+
     lines = []
-    for rel in SOURCE_ORDER:
+    for rel in listed + sorted(extra):
         path = os.path.join(BASE, rel)
         if not os.path.exists(path):
             print("  [警告] 文件不存在，跳过:", rel)

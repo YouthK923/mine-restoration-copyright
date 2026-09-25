@@ -21,7 +21,8 @@
         <td style="text-align:left;">{{ p.name }}</td>
         <td class="nowrap">
           <a href="/report/{{ p.id }}">查看得分明细</a>
-          &nbsp;|&nbsp;<a href="/report/{{ p.id }}/word">导出 Word 报告</a>
+          &nbsp;|&nbsp;<a href="/report/{{ p.id }}/pdf">导出 PDF</a>
+          &nbsp;|&nbsp;<a href="/report/{{ p.id }}/word">导出 Word</a>
         </td>
       </tr>
       {% endfor %}
