@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""M5 微地质单元管理 —— 岩质边坡 / 碎石边坡 / 平台的划分与面积占比。"""
+"""微地质单元管理 —— 岩质边坡 / 碎石边坡 / 平台的划分与面积占比。"""
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required
 
@@ -55,6 +55,16 @@ def add(patch_id):
     form = EmptyForm()
     if form.validate_on_submit():
         unit_type = request.form.get("unit_type")
+        if unit_type not in UNIT_TYPES:
+            flash("微地质单元类型不正确", "error")
+            return redirect(url_for("unit.index", patch_id=patch_id))
+        # 论文 4.1 节将图斑分为平台、碎石边坡、岩质边坡三类，每类至多一个。
+        # 允许重复会让面积占比与按单元类型组织的指标数据对不上号。
+        if MicroUnit.query.filter_by(patch_id=patch.id,
+                                     unit_type=unit_type).first():
+            flash("该图斑已存在「%s」，同一类型只能划分一个" % unit_type, "error")
+            return redirect(url_for("unit.index", patch_id=patch_id))
+
         area = request.form.get("area", "").strip()
         u = MicroUnit(patch_id=patch.id, unit_type=unit_type,
                       area=float(area) if area else None,
@@ -74,7 +84,18 @@ def edit(unit_id):
     u = db.get_or_404(MicroUnit, unit_id)
     form = EmptyForm()
     if request.method == "POST" and form.validate_on_submit():
-        u.unit_type = request.form.get("unit_type", u.unit_type)
+        new_type = request.form.get("unit_type", u.unit_type)
+        if new_type not in UNIT_TYPES:
+            flash("微地质单元类型不正确", "error")
+            return redirect(url_for("unit.edit", unit_id=u.id))
+        # 改类型时同样不允许与本图斑已有的其他单元重复
+        dup = MicroUnit.query.filter_by(patch_id=u.patch_id,
+                                        unit_type=new_type).first()
+        if dup is not None and dup.id != u.id:
+            flash("该图斑已存在「%s」，同一类型只能划分一个" % new_type, "error")
+            return redirect(url_for("unit.edit", unit_id=u.id))
+
+        u.unit_type = new_type
         area = request.form.get("area", "").strip()
         u.area = float(area) if area else None
         u.description = request.form.get("description", "").strip() or None

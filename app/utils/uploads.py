@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""上传文件处理（M2 遥感影像、M7 批量导入）。"""
+"""上传文件处理（遥感影像、批量导入）。"""
 import os
 import re
 import uuid

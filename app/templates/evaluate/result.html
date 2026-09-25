@@ -21,13 +21,14 @@
 
   {% if unit_scores %}
   <h3>各微地质单元得分</h3>
-  <table style="max-width:720px;">
+  <table style="max-width:860px;">
     <thead>
       <tr>
         <th scope="col">微地质单元</th>
         <th scope="col">面积占比</th>
         <th scope="col">单元评价因子 F′</th>
         <th scope="col">加权贡献</th>
+        <th scope="col">权重来源</th>
       </tr>
     </thead>
     <tbody>
@@ -37,6 +38,7 @@
         <td class="num">{{ "%.2f%%"|format(u.ratio * 100) }}</td>
         <td class="mono">{{ u.unit_score }}</td>
         <td class="mono">{{ "%.4f"|format(u.ratio * u.unit_score) }}</td>
+        <td class="muted">{{ u.weight_source or "论文表 3 默认权重" }}</td>
       </tr>
       {% endfor %}
     </tbody>

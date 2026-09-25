@@ -46,10 +46,19 @@
     </table>
 
     <p class="actions">
-      <button type="submit" class="btn">计算权重</button>
+      <button type="submit" class="btn" name="action" value="calc">计算权重</button>
+      {% if result and result.consistent %}
+      <button type="submit" class="btn" name="action" value="save">保存并生效</button>
+      {% endif %}
       <a class="btn btn--ghost" href="/ahp/">重新选择</a>
     </p>
   </form>
+
+  <p class="muted" style="margin-top:10px;">
+    当前「{{ unit_type }}」生效权重：<strong>{{ source_label }}</strong>。
+    点击「保存并生效」后，本单元类型的适宜性评价将采用此处算出的权重；
+    如需回到论文取值，可在 <a href="/ahp/">权重首页</a> 恢复默认。
+  </p>
 
   {% if result %}
   <hr style="margin:22px 0;border:none;border-top:1px solid var(--line);">

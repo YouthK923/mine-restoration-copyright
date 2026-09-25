@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""M2 项目与矿山档案 —— 项目、图斑、参照生态系统、遥感影像挂接。"""
+"""项目与矿山档案 —— 项目、图斑、参照生态系统、遥感影像挂接。"""
 from datetime import datetime
 
 from flask import (Blueprint, render_template, request, redirect, url_for,

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_macros.html" import patch_guide %}
 {% block title %}指标数据采集{% endblock %}
 {% block content %}
 <div class="card">
@@ -12,14 +13,20 @@
     <a class="btn btn--sm" href="/indicator/import">批量导入（CSV / Excel）</a>
   </p>
 
+  {{ patch_guide(projects_without_patch) }}
+
   {% if not patches %}
   <p class="muted">
-    暂无矿山图斑。请先在「项目与档案」中建立图斑，
+    暂无矿山图斑。请先在「项目与矿山档案」中建立图斑，
     或运行 <span class="mono">python seed_demo.py</span> 载入论文案例。
   </p>
   {% else %}
   {% for p in patches %}
-  <h3>{{ p.name }}</h3>
+  <h3>{{ p.name }}
+    <span class="muted" style="font-weight:normal;font-size:0.85em;">
+      所属项目：{{ p.project.name if p.project else "—" }}
+    </span>
+  </h3>
   {% if not p.units.count() %}
   <p class="muted">该图斑尚未划分微地质单元，请先到「微地质单元」页面划分。</p>
   {% else %}

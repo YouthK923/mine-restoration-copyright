@@ -9,7 +9,9 @@ echo   Mine Restoration Suitability Evaluation System  V1.0
 echo ============================================================
 echo.
 
-echo [1/2] Loading demo data ...
+echo [1/2] Preparing demo data ...
+echo.
+echo   (idempotent; your own projects and patches are never deleted)
 echo.
 python seed_demo.py
 if errorlevel 1 (

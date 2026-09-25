@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""M1–M5 模块自检：登录、项目档案、微地质单元、标准库、限制性判定。"""
+"""模块自检：登录、项目档案、微地质单元、标准库、限制性判定。"""
 import os
 import sys
 sys.stdout.reconfigure(encoding="utf-8")
@@ -40,7 +40,7 @@ assert "系统功能" in body
 
 print()
 print(LINE)
-print("测试 3  M2 项目与矿山档案")
+print("测试 3  项目与矿山档案")
 print(LINE)
 r = client.get("/project/")
 body = r.get_data(as_text=True)
@@ -64,7 +64,7 @@ print("  已清理测试项目")
 
 print()
 print(LINE)
-print("测试 4  M5 微地质单元（面积占比自动计算）")
+print("测试 4  微地质单元（面积占比自动计算）")
 print(LINE)
 from app.models import MinePatch
 with app.app_context():
@@ -78,7 +78,7 @@ assert "岩质边坡" in body and "占比合计" in body
 
 print()
 print(LINE)
-print("测试 5  M3 标准知识库与省际口径比对")
+print("测试 5  标准知识库与省际口径比对")
 print(LINE)
 r = client.get("/standard/")
 body = r.get_data(as_text=True)
@@ -93,7 +93,7 @@ assert "植被覆盖度" in body
 
 print()
 print(LINE)
-print("测试 6  M4 限制性指标判定（一票否决）")
+print("测试 6  限制性指标判定（一票否决）")
 print(LINE)
 r = client.get("/constraint/%d" % pid)
 body = r.get_data(as_text=True)
@@ -128,5 +128,5 @@ print("  已恢复为全部通过:", "可进入定量评价" in r.get_data(as_te
 
 print()
 print(LINE)
-print("M1–M5 全部测试通过 ✓")
+print("全部测试通过 ✓")
 print(LINE)

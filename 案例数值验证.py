@@ -14,7 +14,7 @@
     - 表 5  典型矿山调查及适宜性评价结果
     - 4.2.2 式(8)   指标标准化方法与理想极值
     - 4.2.2 式(9)   微地质单元评价因子与面积加权合成
-    - 第 5 节        三类微地质单元面积占比
+    - 第 5 节 三类微地质单元面积占比
 
 运行
     python 案例数值验证.py
@@ -157,7 +157,7 @@ def pollution_score(d):
 
 def check_weighted_total():
     print(LINE)
-    print("核对一  三个单元得分按面积占比加权，是否等于论文最终得分")
+    print("核对一 三个单元得分按面积占比加权，是否等于论文最终得分")
     print(LINE)
     print("  公式（论文 4.2.2 式(9) 后半段）：  F = Σ ( Sᵢ × F′ᵢ )")
     print("  Sᵢ 为第 i 类微地质单元面积占比，F′ᵢ 为该单元评价因子")
@@ -289,7 +289,7 @@ def print_unit_table(u, r):
 def check_unit_reproducible(res):
     print()
     print(LINE)
-    print("核对二  由论文表 5 原始数据，按式(8)+式(9) 能否复现三个单元得分")
+    print("核对二 由论文表 5 原始数据，按式(8)+式(9) 能否复现三个单元得分")
     print(LINE)
     for u in UNITS:
         print_unit_table(u, res[u])
@@ -372,7 +372,7 @@ def ahp_weight(A):
 def check_ahp():
     print()
     print(LINE)
-    print("核对三  论文表 3 的权重能否由 AHP 判断矩阵还原")
+    print("核对三 论文表 3 的权重能否由 AHP 判断矩阵还原")
     print(LINE)
     print("  原理：若判断矩阵完全一致，则 a_ij = w_i / w_j，权重向量即其主特征向量。")
     print("        因此给定任意权重向量，都可构造出与之相容的判断矩阵。")
@@ -418,7 +418,7 @@ def check_ahp():
 def main():
     print()
     print(LINE)
-    print("  历史遗留废弃矿山自然恢复适宜性评价  论文案例数值验证")
+    print("  历史遗留废弃矿山自然恢复适宜性评价 论文案例数值验证")
     print("  案例：河北省唐山市玉田县孤树镇历史遗留白云岩采石场")
     print(LINE)
 

@@ -81,9 +81,23 @@ def create_app(config_class=Config):
             {"title": "评价流程", "links": flow},
             {"title": "系统管理", "links": admin},
         ]
-        return {"nav_groups": groups, "home_active": path == "/"}
 
-    # 操作审计：统一在响应阶段记录成功的写操作（M1 操作日志）
+        # 层级引导用：项目是归档单位，图斑才是评价对象。
+        # 下游各页面按图斑组织数据，因此需要提示「哪些项目下还没有图斑」。
+        counts = {"project_count": 0, "patch_count": 0,
+                  "projects_without_patch": []}
+        if current_user.is_authenticated:
+            from app.models import Project, MinePatch
+            projects = Project.query.order_by(Project.id).all()
+            counts["project_count"] = len(projects)
+            counts["patch_count"] = MinePatch.query.count()
+            counts["projects_without_patch"] = [
+                p for p in projects if p.patches.count() == 0]
+        counts["nav_groups"] = groups
+        counts["home_active"] = path == "/"
+        return counts
+
+    # 操作审计：统一在响应阶段记录成功的写操作（操作日志）
     from app.services import audit
 
     @app.after_request

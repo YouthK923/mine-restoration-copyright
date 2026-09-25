@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""M6 AHP 网页界面自检：走通选择→录入→计算 全流程。"""
+"""AHP 网页界面自检：走通选择→录入→计算 全流程。"""
 import sys
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -88,5 +88,5 @@ assert "建议优先调整" in body
 
 print()
 print(LINE)
-print("M6 网页界面全部测试通过 ✓")
+print("网页界面全部测试通过 ✓")
 print(LINE)

@@ -89,8 +89,23 @@
   {% endif %}
 
   <p class="actions" style="margin-top:16px;">
+    <form method="post"
+          action="/ahp/experts?unit_type={{ unit_type }}&level={{ level }}{% if l1 %}&l1={{ l1 }}{% endif %}"
+          style="display:inline;"
+          onsubmit="return confirm('保存后，「{{ unit_type }}」的适宜性评价将改用这组汇总权重计算。确定继续吗？');">
+      {{ form.hidden_tag() }}
+      <input type="hidden" name="action" value="save_agg">
+      <button type="submit" class="btn" {% if not result.consistent %}disabled{% endif %}>
+        保存为生效权重
+      </button>
+    </form>
     <a class="btn btn--ghost" href="/ahp/experts?unit_type={{ unit_type }}&level={{ level }}{% if l1 %}&l1={{ l1 }}{% endif %}">返回录入</a>
     <a class="btn btn--ghost" href="/ahp/">返回权重计算</a>
   </p>
+  {% if not result.consistent %}
+  <p class="muted" style="margin-top:8px;">
+    汇总矩阵一致性未通过，暂不能保存为生效权重。
+  </p>
+  {% endif %}
 </div>
 {% endblock %}

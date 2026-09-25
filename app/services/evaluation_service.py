@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""适宜性评价引擎（M8）。
+"""适宜性评价引擎。
 
 按论文式(9) 实现：
 - 单元级：F' = Σ（二级指标权重 × 该二级指标下三级指标标准化值）
@@ -48,11 +48,19 @@ def score_unit(unit_type, data, weights=None):
             })
         l1_scores[l1_name] = acc / wsum if wsum > 0 else 0.0
 
-    unit_score = sum(l1_weights[k] * l1_scores[k] for k in l1_scores)
+    # 一级指标权重按实际参与计算的指标归一化。
+    # 论文表 3 的权重本身已归一（和为 1），此处为恒等变换；
+    # 若某层指标缺失或自定义权重不完整，可避免单元得分被整体压低。
+    lw_sum = sum(l1_weights[k] for k in l1_scores if k in l1_weights)
+    if lw_sum > 0:
+        unit_score = sum(l1_weights[k] * l1_scores[k]
+                         for k in l1_scores if k in l1_weights) / lw_sum
+    else:
+        unit_score = 0.0
     return {"l1_scores": l1_scores, "unit_score": unit_score, "details": details}
 
 
-def score_mine(units):
+def score_mine(units, weights_map=None):
     """计算整个矿山的评价因子 F 与适宜性等级。
 
     参数
@@ -60,15 +68,20 @@ def score_mine(units):
     units : list[dict]，每个元素：
         {unit_type, ratio, data}
         ratio 为该单元面积占比（0~1），data 为实测数据 dict。
+    weights_map : dict，{单元类型: 权重结构}。未提供的单元类型
+        使用论文表 3 的默认权重。权重可来自 AHP 计算并经
+        weight_service 保存生效，从而真正参与评价。
 
     返回
     ----
     dict：{ final_score, grade, grade_info, unit_results }
     """
+    weights_map = weights_map or {}
     total = 0.0
     unit_results = []
     for u in units:
-        r = score_unit(u["unit_type"], u["data"])
+        r = score_unit(u["unit_type"], u["data"],
+                       weights_map.get(u["unit_type"]))
         weighted = u["ratio"] * r["unit_score"]
         total += weighted
         unit_results.append({

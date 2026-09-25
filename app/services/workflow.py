@@ -1,15 +1,21 @@
 # -*- coding: utf-8 -*-
-"""评价流程前置条件（M8/M9 的流程门禁）。
+"""评价流程前置条件（定量评价与报告输出的流程门禁）。
 
 论文 4.1 节确定的评价流程存在严格的先后关系：
-    建立图斑 → 划分微地质单元 → 限制性条件判定（通过）
-    → 录入指标数据 → 计算评价因子并判定等级 → 输出报告
+    建立图斑 → 限制性条件判定（通过） → 划分微地质单元并计算面积占比
+    → 逐单元录入指标数据 → 计算评价因子并判定等级 → 输出报告
+
+论文原文：「先进行政策、位置约束地质灾害判断……对于满足限制性条件的
+废弃矿山，按照地形地貌划分，将其划分为平台、碎石边坡和岩质边坡三种
+地质微单元类型，并计算各种地形面积占比。」限制性条件判定（一票否决）
+在前，微地质单元划分在后，顺序不可颠倒。
 
 本模块把该顺序固化为可检查的状态。后续模块在入口处调用它，
 前置步骤未完成时直接拦截并给出「缺什么、去哪补」的提示，
 避免在条件不具备时产出看似合理的评价结论。
 """
-from app.models import (db, MicroUnit, IndicatorData, ConstraintCheck)
+from app.models import (db, MicroUnit, IndicatorData, ConstraintCheck,
+                        EvaluationResult)
 
 # 指标数据非空字段（用于判断某单元是否已录入数据）
 DATA_FIELDS = ("soil_ratio", "thickness", "ph", "organic_matter",
@@ -81,20 +87,8 @@ def patch_progress(patch_id):
     if units and not ratio_ok:
         units_step["detail"] += "（占比合计不等于 100%，请检查面积录入）"
 
-    # ---- 汇总未满足的前置条件（按流程顺序） ----
+    # ---- 汇总未满足的前置条件（按论文 4.1 节的流程顺序：限制性判定优先） ----
     blocking = []
-    if not units_step["done"]:
-        blocking.append({
-            "step": "units", "label": "划分微地质单元",
-            "reason": "该图斑尚未划分微地质单元，无法确定各单元的面积权重。",
-            "fix_url": "/unit/%d" % patch_id, "fix_label": "去划分微地质单元",
-        })
-    elif not ratio_ok:
-        blocking.append({
-            "step": "units", "label": "补齐单元面积",
-            "reason": "各微地质单元面积占比合计不等于 100%，加权结果会失真。",
-            "fix_url": "/unit/%d" % patch_id, "fix_label": "去核对单元面积",
-        })
     if not constraint_step["done"]:
         blocking.append({
             "step": "constraint", "label": "执行限制性条件判定",
@@ -108,6 +102,18 @@ def patch_progress(patch_id):
             "reason": "限制性条件判定未通过。按论文流程，此类矿山应直接判定为"
                       "「人工辅助或生态重建」，不进入定量评价。",
             "fix_url": "/constraint/%d" % patch_id, "fix_label": "去复核判定结果",
+        })
+    if not units_step["done"]:
+        blocking.append({
+            "step": "units", "label": "划分微地质单元",
+            "reason": "该图斑尚未划分微地质单元，无法确定各单元的面积权重。",
+            "fix_url": "/unit/%d" % patch_id, "fix_label": "去划分微地质单元",
+        })
+    elif not ratio_ok:
+        blocking.append({
+            "step": "units", "label": "补齐单元面积",
+            "reason": "各微地质单元面积占比合计不等于 100%，加权结果会失真。",
+            "fix_url": "/unit/%d" % patch_id, "fix_label": "去核对单元面积",
         })
     if units_step["done"] and not data_step["ready"]:
         blocking.append({
@@ -123,4 +129,40 @@ def patch_progress(patch_id):
         "data": data_step,
         "blocking": blocking,
         "ready": not blocking,
+    }
+
+
+def latest_result(patch_id):
+    """取该图斑最近一次的评价记录。"""
+    return EvaluationResult.query.filter_by(patch_id=patch_id) \
+        .order_by(EvaluationResult.id.desc()).first()
+
+
+def report_progress(patch_id):
+    """报告输出的前置条件：评价流程齐备，且已有评价记录。
+
+    报告本质上是评价结论的呈现，因此必须先真实执行过定量评价，
+    导出时读取已保存的评价结果，而不是在导出环节重新计算。
+    否则评价完成后再修改指标数据，报告会与系统记录的评价结论不一致，
+    同一份评价出现两个数字，结论无法追溯。
+
+    返回 dict：{ready, blocking, result, flow}
+        result 为最近一次评价记录（EvaluationResult），无记录时为空。
+    """
+    flow = patch_progress(patch_id)
+    blocking = list(flow["blocking"])
+    record = latest_result(patch_id)
+    if not blocking and record is None:
+        blocking.append({
+            "step": "evaluate", "label": "执行适宜性评价",
+            "reason": "该图斑尚无评价记录。报告是评价结论的呈现，"
+                      "需先执行定量评价后才能生成。",
+            "fix_url": "/evaluate/%d" % patch_id,
+            "fix_label": "去执行适宜性评价",
+        })
+    return {
+        "ready": not blocking,
+        "blocking": blocking,
+        "result": record,
+        "flow": flow,
     }

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-"""补齐模块自检：M1 操作日志与用户维护、M2 遥感影像、M6 指标与多专家矩阵、
-M7 批量导入、M9 图表与 PDF 导出。
+"""补齐模块自检：操作日志与用户维护、遥感影像、指标与多专家矩阵、
+批量导入、图表与 PDF 导出。
 
 对应计划书功能清单与系统实现的差异核对结论。
 """
@@ -53,7 +53,7 @@ def ok(flag, label, extra=""):
 
 # ---------------------------------------------------------------------------
 print(LINE)
-print("M1 操作日志与用户维护")
+print("操作日志与用户维护")
 print(LINE)
 before = None
 with app.app_context():
@@ -100,7 +100,7 @@ with app.app_context():
 # ---------------------------------------------------------------------------
 print()
 print(LINE)
-print("M2 遥感影像挂接")
+print("遥感影像挂接")
 print(LINE)
 doc = fitz.open()
 pg = doc.new_page(width=320, height=200)
@@ -133,7 +133,7 @@ ok(not os.path.isfile(abs_path), "影像文件已删除")
 # ---------------------------------------------------------------------------
 print()
 print(LINE)
-print("M6 指标定义维护与多专家矩阵")
+print("指标定义维护与多专家矩阵")
 print(LINE)
 r = c.get("/ahp/indicators")
 body = r.get_data(as_text=True)
@@ -178,7 +178,7 @@ ok(abs(float(vals[0]) - 0.44) < 0.02, "汇总权重接近论文表 3 取值", va
 # ---------------------------------------------------------------------------
 print()
 print(LINE)
-print("M7 批量导入")
+print("批量导入")
 print(LINE)
 r = c.get("/indicator/import/template")
 tpl = r.data.decode("utf-8-sig")
@@ -213,7 +213,7 @@ ok("仅支持" in r.get_data(as_text=True), "拒绝不支持的导入格式")
 # ---------------------------------------------------------------------------
 print()
 print(LINE)
-print("M9 图表与 PDF 导出")
+print("图表与 PDF 导出")
 print(LINE)
 svg = charts.hbars([("岩质边坡", 0.54, "0.5401"), ("平台", 0.84, "0.8376")])
 ok("<svg" in svg and "0.8376" in svg, "条形图生成且带数值标签")

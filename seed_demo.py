@@ -2,7 +2,9 @@
 """内置玉田县案例：把论文第 5 节案例数据写入数据库。
 
 用于功能验证与操作演示。数据逐字取自论文表 5 与第 5 节。
-运行：python seed_demo.py（幂等：已存在则先清空重建）
+运行：python seed_demo.py            幂等，只补写缺失的演示数据，
+                                     不会删除用户自建的项目与图斑
+      python seed_demo.py --reset    连同标准库与指标定义一并重建
 """
 import json
 import sys
@@ -11,9 +13,12 @@ sys.stdout.reconfigure(encoding="utf-8")
 from app import create_app
 from app.models import (db, User, Project, MinePatch, ReferenceEcosystem,
                         MicroUnit, IndicatorData, Standard, StandardRule,
-                        ConstraintCheck)
+                        ConstraintCheck, EvaluationResult, ScoreDetail)
 
 app = create_app()
+
+# 内置演示案例的项目编号，用于区分「演示数据」与「用户自建数据」
+DEMO_CODE = "DEMO-001"
 
 # 论文表 1：11 项地方标准与政策文件
 STANDARDS = [
@@ -127,27 +132,86 @@ CASE = {
 }
 
 
-def clean_case():
-    """清空案例相关数据（幂等重跑用）。
+def clean_case(reset=False):
+    """清理数据。
 
-    indicator_data / score_details 等表未设级联删除，需显式清理。
+    默认只清理内置演示案例（code = DEMO-001）自身的数据，**不触碰
+    用户自己建立的项目与图斑**。加 --reset 时才额外清空标准库与指标定义，
+    以便把演示环境恢复到初始状态。
+
+    注意：不要在此处执行 Project.query.delete()，否则用户新建的项目
+    会在每次启动时被删除。
     """
     from app.models import EvaluationResult, ScoreDetail, ConstraintCheck
-    ScoreDetail.query.delete()
-    EvaluationResult.query.delete()
-    ConstraintCheck.query.delete()
-    IndicatorData.query.delete()
-    MicroUnit.query.delete()
-    ReferenceEcosystem.query.delete()
-    MinePatch.query.delete()
-    Project.query.delete()
+
+    demo_projects = Project.query.filter_by(code=DEMO_CODE).all()
+    demo_ids = [p.id for p in demo_projects]
+    patch_ids = []
+    if demo_ids:
+        patch_ids = [p.id for p in MinePatch.query.filter(
+            MinePatch.project_id.in_(demo_ids)).all()]
+
+    if patch_ids:
+        unit_ids = [u.id for u in MicroUnit.query.filter(
+            MicroUnit.patch_id.in_(patch_ids)).all()]
+        if unit_ids:
+            IndicatorData.query.filter(
+                IndicatorData.unit_id.in_(unit_ids)).delete(
+                synchronize_session=False)
+        result_ids = [r.id for r in EvaluationResult.query.filter(
+            EvaluationResult.patch_id.in_(patch_ids)).all()]
+        if result_ids:
+            ScoreDetail.query.filter(
+                ScoreDetail.result_id.in_(result_ids)).delete(
+                synchronize_session=False)
+        EvaluationResult.query.filter(
+            EvaluationResult.patch_id.in_(patch_ids)).delete(
+            synchronize_session=False)
+        ConstraintCheck.query.filter(
+            ConstraintCheck.patch_id.in_(patch_ids)).delete(
+            synchronize_session=False)
+        ReferenceEcosystem.query.filter(
+            ReferenceEcosystem.patch_id.in_(patch_ids)).delete(
+            synchronize_session=False)
+        MicroUnit.query.filter(MicroUnit.patch_id.in_(patch_ids)).delete(
+            synchronize_session=False)
+        MinePatch.query.filter(MinePatch.id.in_(patch_ids)).delete(
+            synchronize_session=False)
+
+    if demo_ids:
+        Project.query.filter(Project.id.in_(demo_ids)).delete(
+            synchronize_session=False)
+
+    if reset:
+        StandardRule.query.delete()
+        Standard.query.delete()
+
+    # 兜底：清理指向已不存在评价记录的孤儿得分明细，
+    # 避免长期运行后 score_details 表堆积无效数据。
+    _purge_orphan_details()
+
+    db.session.commit()
+    return len(demo_ids)
+
+
+def _purge_orphan_details():
+    """清理指向已不存在评价记录的孤儿得分明细。
+
+    长期运行后 score_details 表可能堆积无效明细，启动时顺带清一次。
+    """
+    live_ids = [r.id for r in EvaluationResult.query.all()]
+    if live_ids:
+        ScoreDetail.query.filter(~ScoreDetail.result_id.in_(live_ids)).delete(
+            synchronize_session=False)
+    else:
+        ScoreDetail.query.delete()
     db.session.commit()
 
 
-def seed():
+def seed(reset=False):
     with app.app_context():
         db.create_all()      # 全新环境下先建表，保证本脚本可独立运行
-        clean_case()
+        _purge_orphan_details()
 
         admin = User.query.filter_by(username="admin").first()
         if not admin:
@@ -158,7 +222,17 @@ def seed():
             db.session.add(admin)
             db.session.commit()
 
-        project = Project(name=CASE["name"], code="DEMO-001",
+        # 幂等：演示案例已存在就不重复写入，更不清空用户自己的项目
+        existing = Project.query.filter_by(code=DEMO_CODE).first()
+        if existing and not reset:
+            print("演示案例已存在，跳过写入（用户自建项目不受影响）")
+            _report()
+            _seed_reference_data(reset=False)
+            return
+
+        clean_case(reset=reset)
+
+        project = Project(name=CASE["name"], code=DEMO_CODE,
                           description="论文第 5 节典型案例", created_by=admin.id)
         db.session.add(project)
         db.session.flush()
@@ -211,11 +285,31 @@ def seed():
         print("  微地质单元：岩质边坡 13.86% / 碎石边坡 62.95% / 平台 23.19%")
         print("  管理员账号：admin / admin123")
 
+        _seed_reference_data(reset=reset)
+        _report()
+
+
+def _seed_reference_data(reset=False):
+    """写入标准库与指标定义。
+
+    参考资料只在库为空（或显式 --reset）时写入，避免覆盖用户自行维护
+    的标准条目与指标定义。
+    """
+    if reset or Standard.query.count() == 0:
         seed_standards()
-        # 指标定义（M6 指标体系维护）
-        from app.services.indicator_service import seed_indicators
-        n = seed_indicators()
-        print("已写入指标定义：%d 项" % n)
+    from app.services.indicator_service import seed_indicators
+    n = seed_indicators()
+    print("指标定义：%d 项" % n)
+
+
+def _report():
+    total_p = Project.query.count()
+    total_patch = MinePatch.query.count()
+    print()
+    print("当前库内：项目 %d 个、图斑 %d 个" % (total_p, total_patch))
+    if total_p > total_patch:
+        print("  提示：项目是归档单位，评价针对的是图斑。")
+        print("        新项目需先建立图斑，才会出现在后续各模块中。")
 
 
 def seed_standards():
@@ -242,4 +336,6 @@ def seed_standards():
 
 
 if __name__ == "__main__":
-    seed()
+    # --reset：把演示环境恢复到初始状态（清空标准库与指标定义后重建）。
+    # 无论是否 --reset，都不会删除用户自建的项目与图斑。
+    seed(reset="--reset" in sys.argv[1:])

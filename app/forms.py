@@ -11,7 +11,7 @@ from app.utils.constants import UNIT_TYPES, ASPECT_TYPES
 
 
 class AHPSelectForm(FlaskForm):
-    """M6：选择微地质单元类型与指标层级，以确定判断矩阵规模。"""
+    """选择微地质单元类型与指标层级，以确定判断矩阵规模。"""
     unit_type = SelectField("微地质单元类型", validators=[DataRequired()])
     level = SelectField("指标层级",
                         choices=[("1", "一级指标"), ("2", "二级指标")],
@@ -30,7 +30,7 @@ class EmptyForm(FlaskForm):
 
 
 class LoginForm(FlaskForm):
-    """M1：登录表单（占位，由乙完善）。"""
+    """登录表单。支持「记住我」以在关闭浏览器后保持登录状态。"""
     username = StringField("用户名", validators=[DataRequired(), Length(max=64)])
     password = PasswordField("密码", validators=[DataRequired()])
     remember = BooleanField("记住我")

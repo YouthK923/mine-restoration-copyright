@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_macros.html" import patch_guide %}
 {% block title %}微地质单元{% endblock %}
 {% block content %}
 <div class="card">
@@ -8,6 +9,8 @@
     面积占比由面积自动计算，即论文式(9) 中决定各单元权重的系数。
   </p>
 
+  {{ patch_guide(projects_without_patch) }}
+
   {% if not rows %}
   <p class="muted">
     暂无矿山图斑。请先到「项目与矿山档案」建立图斑。
@@ -16,6 +19,7 @@
   <table>
     <thead>
       <tr>
+        <th scope="col">所属项目</th>
         <th scope="col">矿山图斑</th>
         <th scope="col">已划分单元</th>
         <th scope="col">占比合计</th>
@@ -25,6 +29,7 @@
     <tbody>
       {% for r in rows %}
       <tr>
+        <td>{{ r.patch.project.name if r.patch.project else "—" }}</td>
         <td style="text-align:left;">{{ r.patch.name }}</td>
         <td class="num">{{ r.count }} 个</td>
         <td class="num">

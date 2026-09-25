@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""M9 报告输出自检：得分明细页 + Word 导出。"""
+"""报告输出自检：得分明细页 + Word 导出。"""
 import os
 import sys
 import io
@@ -23,16 +23,31 @@ client = app.test_client()
 # 登录（案例种子已创建 admin 用户）
 client.post("/login", data={"username": "admin", "password": "admin123"})
 
-from app.models import MinePatch
+from app.models import MinePatch, EvaluationResult
 with app.app_context():
     patch = MinePatch.query.first()
     pid = patch.id
 
+# 报告取自已保存的评价记录，因此先按网页路径真实执行一次评价
+from app.views.evaluate import load_patch_input, save_evaluation
+with app.app_context():
+    units = load_patch_input(pid)
+    rec = save_evaluation(pid, units)
+    rid = rec.id
+    print("前置：已执行评价并保存记录 id=%d，F=%.4f（%s）"
+          % (rid, rec.final_score, rec.grade))
+    from app.models import ScoreDetail
+    n_detail = ScoreDetail.query.filter_by(result_id=rid).count()
+    print("      逐层得分明细已落库：%d 条" % n_detail)
+
+print()
 print(LINE)
 print("测试 1  报告列表")
 print(LINE)
 r = client.get("/report/")
 print("  状态码:", r.status_code)
+body = r.get_data(as_text=True)
+print("  含「所属项目」列:", "所属项目" in body)
 assert r.status_code == 200
 
 print()
@@ -73,5 +88,5 @@ assert "自然恢复适宜性评价报告" in text and len(d.tables) >= 3
 
 print()
 print(LINE)
-print("M9 报告输出全部测试通过 ✓")
+print("报告输出全部测试通过 ✓")
 print(LINE)

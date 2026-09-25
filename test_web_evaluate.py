@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""M7 + M8 端到端自检：录数据 → 执行评价 → 查看结果。"""
+"""端到端自检：录数据 → 执行评价 → 查看结果。"""
 import os
 import sys
 sys.stdout.reconfigure(encoding="utf-8")
@@ -25,7 +25,7 @@ client = app.test_client()
 client.post("/login", data={"username": "admin", "password": "admin123"})
 
 print(LINE)
-print("测试 1  M7 指标数据列表")
+print("测试 1  指标数据列表")
 print(LINE)
 r = client.get("/indicator/")
 body = r.get_data(as_text=True)
@@ -37,7 +37,7 @@ assert "岩质边坡" in body and "碎石边坡" in body and "平台" in body
 
 print()
 print(LINE)
-print("测试 2  M7 指标数据录入页（按单元类型显示字段）")
+print("测试 2  指标数据录入页（按单元类型显示字段）")
 print(LINE)
 from app.models import MicroUnit, MinePatch
 with app.app_context():
@@ -58,7 +58,7 @@ assert "土石比" in b_gravel and all(m in b_gravel for m in ("Cd", "Hg", "Pb",
 
 print()
 print(LINE)
-print("测试 3  M8 执行评价")
+print("测试 3  执行评价")
 print(LINE)
 with app.app_context():
     patch = MinePatch.query.first()
@@ -84,5 +84,5 @@ with app.app_context():
 
 print()
 print(LINE)
-print("M7 + M8 端到端全部测试通过 ✓")
+print("端到端全部测试通过 ✓")
 print(LINE)

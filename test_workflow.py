@@ -76,6 +76,12 @@ def add_data(pid):
 
 def cleanup(pid, tag):
     with app.app_context():
+        from app.models import ScoreDetail
+        # 先删得分明细，再删评价记录，避免留下孤儿明细
+        rids = [r.id for r in EvaluationResult.query.filter_by(patch_id=pid)]
+        if rids:
+            ScoreDetail.query.filter(ScoreDetail.result_id.in_(rids)).delete(
+                synchronize_session=False)
         EvaluationResult.query.filter_by(patch_id=pid).delete()
         ConstraintCheck.query.filter_by(patch_id=pid).delete()
         uids = [u.id for u in MicroUnit.query.filter_by(patch_id=pid)]
@@ -119,8 +125,12 @@ ok(r.status_code == 302 and n == 0, "未划分单元 → 不产生评价结果",
    "HTTP %d，结果数 %d" % (r.status_code, n))
 with app.app_context():
     pr = wf.patch_progress(pid)
-ok(not pr["ready"] and pr["blocking"][0]["step"] == "units",
-   "拦原因指向「划分微地质单元」")
+steps = [b["step"] for b in pr["blocking"]]
+ok(not pr["ready"] and "units" in steps,
+   "拦原因包含「划分微地质单元」", "、".join(steps))
+ok(steps == ["constraint", "units"],
+   "拦截顺序符合论文 4.1 节：限制性判定在前，划分单元在后",
+   "、".join(steps))
 cleanup(pid, "1")
 
 print()
@@ -206,6 +216,119 @@ for suffix in ("/pdf", "/word"):
     ok(rr.status_code == 302, "导出 %s 同样被拦住" % suffix, "HTTP %d" % rr.status_code)
 cleanup(pid2, "R")
 cleanup(pid, "OK")
+
+print()
+print(LINE)
+print("四、前置齐备但从未执行评价时，报告仍不得产生")
+print(LINE)
+# 报告是评价结论的呈现：即使前置步骤都做完了，只要没真正执行过定量评价，
+# 也不应凭空推算出结论。
+pid3 = new_patch("N")
+add_units(pid3); add_constraint(pid3, passed=True); add_data(pid3)
+with app.app_context():
+    pr = wf.report_progress(pid3)
+ok(not pr["ready"], "无评价记录 → 报告流程判定为未就绪")
+ok(bool(pr["blocking"]) and pr["blocking"][0]["step"] == "evaluate",
+   "拦原因指向「执行适宜性评价」")
+r = get_report(pid3)
+ok(r.status_code == 302 and results_of(pid3) == 0,
+   "直接访问 /report/<id> 被退回，且不产生任何评价结果",
+   "HTTP %d" % r.status_code)
+
+# 真正执行评价之后，报告才放行，且取值与评价记录一致
+r = post_eval(pid3)
+ok(results_of(pid3) == 1, "先执行评价 → 产生评价记录")
+with app.app_context():
+    pr = wf.report_progress(pid3)
+    rec = pr["result"]
+ok(pr["ready"] and rec is not None, "有评价记录后，报告流程就绪")
+rr = get_report(pid3)
+body = rr.get_data(as_text=True)
+ok(rr.status_code == 200, "此时可打开得分明细页", "HTTP %d" % rr.status_code)
+ok(("%.4f" % rec.final_score) in body,
+   "报告数值取自评价记录，而非重新计算",
+   "F=%.4f" % rec.final_score)
+cleanup(pid3, "N")
+
+print()
+print(LINE)
+print("五、内置演示数据的清理不得波及用户自建数据")
+print(LINE)
+# 回归保护：seed_demo.clean_case() 曾执行 Project.query.delete()，
+# 导致用户新建的项目在每次启动时被连带删除。
+import seed_demo as sd
+
+with app.app_context():
+    keep_p = Project(name="用户自建项目-守护", code="KEEP-001")
+    db.session.add(keep_p); db.session.flush()
+    keep_patch = MinePatch(project_id=keep_p.id, name="用户自建图斑-守护")
+    db.session.add(keep_patch); db.session.flush()
+    keep_pid = keep_p.id
+    keep_patch_id = keep_patch.id
+    db.session.commit()
+
+with app.app_context():
+    sd.clean_case(reset=False)
+
+with app.app_context():
+    still_p = db.session.get(Project, keep_pid)
+    still_patch = db.session.get(MinePatch, keep_patch_id)
+ok(still_p is not None, "清理演示数据后，用户自建项目仍存在")
+ok(still_patch is not None, "清理演示数据后，用户自建图斑仍存在")
+
+# 演示数据清掉后应能重新写入，保证演示环境可恢复
+sd.seed()
+with app.app_context():
+    demo_back = Project.query.filter_by(code=sd.DEMO_CODE).first()
+ok(demo_back is not None, "演示案例可重新写入（幂等恢复）")
+
+with app.app_context():
+    m = db.session.get(MinePatch, keep_patch_id)
+    if m:
+        db.session.delete(m)
+    p = db.session.get(Project, keep_pid)
+    if p:
+        db.session.delete(p)
+    db.session.commit()
+
+print()
+print(LINE)
+print("六、同一图斑不得重复划分同类型微地质单元")
+print(LINE)
+# 论文 4.1 节把图斑分为平台、碎石边坡、岩质边坡三类，每类至多一个。
+# 允许重复会让面积占比、按类型组织的指标数据与批量导入对不上号。
+pid4 = new_patch("D")
+c.post("/unit/%d/add" % pid4, data={"unit_type": "平台", "area": "1.0"},
+       follow_redirects=True)
+with app.app_context():
+    n1 = MicroUnit.query.filter_by(patch_id=pid4).count()
+ok(n1 == 1, "首次添加「平台」成功", "单元数 %d" % n1)
+
+r = c.post("/unit/%d/add" % pid4, data={"unit_type": "平台", "area": "2.0"},
+           follow_redirects=True)
+with app.app_context():
+    n2 = MicroUnit.query.filter_by(patch_id=pid4).count()
+ok(n2 == 1, "重复添加同类型被拒绝", "单元数 %d" % n2)
+ok("同一类型只能划分一个" in r.get_data(as_text=True), "给出重复提示")
+
+r = c.post("/unit/%d/add" % pid4, data={"unit_type": "火山口", "area": "1.0"},
+           follow_redirects=True)
+with app.app_context():
+    n3 = MicroUnit.query.filter_by(patch_id=pid4).count()
+ok(n3 == 1, "非法单元类型被拒绝", "单元数 %d" % n3)
+
+c.post("/unit/%d/add" % pid4, data={"unit_type": "碎石边坡", "area": "3.0"},
+       follow_redirects=True)
+with app.app_context():
+    uid = MicroUnit.query.filter_by(patch_id=pid4,
+                                    unit_type="碎石边坡").first().id
+r = c.post("/unit/edit/%d" % uid,
+           data={"unit_type": "平台", "area": "3.0"}, follow_redirects=True)
+with app.app_context():
+    types = sorted(u.unit_type for u in
+                   MicroUnit.query.filter_by(patch_id=pid4).all())
+ok(types == ["平台", "碎石边坡"], "改类型时同样拦截重复", "、".join(types))
+cleanup(pid4, "D")
 
 print()
 print(LINE)

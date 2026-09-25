@@ -14,7 +14,7 @@ db = SQLAlchemy()
 
 
 class User(UserMixin, db.Model):
-    """用户（M1 用户与权限管理）。"""
+    """用户（用户与权限管理）。"""
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -31,7 +31,7 @@ class User(UserMixin, db.Model):
 
 
 class OperationLog(db.Model):
-    """操作日志（M1）。"""
+    """操作日志。"""
     __tablename__ = "operation_logs"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -44,7 +44,7 @@ class OperationLog(db.Model):
 
 
 class Project(db.Model):
-    """评价项目（M2 项目与矿山档案）。"""
+    """评价项目（项目与矿山档案）。"""
     __tablename__ = "projects"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -60,7 +60,7 @@ class Project(db.Model):
 
 
 class MinePatch(db.Model):
-    """矿山图斑（M2）。"""
+    """矿山图斑。"""
     __tablename__ = "mine_patches"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -74,7 +74,7 @@ class MinePatch(db.Model):
     mining_method = db.Column(db.String(64), nullable=True)   # 开采方式
     stop_years = db.Column(db.Float, nullable=True)           # 停产年限
     responsible_entity_missing = db.Column(db.Boolean, default=True)  # 责任主体是否缺失
-    # 遥感底图 / 无人机正射影像挂接（M2）
+    # 遥感底图 / 无人机正射影像挂接
     image_path = db.Column(db.String(256), nullable=True)     # 相对 static 的路径
     image_note = db.Column(db.String(256), nullable=True)     # 影像说明（如来源、时相）
     image_uploaded_at = db.Column(db.DateTime, nullable=True)
@@ -85,7 +85,7 @@ class MinePatch(db.Model):
 
 
 class ReferenceEcosystem(db.Model):
-    """参照生态系统（M2）：标准化基准值，与图斑绑定。"""
+    """参照生态系统：标准化基准值，与图斑绑定。"""
     __tablename__ = "reference_ecosystems"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -97,7 +97,7 @@ class ReferenceEcosystem(db.Model):
 
 
 class Standard(db.Model):
-    """地方标准/政策文件（M3 政策与标准知识库）。"""
+    """地方标准/政策文件（政策与标准知识库）。"""
     __tablename__ = "standards"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -115,7 +115,7 @@ class Standard(db.Model):
 
 
 class StandardRule(db.Model):
-    """结构化规则（M3）：将标准条文拆解为可执行规则。"""
+    """结构化规则：将标准条文拆解为可执行规则。"""
     __tablename__ = "standard_rules"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -129,7 +129,7 @@ class StandardRule(db.Model):
 
 
 class ConstraintCheck(db.Model):
-    """限制性判定记录（M4）。"""
+    """限制性判定记录。"""
     __tablename__ = "constraint_checks"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -145,7 +145,7 @@ class ConstraintCheck(db.Model):
 
 
 class MicroUnit(db.Model):
-    """微地质单元（M5）：岩质边坡 / 碎石边坡 / 平台。"""
+    """微地质单元：岩质边坡 / 碎石边坡 / 平台。"""
     __tablename__ = "micro_units"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -157,7 +157,7 @@ class MicroUnit(db.Model):
 
 
 class Indicator(db.Model):
-    """指标定义（M6）：指标树，含角色与启用单元类型。"""
+    """指标定义：指标树，含角色与启用单元类型。"""
     __tablename__ = "indicators"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -180,7 +180,7 @@ class Indicator(db.Model):
 
 
 class WeightScheme(db.Model):
-    """权重方案（M6）：按微地质单元类型分别保存。"""
+    """权重方案：按微地质单元类型分别保存。"""
     __tablename__ = "weight_schemes"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -192,7 +192,7 @@ class WeightScheme(db.Model):
 
 
 class WeightItem(db.Model):
-    """权重明细（M6）：方案内的各项权重。"""
+    """权重明细：方案内的各项权重。"""
     __tablename__ = "weight_items"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -202,7 +202,7 @@ class WeightItem(db.Model):
 
 
 class ExpertMatrix(db.Model):
-    """专家判断矩阵（M6）：多专家打分的原始矩阵。"""
+    """专家判断矩阵：多专家打分的原始矩阵。"""
     __tablename__ = "expert_matrices"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -218,7 +218,7 @@ class ExpertMatrix(db.Model):
 
 
 class IndicatorData(db.Model):
-    """指标实测数据（M7）：按微地质单元组织。"""
+    """指标实测数据：按微地质单元组织。"""
     __tablename__ = "indicator_data"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -239,7 +239,7 @@ class IndicatorData(db.Model):
 
 
 class EvaluationResult(db.Model):
-    """评价结果（M8）。"""
+    """评价结果。"""
     __tablename__ = "evaluation_results"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -252,7 +252,7 @@ class EvaluationResult(db.Model):
 
 
 class ScoreDetail(db.Model):
-    """得分明细（M8）：每一层指标的权重、标准化值、加权贡献，供追溯与复核。"""
+    """得分明细：每一层指标的权重、标准化值、加权贡献，供追溯与复核。"""
     __tablename__ = "score_details"
 
     id = db.Column(db.Integer, primary_key=True)

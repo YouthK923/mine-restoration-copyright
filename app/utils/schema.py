@@ -9,14 +9,14 @@ from sqlalchemy import text
 
 # (表名, 列名, 列定义)
 REQUIRED_COLUMNS = [
-    # M2 遥感影像挂接
+    # 遥感影像挂接
     ("mine_patches", "image_path", "VARCHAR(256)"),
     ("mine_patches", "image_note", "VARCHAR(256)"),
     ("mine_patches", "image_uploaded_at", "DATETIME"),
-    # M6 指标维护
+    # 指标维护
     ("indicators", "enabled_units", "VARCHAR(128)"),
     ("indicators", "description", "TEXT"),
-    # M6 多专家矩阵
+    # 多专家矩阵
     ("expert_matrices", "unit_type", "VARCHAR(32)"),
     ("expert_matrices", "l1_name", "VARCHAR(64)"),
     ("expert_matrices", "cr", "FLOAT"),

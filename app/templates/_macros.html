@@ -1,22 +1,25 @@
 {# 共用宏：流程状态面板 #}
 
-{# 评价流程步骤条：显示各前置步骤的完成情况 #}
+{# 评价流程步骤条：按论文 4.1 节顺序显示各前置步骤的完成情况
+   顺序为：限制性条件判定 → 划分微地质单元 → 录入指标数据 → 执行评价。
+   论文原文：「先进行政策、位置约束地质灾害判断……对于满足限制性条件的
+   废弃矿山，按照地形地貌划分……三种地质微单元类型」，故判定在前。 #}
 {% macro workflow_steps(progress) %}
 <div class="steps">
-  <div class="step {% if progress.units.done %}step--done{% else %}step--todo{% endif %}">
-    <span class="step__no">1</span>
-    <span class="step__name">划分微地质单元</span>
-    <span class="step__state">
-      {% if progress.units.done %}已完成{% else %}待完成{% endif %}
-    </span>
-  </div>
   <div class="step {% if progress.constraint.passed %}step--done{% elif progress.constraint.done %}step--fail{% else %}step--todo{% endif %}">
-    <span class="step__no">2</span>
+    <span class="step__no">1</span>
     <span class="step__name">限制性条件判定</span>
     <span class="step__state">
       {% if progress.constraint.passed %}已通过
       {% elif progress.constraint.done %}未通过
       {% else %}待完成{% endif %}
+    </span>
+  </div>
+  <div class="step {% if progress.units.done %}step--done{% else %}step--todo{% endif %}">
+    <span class="step__no">2</span>
+    <span class="step__name">划分微地质单元</span>
+    <span class="step__state">
+      {% if progress.units.done %}已完成{% else %}待完成{% endif %}
     </span>
   </div>
   <div class="step {% if progress.data.ready %}step--done{% else %}step--todo{% endif %}">
@@ -64,5 +67,32 @@
 {% elif progress.blocking %}
 <span class="tag tag--warn">{{ progress.blocking[0].label }}</span>
 <span class="muted">{{ progress.blocking[0].reason }}</span>
+{% endif %}
+{% endmacro %}
+
+
+{# 层级引导：本系统是「项目 → 图斑」两级结构，评价针对的是图斑而非项目。
+   下游各页按图斑组织数据，故只要存在「还没建图斑的项目」，就提示下一步该做什么。 #}
+{% macro patch_guide(projects_without_patch) %}
+{% if projects_without_patch %}
+<div class="notice notice--warn">
+  <p class="notice__title">有 {{ projects_without_patch|length }} 个项目下还没有图斑，本页不会出现它们。</p>
+  <p>
+    本系统是「项目 → 矿山图斑」两级结构：项目是归档单位，而
+    <strong>限制性条件判定、微地质单元划分、指标数据与适宜性评价都是针对图斑进行的</strong>。
+  </p>
+  <ul class="notice__list">
+    {% for p in projects_without_patch %}
+    <li>
+      {{ p.name }}
+      —— <a href="/project/{{ p.id }}/patch/add">为它新建图斑</a>
+    </li>
+    {% endfor %}
+  </ul>
+  <p class="notice__hint">
+    也可以先进入 <a href="/project/">项目与矿山档案</a>，
+    点该项目右侧的「＋ 新建图斑」，建好之后本页就会出现该图斑。
+  </p>
+</div>
 {% endif %}
 {% endmacro %}

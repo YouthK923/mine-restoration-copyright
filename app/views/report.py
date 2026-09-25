@@ -1,37 +1,43 @@
 # -*- coding: utf-8 -*-
-"""M9 报告与结果输出 —— 得分明细、图表、Word / PDF 导出。"""
+"""报告与结果输出 —— 得分明细、图表、Word / PDF 导出。"""
 import io
+import json
 from datetime import datetime
 
 from flask import Blueprint, render_template, send_file, flash, redirect, url_for
 
 from app.models import db, MinePatch, ReferenceEcosystem
-from app.services import evaluation_service as ev
 from app.services import report_service as rs
 from app.services import workflow as wf
 from app.utils import charts
 from app.utils import browser
-from app.views.evaluate import load_patch_input
+from app.utils.constants import grade_of
 
 bp = Blueprint("report", __name__, url_prefix="/report")
 
 
 def _prepare(patch_id):
-    """加载图斑、参照生态系统并执行评价，供明细页与导出复用。
+    """加载图斑并取出已记录的评价结果，供明细页与导出复用。
 
-    同时返回流程检查结果：前置步骤未完成时，调用方应拦截并提示，
-    不应直接出报告（报告本质上是评价结论的呈现，不能先于评价产生）。
+    报告是评价结论的呈现，因此这里读取最近一次保存的评价记录，
+    而不是重新计算：评价完成后再改动指标数据，也不会让报告与
+    系统记录的评价结论对不上。没有任何评价记录时，返回流程检查
+    结果，由调用方拦截并提示先去执行评价。
     """
     patch = db.get_or_404(MinePatch, patch_id)
-    progress = wf.patch_progress(patch_id)
-    if not progress["ready"]:
-        return patch, None, None, None, progress
-    units = load_patch_input(patch_id)
-    if not units:
-        return patch, None, None, None, progress
-    result = ev.score_mine(units)
+    prog = wf.report_progress(patch_id)
+    if not prog["ready"]:
+        return patch, None, None, None, prog
+
+    rec = prog["result"]
+    result = {
+        "final_score": rec.final_score,
+        "grade": rec.grade,
+        "grade_info": grade_of(rec.final_score),
+        "unit_results": json.loads(rec.unit_scores) if rec.unit_scores else [],
+    }
     reference = ReferenceEcosystem.query.filter_by(patch_id=patch_id).first()
-    return patch, reference, result, units, progress
+    return patch, reference, result, rec, prog
 
 
 def _deny(progress, patch_id, endpoint="report.detail"):
@@ -64,27 +70,27 @@ def _charts(result):
 @bp.route("/")
 def index():
     patches = MinePatch.query.order_by(MinePatch.id.desc()).all()
-    progress = {p.id: wf.patch_progress(p.id) for p in patches}
+    progress = {p.id: wf.report_progress(p.id) for p in patches}
     return render_template("report/index.html", patches=patches,
                            progress=progress)
 
 
 @bp.route("/<int:patch_id>")
 def detail(patch_id):
-    patch, reference, result, units, progress = _prepare(patch_id)
+    patch, reference, result, record, prog = _prepare(patch_id)
     if result is None:
-        return _deny(progress, patch_id)
+        return _deny(prog, patch_id)
     chart_units, chart_weight = _charts(result)
     return render_template("report/detail.html", patch=patch, result=result,
-                           reference=reference, chart_units=chart_units,
-                           chart_weight=chart_weight)
+                           record=record, reference=reference,
+                           chart_units=chart_units, chart_weight=chart_weight)
 
 
 @bp.route("/<int:patch_id>/word")
 def word(patch_id):
-    patch, reference, result, units, progress = _prepare(patch_id)
+    patch, reference, result, record, prog = _prepare(patch_id)
     if result is None:
-        return _deny(progress, patch_id)
+        return _deny(prog, patch_id)
     buf = rs.build_report(patch, result)
     filename = "自然恢复适宜性评价报告_%s.docx" % patch.name
     return send_file(buf, as_attachment=True, download_name=filename,
@@ -95,9 +101,9 @@ def word(patch_id):
 @bp.route("/<int:patch_id>/pdf")
 def pdf(patch_id):
     """导出 PDF 报告：服务端渲染打印模板，再交浏览器无头打印。"""
-    patch, reference, result, units, progress = _prepare(patch_id)
+    patch, reference, result, record, prog = _prepare(patch_id)
     if result is None:
-        return _deny(progress, patch_id)
+        return _deny(prog, patch_id)
 
     chart_units, chart_weight = _charts(result)
     html = render_template(

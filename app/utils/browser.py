@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""HTML 转 PDF（M9 报告导出）。
+"""HTML 转 PDF（报告导出）。
 
 复用本机已安装的 Chrome/Edge 无头模式打印，避免引入 reportlab、
 weasyprint 等额外依赖。生成过程使用系统临时目录中的 ASCII 文件名，

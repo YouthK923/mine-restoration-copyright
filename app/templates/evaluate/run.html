@@ -31,19 +31,12 @@
 
 <div class="card" style="max-width:880px;">
   <h2>当前流程状态</h2>
+  <p class="muted">按论文 4.1 节的顺序列出，限制性条件判定在前。</p>
   <table>
     <thead>
       <tr><th scope="col">步骤</th><th scope="col">状态</th><th scope="col">说明</th></tr>
     </thead>
     <tbody>
-      <tr>
-        <td>划分微地质单元</td>
-        <td>
-          {% if progress.units.done %}<span class="tag tag--ok">已完成</span>
-          {% else %}<span class="tag tag--muted">待完成</span>{% endif %}
-        </td>
-        <td style="text-align:left;">{{ progress.units.detail }}</td>
-      </tr>
       <tr>
         <td>限制性条件判定</td>
         <td>
@@ -52,6 +45,14 @@
           {% else %}<span class="tag tag--muted">待完成</span>{% endif %}
         </td>
         <td style="text-align:left;">{{ progress.constraint.detail }}</td>
+      </tr>
+      <tr>
+        <td>划分微地质单元</td>
+        <td>
+          {% if progress.units.done %}<span class="tag tag--ok">已完成</span>
+          {% else %}<span class="tag tag--muted">待完成</span>{% endif %}
+        </td>
+        <td style="text-align:left;">{{ progress.units.detail }}</td>
       </tr>
       <tr>
         <td>录入指标数据</td>
@@ -64,4 +65,33 @@
     </tbody>
   </table>
 </div>
+
+{% if weight_sources %}
+<div class="card" style="max-width:880px;">
+  <h2>本次将采用的指标权重</h2>
+  <p class="muted">
+    权重决定各指标对评价结果的影响程度。默认采用论文表 3 的取值；
+    若已用层次分析法算出新权重并保存，则按新权重计算。
+  </p>
+  <table style="max-width:720px;">
+    <thead>
+      <tr><th scope="col">微地质单元</th><th scope="col">权重来源</th></tr>
+    </thead>
+    <tbody>
+      {% for ut, label in weight_sources.items() %}
+      <tr>
+        <td style="text-align:left;">{{ ut }}</td>
+        <td style="text-align:left;">
+          {% if "自定义" in label %}
+          <span class="tag tag--warn">{{ label }}</span>
+          {% else %}
+          <span class="tag tag--muted">{{ label }}</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
 {% endblock %}

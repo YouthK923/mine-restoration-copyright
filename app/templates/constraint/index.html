@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_macros.html" import patch_guide %}
 {% block title %}限制性指标判定{% endblock %}
 {% block content %}
 <div class="card">
@@ -8,12 +9,15 @@
     任一项不通过即判定为「人工辅助或生态重建」，不再进入定量评价。
   </p>
 
+  {{ patch_guide(projects_without_patch) }}
+
   {% if not patches %}
-  <p class="muted">暂无矿山图斑。请先在「项目与档案」中建立图斑。</p>
+  <p class="muted">暂无矿山图斑。请先在「项目与矿山档案」中建立图斑。</p>
   {% else %}
   <table>
     <thead>
       <tr>
+        <th scope="col">所属项目</th>
         <th scope="col">矿山图斑</th>
         <th scope="col">判定结果</th>
         <th scope="col">操作</th>
@@ -23,6 +27,7 @@
       {% for p in patches %}
       {% set r = latest.get(p.id) %}
       <tr>
+        <td>{{ p.project.name if p.project else "—" }}</td>
         <td style="text-align:left;">{{ p.name }}</td>
         <td style="text-align:left;">
           {% if r %}

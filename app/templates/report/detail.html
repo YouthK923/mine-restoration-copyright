@@ -19,6 +19,13 @@
     </div>
   </div>
 
+  <p class="muted" style="margin-top:12px;">
+    本页与导出报告均取自
+    <strong>{% if record %}{{ record.created_at.strftime("%Y-%m-%d %H:%M:%S") }}{% endif %}
+    记录的那次评价结果</strong>（评价记录编号 {{ record.id if record else "—" }}），
+    不会因事后修改指标数据而变化。
+  </p>
+
   <p class="actions" style="margin-top:16px;">
     <a class="btn" href="/report/{{ patch.id }}/pdf">导出 PDF 报告</a>
     <a class="btn btn--ghost" href="/report/{{ patch.id }}/word">导出 Word 报告</a>
@@ -40,6 +47,9 @@
 {% for u in result.unit_results %}
 <div class="card">
   <h2>{{ u.unit_type }} · 占比 {{ "%.2f%%"|format(u.ratio * 100) }} · 单元得分 {{ "%.4f"|format(u.unit_score) }}</h2>
+  {% if u.weight_source %}
+  <p class="muted" style="margin-top:-6px;">权重来源：{{ u.weight_source }}</p>
+  {% endif %}
 
   <table>
     <thead>

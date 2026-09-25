@@ -17,9 +17,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 
 from app import create_app
 from app.config import Config
-from app.models import (db, MinePatch, MicroUnit, EvaluationResult,
-                        ConstraintCheck)
-from app.services import evaluation_service as ev
+from app.models import (db, MinePatch, EvaluationResult, ConstraintCheck)
 from app.views.evaluate import load_patch_input
 
 BASE = os.path.dirname(os.path.abspath(__file__))
@@ -56,18 +54,10 @@ def prepare_data(app):
         res = EvaluationResult.query.filter_by(patch_id=patch.id) \
             .order_by(EvaluationResult.id.desc()).first()
         if res is None:
-            units = load_patch_input(patch.id)
-            r = ev.score_mine(units)
-            import json
-            res = EvaluationResult(
-                patch_id=patch.id, final_score=round(r["final_score"], 4),
-                grade=r["grade"], measures=r["grade_info"]["measure"],
-                unit_scores=json.dumps(
-                    [{"unit_type": u["unit_type"], "ratio": u["ratio"],
-                      "unit_score": round(u["unit_score"], 4)}
-                     for u in r["unit_results"]], ensure_ascii=False))
-            db.session.add(res)
-            db.session.commit()
+            # 用与网页相同的落库逻辑生成一次真实评价记录，
+            # 保证结果页与报告页取到的是同一条记录
+            from app.views.evaluate import save_evaluation
+            res = save_evaluation(patch.id, load_patch_input(patch.id))
         return patch.id, res.id
 
 

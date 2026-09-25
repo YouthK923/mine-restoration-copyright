@@ -31,16 +31,16 @@ rules = [x for x in app.url_map.iter_rules() if x.endpoint != "static"]
 print("  应用创建成功，路由 %d 条" % len(rules))
 
 modules = {
-    "M1 用户与权限": ["auth.login", "auth.logout", "auth.users"],
-    "M2 项目与矿山档案": ["project.index", "project.add", "project.patch_add",
+    "用户与权限": ["auth.login", "auth.logout", "auth.users"],
+    "项目与矿山档案": ["project.index", "project.add", "project.patch_add",
                     "project.patch_delete"],
-    "M3 标准知识库": ["standard.index", "standard.rules", "standard.compare"],
-    "M4 限制性判定": ["constraint.index", "constraint.check"],
-    "M5 微地质单元": ["unit.index", "unit.add", "unit.edit", "unit.delete"],
-    "M6 AHP 权重": ["ahp.index", "ahp.matrix"],
-    "M7 指标数据采集": ["indicator.index", "indicator.edit"],
-    "M8 适宜性评价": ["evaluate.index", "evaluate.run", "evaluate.result"],
-    "M9 报告输出": ["report.index", "report.detail", "report.word"],
+    "标准知识库": ["standard.index", "standard.rules", "standard.compare"],
+    "限制性判定": ["constraint.index", "constraint.check"],
+    "微地质单元": ["unit.index", "unit.add", "unit.edit", "unit.delete"],
+    "AHP 权重": ["ahp.index", "ahp.matrix"],
+    "指标数据采集": ["indicator.index", "indicator.edit"],
+    "适宜性评价": ["evaluate.index", "evaluate.run", "evaluate.result"],
+    "报告输出": ["report.index", "report.detail", "report.word"],
 }
 for name, need in modules.items():
     missing = [e for e in need if e not in eps]

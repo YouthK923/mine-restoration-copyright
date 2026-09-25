@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""M3 政策与标准知识库 —— 标准/政策文件的结构化规则与省际口径比对。"""
+"""政策与标准知识库 —— 标准/政策文件的结构化规则与省际口径比对。"""
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required
 

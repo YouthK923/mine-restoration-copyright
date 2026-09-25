@@ -35,4 +35,50 @@
     </p>
   </form>
 </div>
+
+<div class="card">
+  <h2>各微地质单元当前生效权重</h2>
+  <p class="muted">
+    适宜性评价按此处列出的权重计算。默认采用论文表 3 的取值；
+    若在本系统中用层次分析法算出了新权重并保存，则改按新权重计算。
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">微地质单元</th>
+        <th scope="col">当前权重来源</th>
+        <th scope="col">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in weight_rows %}
+      <tr>
+        <td style="text-align:left;">{{ r.unit_type }}</td>
+        <td style="text-align:left;">
+          {% if r.custom %}
+          <span class="tag tag--warn">{{ r.label }}</span>
+          {% else %}
+          <span class="tag tag--muted">{{ r.label }}</span>
+          {% endif %}
+        </td>
+        <td class="nowrap">
+          <a href="/ahp/matrix?unit_type={{ r.unit_type }}&level=1">一级指标权重</a>
+          &nbsp;|&nbsp;
+          <a href="/ahp/matrix?unit_type={{ r.unit_type }}&level=1&calc=1">查看一致性</a>
+          {% if r.custom %}
+          &nbsp;|&nbsp;
+          <form method="post" action="/ahp/weights/reset" style="display:inline;"
+                onsubmit="return confirm('确定把「{{ r.unit_type }}」恢复为论文表 3 的默认权重吗？');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="unit_type" value="{{ r.unit_type }}">
+            <button type="submit" class="btn btn--sm btn--ghost">恢复默认</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}

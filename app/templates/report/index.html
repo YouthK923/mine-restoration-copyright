@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_macros.html" import patch_guide %}
 {% block title %}报告输出{% endblock %}
 {% block content %}
 <div class="card">
@@ -8,12 +9,15 @@
     报告是评价结论的呈现，因此仅在评价所依赖的前置步骤全部完成后才可生成。
   </p>
 
+  {{ patch_guide(projects_without_patch) }}
+
   {% if not patches %}
   <p class="muted">暂无矿山图斑。请先到「项目与矿山档案」建立图斑。</p>
   {% else %}
   <table>
     <thead>
       <tr>
+        <th scope="col">所属项目</th>
         <th scope="col">矿山图斑</th>
         <th scope="col">可生成报告</th>
         <th scope="col">操作</th>
@@ -23,6 +27,7 @@
       {% for p in patches %}
       {% set pr = progress.get(p.id) %}
       <tr>
+        <td>{{ p.project.name if p.project else "—" }}</td>
         <td style="text-align:left;">{{ p.name }}</td>
         <td style="text-align:left;">
           {% if pr and pr.ready %}

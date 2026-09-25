@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""操作审计（M1）。
+"""操作审计。
 
 在应用工厂中以 after_request 钩子统一埋点：凡是成功的写操作（POST/PUT/DELETE）
 且已登录，即写入 operation_logs 表，无需在每个视图里手工调用。

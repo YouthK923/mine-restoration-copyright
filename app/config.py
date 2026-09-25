@@ -19,7 +19,7 @@ class Config:
     REMEMBER_COOKIE_HTTPONLY = True
     REMEMBER_COOKIE_SAMESITE = "Lax"
 
-    # 影像与数据文件上传（M2 遥感影像挂接、M7 批量导入）
+    # 影像与数据文件上传（遥感影像挂接、批量导入）
     UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")
     MAX_CONTENT_LENGTH = 32 * 1024 * 1024        # 单次上传上限 32 MB
     ALLOWED_IMAGE_EXT = {"png", "jpg", "jpeg", "gif", "webp", "bmp", "tif", "tiff"}
