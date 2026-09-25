@@ -6,8 +6,9 @@
 根目录只保留系统本体与启动所需文件，其余按用途分类：
 
 ```
-run.py                  启动入口
-启动.bat                Windows 一键启动（载入演示数据 + 启动服务）
+run.py                  启动入口（--no-browser / --port / --dev）
+启动.bat                Windows 一键启动（载入演示数据 + 启动服务 + 开浏览器）
+创建桌面快捷方式.bat    在桌面与开始菜单创建快捷方式（双击即可）
 requirements.txt        依赖清单
 seed_demo.py            内置玉田县案例与论文表 1 的标准库（幂等，不动用户数据）
 app/                    应用代码（详见下方「系统代码结构」）
@@ -24,10 +25,12 @@ app/                    应用代码（详见下方「系统代码结构」）
     make_screenshots.py         自动抓取界面截图（Chrome 无头模式）
     check_materials.py          申请材料形式要求自检（21 项）
     verify_all.py               项目最终验收汇总
+    生成图标.py                 生成 app/static/favicon.ico（网页图标 + 快捷方式图标）
+    创建桌面快捷方式.py         在桌面/开始菜单创建快捷方式
     提取论文与模板文本.py        从论文/模板 PDF 提取全文到 参考资料/论文与模板解析文本/
     生成Word中文模板.py         生成 pandoc 中文排版模板
     修正Word标题配色.py         修正 docx 标题样式为「黑体 + 纯黑」
-    数值核对/                   案例数值的独立复算脚本
+    数值核对/                   案例数值的独立复算与正确性验证脚本
 
 测试/                   ★ 自检脚本（10 套，均从仓库根运行）
     test_ahp.py test_evaluate.py test_web_ahp.py test_web_modules.py
@@ -93,15 +96,41 @@ seed_demo.py              内置玉田县案例 + 论文表1的 11 项标准与 
 
 ## 启动
 
+**最省事：在桌面放一个快捷方式，以后双击就能用。**
+
 ```bash
-pip install -r requirements.txt
-python seed_demo.py     # 载入演示案例（含管理员 admin/admin123）
-python run.py           # 打开 http://127.0.0.1:5000
+python 工具/创建桌面快捷方式.py       # 在桌面和开始菜单创建快捷方式
 ```
 
-Windows 下也可直接双击 `启动.bat`。`seed_demo.py` 是**幂等**的：
-演示案例已存在则跳过，**不会删除你自己建立的项目与图斑**。
-需要把演示环境彻底重建时用 `python seed_demo.py --reset`。
+（Windows 下也可以直接双击根目录的 `创建桌面快捷方式.bat`。）
+
+之后双击桌面上的「自然恢复适宜性评价系统」即可：服务启动、浏览器自动打开、
+直接进登录页。演示账号 `admin` / `admin123`。
+
+> - 图标取自 `app/static/favicon.ico`，与网页标签页图标是同一个。
+> - 服务已在运行时再次双击，只会打开浏览器，不会重复启动。
+> - 停止系统：在黑色命令行窗口按 `Ctrl+C`，或直接关掉那个窗口。
+> - 移动或重命名了项目文件夹后，快捷方式会失效，重新运行一次创建脚本即可。
+> - 删除快捷方式：`python 工具/创建桌面快捷方式.py --remove`
+
+### 其他启动方式
+
+```bash
+python seed_demo.py     # 载入演示案例（含管理员 admin/admin123）
+python run.py           # 启动并自动打开浏览器
+```
+
+`run.py` 的可用参数：
+
+```bash
+python run.py --no-browser   # 只启动服务，不打开浏览器
+python run.py --port 5001    # 换端口（默认 5000）
+python run.py --dev          # 开发模式：开启热重载与调试器
+```
+
+> `seed_demo.py` 是**幂等**的：演示案例已存在则跳过，
+> **不会删除你自己建立的项目与图斑**。需要把演示环境彻底重建时用
+> `python seed_demo.py --reset`。
 
 ## 运行自检
 

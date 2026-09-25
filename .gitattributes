@@ -8,6 +8,12 @@
 # 默认：自动识别文本，仓库内统一为 LF
 * text=auto eol=lf
 
+# ---- Windows 批处理必须用 CRLF ----
+# cmd.exe 按字节偏移读取批处理文件，LF 换行会让解析位置漂移，
+# 表现为「'd' 不是内部或外部命令」这类莫名其妙的报错。
+*.bat     text eol=crlf
+*.cmd     text eol=crlf
+
 # ---- 明确按文本处理 ----
 *.md      text eol=lf
 *.py      text eol=lf
@@ -34,6 +40,7 @@
 *.jpg     binary
 *.jpeg    binary
 *.gif     binary
+*.ico     binary
 *.zip     binary
 *.7z      binary
 
