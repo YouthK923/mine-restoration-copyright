@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}报告输出{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>报告与结果输出</h2>
+  {% if not patches %}
+  <p class="muted">暂无矿山图斑。请先运行 <span class="mono">python seed_demo.py</span> 载入案例。</p>
+  {% else %}
+  <table>
+    <tr><th>矿山图斑</th><th>操作</th></tr>
+    {% for p in patches %}
+    <tr>
+      <td>{{ p.name }}</td>
+      <td>
+        <a href="/report/{{ p.id }}">查看得分明细</a>
+        &nbsp;|&nbsp;<a href="/report/{{ p.id }}/word">导出 Word 报告</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}得分明细{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>得分明细 · {{ patch.name }}</h2>
+
+  <table style="width:auto;">
+    <tr>
+      <th style="text-align:left;">最终评价因子 F</th>
+      <td class="mono" style="font-size:18px;font-weight:700;">{{ "%.4f"|format(result.final_score) }}</td>
+    </tr>
+    <tr>
+      <th style="text-align:left;">适宜性等级</th>
+      <td class="ok" style="font-size:18px;font-weight:700;">{{ result.grade }}</td>
+    </tr>
+    <tr>
+      <th style="text-align:left;">推荐措施</th>
+      <td>{{ result.grade_info.measure }}</td>
+    </tr>
+  </table>
+
+  <p style="margin-top:16px;">
+    <a href="/report/{{ patch.id }}/word" class="btn">导出 Word 报告</a>
+    <a href="/report/" class="btn" style="background:#8896a8;">返回</a>
+  </p>
+
+  {% for u in result.unit_results %}
+  <h3 style="font-size:15px;color:#1f3a5f;margin:24px 0 8px;">
+    {{ u.unit_type }}（占比 {{ "%.2f%%"|format(u.ratio*100) }}）— 单元得分 {{ "%.4f"|format(u.unit_score) }}
+  </h3>
+  <table>
+    <tr><th>一级指标</th><th>二级指标</th><th>实测值</th><th>标准化值</th><th>权重</th><th>贡献</th></tr>
+    {% for d in u.details %}
+    <tr>
+      <td>{{ d.l1 }}</td>
+      <td>{{ d.l2 }}</td>
+      <td class="mono">{{ "—" if d.raw is none else d.raw }}</td>
+      <td class="mono">{{ "—" if d.std_value is none else "%.4f"|format(d.std_value) }}</td>
+      <td class="mono">{{ "%.4f"|format(d.weight) }}</td>
+      <td class="mono">{{ "—" if d.contribution is none else "%.4f"|format(d.contribution) }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <p class="muted" style="margin-top:6px;">
+    一级指标得分：
+    {% for k, v in u.l1_scores.items() %}{{ k }}={{ "%.4f"|format(v) }} {% endfor %}
+  </p>
+  {% endfor %}
+</div>
+{% endblock %}
