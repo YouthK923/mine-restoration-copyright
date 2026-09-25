@@ -39,6 +39,12 @@ ENV/
 dist/
 build/
 
+# ---- 数据库与实例（本地运行产物，不入库）----
+*.db
+*.sqlite
+*.sqlite3
+instance/
+
 # ---- 系统与编辑器 ----
 Thumbs.db
 ehthumbs.db
