@@ -1,0 +1,59 @@
+# ============================================================
+# 历史遗留废弃矿山自然恢复适宜性评价系统 V1.0
+# .gitignore —— 只纳入项目核心文件
+# 原则：文本、可读、可 diff、需多人协作的留下；
+#       大体积二进制、可从源重建的中间产物剔除。
+# ============================================================
+
+# ---- Office 临时锁文件（Word/Excel 打开时生成，误提交后必然冲突）----
+~$*
+*.~vsd*
+*.tmp
+
+# ---- 参考资料：大体积二进制、只读、不参与协作编辑 ----
+# 软著格式模板 PDF（变压器 / 电网两套）
+变压器抗短路能力评估系统V1.0-*.pdf
+电网安全风险数据分析系统-*.pdf
+# 原始论文稿（仅作输入源，全文文本见 read_output.md）
+*审改稿*.docx
+# Word 产物：文档以 Markdown 为源文件，docx 属构建产物
+软件著作权登记项目计划书_*.docx
+*.doc
+*~$*.docx
+
+# ---- 提取产物：可由 _extract.py 重建 ----
+_dump/
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+
+# ---- 系统与编辑器 ----
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.STORE
+.DS_Store
+.idea/
+*.swp
+*~
+.vscode/settings.json
+.vscode/*.local.json
+
+# ---- 密钥与本地配置（防止误传）----
+.env
+.env.*
+*.key
+*.pem
+secrets.json
