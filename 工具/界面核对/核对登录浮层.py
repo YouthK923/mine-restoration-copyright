@@ -184,7 +184,26 @@ ok("@media (max-width: 900px)" in lp and "@media (max-width: 620px)" in lp,
    "窄屏退为两列、一列")
 
 print()
-print("七、清理测试数据")
+print("七、进场动画：从屏外飞入、不撑出横向滚动条")
+left = rule_of(lp, '.lp-reveal[data-dir="left"]')
+right = rule_of(lp, '.lp-reveal[data-dir="right"]')
+up = rule_of(lp, '.lp-reveal[data-dir="up"]')
+ok("vw" in left and "vh" in left, "左进：位移按视口取，起点在屏外",
+   left.strip())
+ok("vw" in right and "vh" in right, "右进：位移按视口取，起点在屏外")
+ok("vh" in up, "上进：位移按视口高度取", up.strip())
+ok("scale(" in left and "scale(" in right and "scale(" in up,
+   "起飞时带缩小（有纵深）")
+m_ez = re.search(r"transform\s+([\d.]+)s\s+cubic-bezier\(([^)]*)\)",
+                 rule_of(lp, ".lp-reveal"))
+ez = [float(x) for x in m_ez.group(2).split(",")] if m_ez else []
+ok(bool(ez) and ez[1] > 1, "落位带轻微过冲（回弹）",
+   m_ez.group(0) if m_ez else "未找到缓动")
+ok("overflow-x: clip" in rule_of(lp, ".lp-intro"),
+   "介绍区裁掉横向溢出（不会出现横向滚动条）")
+
+print()
+print("八、清理测试数据")
 with app.app_context():
     from app.models import db, Project
     p = Project.query.filter_by(code="TOASTCHK").first()

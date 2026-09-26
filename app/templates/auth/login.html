@@ -111,23 +111,25 @@
   }
 
   /* ---------- 滚动进场 ----------
-     进入视口时按方向弹入，离开视口时弹回，可反复。
+     进入视口时从屏外飞入，离开视口时飞回，可反复。
      交错延迟只加在「进入」的规则上，退出时不延迟，否则会显得拖沓。 */
   .lp-reveal {
     opacity: 0;
-    transition: opacity .62s ease,
-                transform .62s cubic-bezier(.16, .84, .34, 1),
+    transition: opacity .7s ease,
+                transform 1.05s cubic-bezier(.18, 1.04, .3, 1),
                 border-color .62s ease, background-color .62s ease;
     transition-delay: 0s;
     will-change: opacity, transform;
   }
-  .lp-reveal[data-dir="left"]  { transform: translate3d(-48px, 0, 0); }
-  .lp-reveal[data-dir="right"] { transform: translate3d(48px, 0, 0); }
-  .lp-reveal[data-dir="up"]    { transform: translate3d(0, 36px, 0); }
+  /* 起始位置整体在屏外：横向按视口宽度取位移，纵向按视口高度取位移，
+     再带一点缩小，落位时按贝塞尔曲线的过冲轻微回弹。 */
+  .lp-reveal[data-dir="left"]  { transform: translate3d(-56vw, 5vh, 0) scale(.9); }
+  .lp-reveal[data-dir="right"] { transform: translate3d(56vw, 5vh, 0) scale(.9); }
+  .lp-reveal[data-dir="up"]    { transform: translate3d(0, 24vh, 0) scale(.94); }
   .lp-reveal.is-in {
     opacity: 1;
     transform: none;
-    transition-delay: calc(var(--i, 0) * 85ms);
+    transition-delay: calc(var(--i, 0) * 110ms);
   }
 
   /* 标题颜色由淡到深，强化「浮现」的层次感 */
@@ -144,6 +146,9 @@
     margin: 0;
     padding: 56px 24px 72px;
     background: transparent;
+    /* 卡片从屏外飞入，横向超出的部分裁掉，免得出现横向滚动条；
+       用 clip 而不是 hidden，纵向滚动仍由页面本身负责 */
+    overflow-x: clip;
   }
   .lp-intro > * { max-width: 1040px; margin-left: auto; margin-right: auto; }
   .lp-intro__title {
