@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+{% block title %}注册账号 · 历史遗留废弃矿山自然恢复适宜性评价系统{% endblock %}
+
+{% block content %}
+<style>
+  /* ================= 注册页 =================
+     与登录页同一套观感：浅绿渐变底 + 白色卡片。
+     必填只有账户名称与密码，其余收在「选填」分隔线以下，
+     这样首次注册不会被一堆输入框挡住。 */
+
+  .rg {
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    padding: 40px 20px 56px;
+    background:
+      radial-gradient(900px 520px at 50% 0%,
+                      rgba(31, 107, 69, .14), rgba(31, 107, 69, 0) 72%),
+      #f6faf7;
+  }
+
+  .rg-card {
+    width: 100%;
+    max-width: 470px;
+    padding: 38px 40px 30px;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 26px 70px rgba(14, 46, 32, .13);
+    animation: rg-in .5s cubic-bezier(.16, .84, .34, 1) both;
+  }
+  @keyframes rg-in {
+    from { opacity: 0; transform: translateY(16px) scale(.98); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .rg-title {
+    margin: 0 0 6px;
+    text-align: center;
+    font-size: 25px;
+    font-weight: 700;
+    letter-spacing: -.2px;
+  }
+  .rg-sub {
+    margin: 0 0 28px;
+    text-align: center;
+    font-size: 13px;
+    color: #86868b;
+  }
+
+  .rg-field { margin-bottom: 15px; }
+  .rg-field > label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 13px;
+    color: #6e6e73;
+  }
+  .rg-field > label .rg-opt {
+    margin-left: 5px;
+    font-size: 12px;
+    color: #a1a1a6;
+  }
+  .rg-field input[type="text"],
+  .rg-field input[type="password"] {
+    width: 100%;
+    padding: 12px 15px;
+    font-family: inherit;
+    font-size: 16px;          /* 不小于 16px，避免手机端聚焦时自动放大 */
+    color: #1d1d1f;
+    background: #f5f5f7;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    outline: none;
+    transition: background-color .18s ease, border-color .18s ease,
+                box-shadow .18s ease;
+  }
+  .rg-field input::placeholder { color: #a1a1a6; }
+  .rg-field input:focus {
+    background: #fff;
+    border-color: rgba(31, 107, 69, .55);
+    box-shadow: 0 0 0 3px rgba(31, 107, 69, .14);
+  }
+  .rg-field input[aria-invalid="true"] {
+    border-color: rgba(180, 60, 50, .55);
+    background: #fff;
+  }
+  .rg-field select {
+    width: 100%;
+    padding: 12px 15px;
+    font-family: inherit;
+    font-size: 15px;
+    color: #1d1d1f;
+    background: #f5f5f7;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    outline: none;
+  }
+  .rg-field select:focus {
+    background: #fff;
+    border-color: rgba(31, 107, 69, .55);
+    box-shadow: 0 0 0 3px rgba(31, 107, 69, .14);
+  }
+  .rg-err {
+    margin: 6px 0 0;
+    font-size: 12.5px;
+    color: var(--danger);
+  }
+
+  /* 「选填」分隔线 */
+  .rg-split {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 24px 0 18px;
+    font-size: 12.5px;
+    color: #a1a1a6;
+  }
+  .rg-split::before,
+  .rg-split::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #ececee;
+  }
+
+  .rg-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 14px;
+  }
+  @media (max-width: 480px) { .rg-pair { grid-template-columns: 1fr; } }
+
+  /* 头像：圆形预览 + 选择文件 */
+  .rg-avatar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 15px;
+  }
+  .rg-avatar__face {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: #eef2f0;
+    color: #9aa8a1;
+    font-size: 12px;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+  }
+  .rg-avatar__pick { min-width: 0; }
+  .rg-avatar__pick input[type="file"] {
+    max-width: 100%;
+    font-family: inherit;
+    font-size: 12.5px;
+    color: #6e6e73;
+  }
+  .rg-avatar__tip {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: #a1a1a6;
+  }
+
+  .rg-submit {
+    width: 100%;
+    margin-top: 24px;
+    padding: 13px 20px;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 500;
+    color: #fff;
+    background: var(--accent);
+    border: none;
+    border-radius: 980px;
+    cursor: pointer;
+    transition: background-color .2s ease, box-shadow .2s ease,
+                transform .2s ease;
+  }
+  .rg-submit:hover {
+    background: var(--accent-hover);
+    box-shadow: 0 10px 24px rgba(31, 107, 69, .26);
+  }
+  .rg-submit:active { transform: translateY(1px); box-shadow: none; }
+  .rg-submit:focus-visible { outline: 3px solid rgba(31, 107, 69, .40); outline-offset: 3px; }
+
+  .rg-foot {
+    margin: 20px 0 0;
+    text-align: center;
+    font-size: 13px;
+    color: #86868b;
+  }
+  .rg-foot a { color: var(--accent); text-decoration: none; }
+  .rg-foot a:hover { text-decoration: underline; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rg-card { animation: none; }
+  }
+</style>
+
+<div class="rg">
+  <div class="rg-card">
+    <h1 class="rg-title">创建账号</h1>
+    <p class="rg-sub">新账号为「操作员」，职务由管理员调整</p>
+
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {{ form.hidden_tag() }}
+
+      <div class="rg-field">
+        <label for="{{ form.username.id }}">账户名称</label>
+        {{ form.username(id=form.username.id, autocomplete="username",
+                         placeholder="2–64 个字符",
+                         **({'aria-invalid': 'true'} if form.username.errors else {})) }}
+        {% for e in form.username.errors %}<p class="rg-err">{{ e }}</p>{% endfor %}
+      </div>
+
+      <div class="rg-field">
+        <label for="{{ form.password.id }}">密码</label>
+        {{ form.password(id=form.password.id, autocomplete="new-password",
+                         placeholder="至少 6 位",
+                         **({'aria-invalid': 'true'} if form.password.errors else {})) }}
+        {% for e in form.password.errors %}<p class="rg-err">{{ e }}</p>{% endfor %}
+      </div>
+
+      <div class="rg-field">
+        <label for="{{ form.confirm.id }}">确认密码</label>
+        {{ form.confirm(id=form.confirm.id, autocomplete="new-password",
+                        placeholder="再次输入密码",
+                        **({'aria-invalid': 'true'} if form.confirm.errors else {})) }}
+        {% for e in form.confirm.errors %}<p class="rg-err">{{ e }}</p>{% endfor %}
+      </div>
+
+      <p class="rg-split">以下均为选填</p>
+
+      <div class="rg-avatar">
+        <span class="rg-avatar__face" id="rg-face" aria-hidden="true">头像</span>
+        <div class="rg-avatar__pick">
+          <label class="visually-hidden" for="rg-avatar">选择头像图片</label>
+          <input id="rg-avatar" type="file" name="avatar"
+                 accept=".png,.jpg,.jpeg,.gif,.webp">
+          <p class="rg-avatar__tip">PNG / JPG / GIF / WebP，不超过 4 MB</p>
+        </div>
+      </div>
+
+      <div class="rg-pair">
+        <div class="rg-field">
+          <label for="{{ form.display_name.id }}">昵称</label>
+          {{ form.display_name(id=form.display_name.id,
+                               placeholder="留空则显示账户名称") }}
+        </div>
+        <div class="rg-field">
+          <label for="{{ form.gender.id }}">性别</label>
+          {{ form.gender(id=form.gender.id) }}
+        </div>
+      </div>
+
+      <div class="rg-field">
+        <label for="{{ form.email.id }}">邮箱</label>
+        {{ form.email(id=form.email.id, autocomplete="email",
+                      placeholder="用于联系，可留空",
+                      **({'aria-invalid': 'true'} if form.email.errors else {})) }}
+        {% for e in form.email.errors %}<p class="rg-err">{{ e }}</p>{% endfor %}
+      </div>
+
+      <div class="rg-field" style="margin-bottom:0;">
+        <label for="{{ form.phone.id }}">手机号</label>
+        {{ form.phone(id=form.phone.id, autocomplete="tel", placeholder="可留空") }}
+      </div>
+
+      {{ form.submit_reg(class_="rg-submit") }}
+    </form>
+
+    <p class="rg-foot">已有账号？<a href="{{ url_for('auth.login') }}">返回登录</a></p>
+  </div>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+// 选好头像后立刻在左侧圆框里预览，省得传上去才知道选错了
+(function () {
+  var input = document.getElementById('rg-avatar');
+  var face = document.getElementById('rg-face');
+  if (!input || !face || !window.FileReader) return;
+  input.addEventListener('change', function () {
+    var file = input.files && input.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      face.textContent = '';
+      face.style.backgroundImage = 'url("' + e.target.result + '")';
+    };
+    reader.readAsDataURL(file);
+  });
+})();
+</script>
+{% endblock %}

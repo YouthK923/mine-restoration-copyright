@@ -93,15 +93,16 @@ assert has_del, "项目列表缺少删除按钮"
 print("  %s 删除前有二次确认" % ("[符合]" if "confirm(" in html else "[不符合]"))
 assert "confirm(" in html
 
-# 图斑列表
+# 图斑列表：地址用的是项目主键，不是图斑主键
 with app.app_context():
     from app.models import MinePatch, Project
     import seed_demo
     patch = seed_demo.demo_patch()
     patch_id = patch.id
-html = client.get("/project/%d/patches" % patch_id).get_data(as_text=True)
+    project_id = patch.project_id
+html = client.get("/project/%d/patches" % project_id).get_data(as_text=True)
 print("  %s 图斑列表含删除按钮" % ("[符合]" if "/project/patch/" in html and "btn--danger" in html else "[不符合]"))
-assert "btn--danger" in html
+assert "/project/patch/" in html and "btn--danger" in html
 
 # 微地质单元
 html = client.get("/unit/%d" % patch_id).get_data(as_text=True)

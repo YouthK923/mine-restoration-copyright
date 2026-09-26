@@ -44,7 +44,7 @@ def create_app(config_class=Config):
     from flask import request, redirect, url_for, send_from_directory
     from flask_login import current_user, login_user
 
-    PUBLIC_ENDPOINTS = {"auth.login", "static", "favicon"}
+    PUBLIC_ENDPOINTS = {"auth.login", "auth.register", "static", "favicon"}
 
     # 浏览器默认会请求根路径下的 /favicon.ico。
     # 页面里虽已用 <link rel="icon"> 指向 static 目录，但出错页等场景仍会
@@ -58,7 +58,7 @@ def create_app(config_class=Config):
     def require_login():
         # 截图模式（仅用于生成说明书配图）：自动以管理员身份登录
         if app.config.get("SCREENSHOT_MODE"):
-            if (request.endpoint not in ("auth.login", "static")
+            if (request.endpoint not in ("auth.login", "auth.register", "static")
                     and not current_user.is_authenticated):
                 admin = User.query.filter_by(role="admin").first()
                 if admin:
@@ -85,9 +85,10 @@ def create_app(config_class=Config):
         ("适宜性定量评价", "/evaluate/", "target"),
         ("报告与结果输出", "/report/", "file"),
     ]
+    # 「用户与操作日志」已并入「个人设置」，不再是独立菜单，
+    # 因此系统管理组只留一个入口。
     ADMIN_LINKS = [
         ("个人设置", "/profile", "user"),
-        ("用户与操作日志", "/users", "users"),
     ]
 
     @app.context_processor
@@ -119,7 +120,7 @@ def create_app(config_class=Config):
         elif path.startswith("/profile"):
             page_title = "个人设置"
         elif path.startswith(("/users", "/logs")):
-            page_title = "用户与操作日志"
+            page_title = "账号与日志"
         elif path.startswith("/search"):
             page_title = "搜索结果"
         else:

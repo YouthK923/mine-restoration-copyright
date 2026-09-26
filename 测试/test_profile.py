@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-"""个人设置自检：资料、头像、密码。
+"""个人设置自检：资料、头像、密码，以及管理员的「账号 / 操作日志」分类。
 
-与「用户管理」的区别：那里是管理员维护别人，这里是用户维护自己。
-注意本脚本会临时改动 admin 的密码，测完必须还原，否则会污染其他测试。
+职务分管理员与操作员两种：普通用户维护自己，管理员在此之外还能管账号、查日志。
+注意本脚本会临时改动 admin 的密码与资料，因此开头先快照、结尾原样还原，
+避免污染用户自己的数据。
 """
 import io
 import os
-import re
 import sys
 
 sys.stdout.reconfigure(encoding="utf-8")
@@ -45,6 +45,18 @@ class TestConfig(Config):
 app = create_app(TestConfig)
 client = app.test_client()
 
+# 先把 admin 的现状存下来，测试结束再写回 —— 用户可能已经填过自己的资料
+with app.app_context():
+    _admin = User.query.filter_by(username="admin").first()
+    SNAPSHOT = {
+        "password_hash": _admin.password_hash,
+        "display_name": _admin.display_name,
+        "gender": _admin.gender,
+        "email": _admin.email,
+        "phone": _admin.phone,
+        "avatar": _admin.avatar,
+    }
+
 print(LINE)
 print("一、访问控制")
 print(LINE)
@@ -57,8 +69,9 @@ client.post("/login", data={"username": "admin", "password": "admin123"},
 r = client.get("/profile")
 body = r.get_data(as_text=True)
 ok(r.status_code == 200, "登录后可访问个人设置", "HTTP %d" % r.status_code)
-ok("个人信息" in body and "登录与安全性" in body, "左栏含两个分类入口")
-ok("姓名" in body and "邮箱" in body and 'class="acct-card"' in body,
+ok("个人信息" in body and "登录与安全性" in body, "左栏含个人分类入口")
+ok("tab=users" in body and "tab=logs" in body, "管理员额外看到账号与操作日志分类")
+ok("昵称" in body and "邮箱" in body and 'class="acct-card"' in body,
    "个人信息页为可展开的功能卡")
 sec = client.get("/profile?tab=security").get_data(as_text=True)
 ok("密码" in sec and "登录账号" in sec, "登录与安全性页含密码与账号两张卡")
@@ -72,7 +85,7 @@ print(LINE)
 r = client.post("/profile", data={
     "action": "info",
     "info-display_name": "赵永凯",
-    "info-title": "项目负责人",
+    "info-gender": "男",
     "info-email": "zhao@example.com",
     "info-phone": "13800000000",
 }, follow_redirects=True)
@@ -80,11 +93,11 @@ body = r.get_data(as_text=True)
 ok("个人资料已保存" in body, "保存成功并给出反馈")
 with app.app_context():
     u = User.query.filter_by(username="admin").first()
-    ok(u.display_name == "赵永凯" and u.title == "项目负责人",
-       "显示名称与职务已写入", u.display_name or "")
+    ok(u.display_name == "赵永凯" and u.gender == "男",
+       "昵称与性别已写入", u.display_name or "")
     ok(u.email == "zhao@example.com" and u.phone == "13800000000",
        "邮箱与手机号已写入")
-ok("赵永凯" in body, "侧边栏改为显示名称")
+ok("赵永凯" in body, "侧边栏改为显示昵称")
 
 r = client.post("/profile", data={
     "action": "info", "info-display_name": "赵永凯",
@@ -94,12 +107,12 @@ ok("邮箱格式不正确" in r.get_data(as_text=True), "邮箱格式错误被�
 
 # 留空应清空，而不是写入空串
 client.post("/profile", data={"action": "info", "info-display_name": "",
-                              "info-title": "", "info-email": "",
+                              "info-gender": "", "info-email": "",
                               "info-phone": ""}, follow_redirects=True)
 with app.app_context():
     u = User.query.filter_by(username="admin").first()
     ok(u.display_name is None and u.email is None, "留空字段存为 NULL 而非空串")
-    ok(u.shown_name == "admin", "没填显示名称时回退到账号名", u.shown_name)
+    ok(u.shown_name == "admin", "没填昵称时回退到账户名称", u.shown_name)
 
 print()
 print(LINE)
@@ -189,36 +202,44 @@ ok(good.status_code == 200 and "用户名或密码错误" not in
 
 print()
 print(LINE)
-print("五、管理员代改他人资料（用户管理页）")
+print("五、管理员维护他人账号（个人设置 · 账号）")
 print(LINE)
 with app.app_context():
     other = User.query.filter_by(username="prof_target").first()
     if other is None:
         other = User(username="prof_target",
                      password_hash=generate_password_hash("target123"),
-                     role="evaluator")
+                     role="operator")
         db.session.add(other)
         db.session.commit()
     other_id = other.id
 
-r = client.get("/users")
-ok("显示名称" in r.get_data(as_text=True), "用户列表含「显示名称」列")
+r = client.get("/profile?tab=users")
+body = r.get_data(as_text=True)
+ok(r.status_code == 200 and "昵称" in body and "职务" in body,
+   "账号分类含昵称与职务列")
+ok("操作员" in body, "职务列显示「操作员」")
+
+# 旧地址仍可用，且落到同一分类
+r = client.get("/users", follow_redirects=False)
+ok(r.status_code == 302 and "tab=users" in (r.headers.get("Location") or ""),
+   "/users 旧地址跳到个人设置的账号分类")
 
 r = client.post("/users/%d/edit" % other_id, data={
-    "role": "evaluator", "active": "1",
-    "display_name": "李四", "title": "评价员",
+    "role": "operator", "active": "1",
+    "display_name": "李四", "gender": "男",
     "email": "lisi@example.com", "phone": "13900000000",
 }, follow_redirects=True)
-ok("用户信息已保存" in r.get_data(as_text=True), "管理员保存他人资料成功")
+ok("账号信息已保存" in r.get_data(as_text=True), "管理员保存他人资料成功")
 with app.app_context():
     o = db.session.get(User, other_id)
-    ok(o.display_name == "李四" and o.title == "评价员",
-       "显示名称与职务已写入", o.display_name or "")
+    ok(o.display_name == "李四" and o.gender == "男",
+       "昵称与性别已写入", o.display_name or "")
     ok(o.email == "lisi@example.com" and o.phone == "13900000000",
        "邮箱与手机号已写入")
 
 r = client.post("/users/%d/edit" % other_id, data={
-    "role": "evaluator", "active": "1", "display_name": "李四",
+    "role": "operator", "active": "1", "display_name": "李四",
     "email": "坏邮箱",
 }, follow_redirects=True)
 ok("邮箱格式不正确" in r.get_data(as_text=True), "管理员改错邮箱同样被拦下")
@@ -226,12 +247,41 @@ with app.app_context():
     o = db.session.get(User, other_id)
     ok(o.email == "lisi@example.com", "非法邮箱未写入", o.email or "")
 
-# 被改的人登录后，界面上应显示新的显示名称
+# 只有管理员能设置职务
+r = client.post("/users/%d/edit" % other_id, data={
+    "role": "admin", "active": "1", "display_name": "李四",
+}, follow_redirects=True)
+with app.app_context():
+    o = db.session.get(User, other_id)
+    ok(o.role == "admin", "管理员可把他人职务改为管理员", o.role)
+client.post("/users/%d/edit" % other_id, data={
+    "role": "operator", "active": "1", "display_name": "李四"},
+    follow_redirects=True)
+
+# 被改的人登录后，界面上应显示新的昵称
 c3 = app.test_client()
 body = c3.post("/login", data={"username": "prof_target",
                                "password": "target123"},
                follow_redirects=True).get_data(as_text=True)
-ok("李四" in body, "被改用户登录后侧边栏显示其显示名称")
+ok("李四" in body, "被改账号登录后侧边栏显示其昵称")
+ok("tab=users" not in body, "操作员看不到账号与操作日志分类")
+r = c3.get("/users/add")
+ok(r.status_code == 403, "操作员访问新增账号被拒", "HTTP %d" % r.status_code)
+
+print()
+print(LINE)
+print("六、操作日志分类")
+print(LINE)
+r = client.get("/profile?tab=logs")
+body = r.get_data(as_text=True)
+ok(r.status_code == 200 and "操作日志" in body, "管理员可查看操作日志")
+ok("保存个人资料" in body or "修改" in body, "日志列出了刚才的写操作")
+r = client.get("/logs", follow_redirects=False)
+ok(r.status_code == 302 and "tab=logs" in (r.headers.get("Location") or ""),
+   "/logs 旧地址跳到个人设置的操作日志分类")
+r = c3.get("/profile?tab=logs", follow_redirects=True)
+ok("操作日志</h1>" not in r.get_data(as_text=True),
+   "操作员越权访问日志被退回个人信息")
 
 with app.app_context():
     o = User.query.filter_by(username="prof_target").first()
@@ -239,23 +289,24 @@ with app.app_context():
         db.session.delete(o)
         db.session.commit()
     ok(User.query.filter_by(username="prof_target").first() is None,
-       "临时用户已清理")
+       "临时账号已清理")
 
 print()
 print(LINE)
-print("六、还原环境")
+print("七、还原环境")
 print(LINE)
 with app.app_context():
     u = User.query.filter_by(username="admin").first()
-    u.password_hash = generate_password_hash("admin123")
-    u.display_name = None
-    u.title = None
-    u.email = None
-    u.phone = None
-    u.avatar = None
+    u.password_hash = SNAPSHOT["password_hash"]
+    u.display_name = SNAPSHOT["display_name"]
+    u.gender = SNAPSHOT["gender"]
+    u.email = SNAPSHOT["email"]
+    u.phone = SNAPSHOT["phone"]
+    u.avatar = SNAPSHOT["avatar"]
     db.session.commit()
     ok(check_password_hash(u.password_hash, "admin123"), "admin 密码已还原")
-    ok(u.display_name is None, "个人资料已清空")
+    ok(u.display_name == SNAPSHOT["display_name"],
+       "admin 原有资料已还原", u.display_name or "（空）")
 
 print()
 print(LINE)

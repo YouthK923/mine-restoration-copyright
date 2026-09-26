@@ -186,6 +186,33 @@
     font-size: 12.5px;
     color: var(--danger);
   }
+
+  /* 管理员分类（账号 / 操作日志）里的表格面板 */
+  .acct-panel {
+    background: #fff;
+    border: 1px solid #e6e6e8;
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .acct-panel__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 13px 20px;
+    border-bottom: 1px solid #f0f1f2;
+  }
+  .acct-panel__count {
+    margin: 0;
+    font-size: 13.5px;
+    color: #6e6e73;
+  }
+  .acct-panel table { margin: 0; }
+  .acct-panel th,
+  .acct-panel td { border: 0; border-bottom: 1px solid #f0f1f2; }
+  .acct-panel thead th { background: #f7f9f8; }
+  .acct-panel tbody tr:last-child td { border-bottom: 0; }
+  .acct-panel tbody tr:hover { background: #fafbfa; }
 </style>
 
 <div class="acct">
@@ -202,7 +229,8 @@
 
     <p class="acct-rail__name">{{ current_user.shown_name }}</p>
     <p class="acct-rail__sub">
-      {{ current_user.email or current_user.username }}
+      {{ role_labels.get(current_user.role, current_user.role) }}
+      {% if current_user.email %} · {{ current_user.email }}{% endif %}
     </p>
 
     <nav class="acct-tabs" aria-label="个人设置分类">
@@ -210,6 +238,12 @@
          {% if tab == 'info' %}class="is-active" aria-current="page"{% endif %}>个人信息</a>
       <a href="{{ url_for('auth.profile', tab='security') }}"
          {% if tab == 'security' %}class="is-active" aria-current="page"{% endif %}>登录与安全性</a>
+      {% if current_user.is_admin %}
+      <a href="{{ url_for('auth.profile', tab='users') }}"
+         {% if tab == 'users' %}class="is-active" aria-current="page"{% endif %}>账号</a>
+      <a href="{{ url_for('auth.profile', tab='logs') }}"
+         {% if tab == 'logs' %}class="is-active" aria-current="page"{% endif %}>操作日志</a>
+      {% endif %}
     </nav>
 
     <details class="acct-avatar-edit">
@@ -299,7 +333,7 @@
         <div class="acct-card__body">
           <dl class="acct-kv">
             <dt>登录账号</dt><dd class="mono">{{ current_user.username }}</dd>
-            <dt>角色</dt>
+            <dt>职务</dt>
             <dd>{{ role_labels.get(current_user.role, current_user.role) }}</dd>
             <dt>状态</dt>
             <dd>
@@ -319,10 +353,22 @@
       </details>
     </div>
 
+    {% elif tab == 'users' %}
+
+    <h1 class="acct-title">账号</h1>
+    <p class="acct-lead">管理本系统的账号、职务与启用状态。新注册的账号默认为「操作员」。</p>
+    {% include "auth/_users.html" %}
+
+    {% elif tab == 'logs' %}
+
+    <h1 class="acct-title">操作日志</h1>
+    <p class="acct-lead">记录各账号在本系统中的关键操作。</p>
+    {% include "auth/_logs.html" %}
+
     {% else %}
 
     <h1 class="acct-title">个人信息</h1>
-    <p class="acct-lead">管理你的姓名、职务以及可以联系到你的邮箱与手机号。</p>
+    <p class="acct-lead">管理你的昵称、性别以及可以联系到你的邮箱与手机号。</p>
 
     <form method="post">
       {{ info_form.hidden_tag() }}
@@ -332,7 +378,7 @@
       <div class="acct-grid">
         <details class="acct-card" {% if info_form.display_name.errors %}open{% endif %}>
           <summary>
-            <span class="acct-card__title">姓名</span>
+            <span class="acct-card__title">昵称</span>
             <span class="acct-card__value">
               {{ current_user.display_name or "未设置" }}
             </span>
@@ -341,10 +387,10 @@
           <div class="acct-card__body">
             <div class="field">
               <label class="field__label" for="{{ info_form.display_name.id }}">
-                显示名称
+                昵称
               </label>
               {{ info_form.display_name(id=info_form.display_name.id,
-                                        placeholder="留空则显示登录账号") }}
+                                        placeholder="留空则显示账户名称") }}
               {% for e in info_form.display_name.errors %}
               <p class="field__error">{{ e }}</p>
               {% endfor %}
@@ -353,18 +399,17 @@
           </div>
         </details>
 
-        <details class="acct-card" {% if info_form.title.errors %}open{% endif %}>
+        <details class="acct-card" {% if info_form.gender.errors %}open{% endif %}>
           <summary>
-            <span class="acct-card__title">职务</span>
-            <span class="acct-card__value">{{ current_user.title or "未设置" }}</span>
-            <span class="acct-card__icon">{{ icon("briefcase", 15) }}</span>
+            <span class="acct-card__title">性别</span>
+            <span class="acct-card__value">{{ current_user.gender or "未设置" }}</span>
+            <span class="acct-card__icon">{{ icon("user", 15) }}</span>
           </summary>
           <div class="acct-card__body">
             <div class="field">
-              <label class="field__label" for="{{ info_form.title.id }}">职务</label>
-              {{ info_form.title(id=info_form.title.id,
-                                 placeholder="如：评价员、项目负责人") }}
-              {% for e in info_form.title.errors %}
+              <label class="field__label" for="{{ info_form.gender.id }}">性别</label>
+              {{ info_form.gender(id=info_form.gender.id) }}
+              {% for e in info_form.gender.errors %}
               <p class="field__error">{{ e }}</p>
               {% endfor %}
             </div>

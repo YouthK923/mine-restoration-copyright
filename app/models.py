@@ -14,37 +14,41 @@ db = SQLAlchemy()
 
 
 class User(UserMixin, db.Model):
-    """用户（用户与权限管理）。"""
+    """用户（账户与权限）。"""
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(256), nullable=False)
-    # 角色：管理员 admin / 评价员 evaluator / 查看者 viewer
-    role = db.Column(db.String(20), nullable=False, default="viewer")
+    # 职务只有两种：管理员 admin（可管理账号与他人的职务）/ 操作员 operator
+    role = db.Column(db.String(20), nullable=False, default="operator")
     active = db.Column(db.Boolean, nullable=False, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # ---- 个人资料（用户可在「个人设置」中自行维护）----
-    display_name = db.Column(db.String(64), nullable=True)    # 显示名称（姓名）
-    title = db.Column(db.String(64), nullable=True)           # 职务 / 岗位
+    # ---- 个人资料（用户可在「个人设置」里自行维护）----
+    display_name = db.Column(db.String(64), nullable=True)    # 昵称
     email = db.Column(db.String(128), nullable=True)
     phone = db.Column(db.String(32), nullable=True)
+    gender = db.Column(db.String(8), nullable=True)           # 男 / 女 / 保密
     avatar = db.Column(db.String(256), nullable=True)         # 头像，相对 static 的路径
 
     @property
+    def is_admin(self):
+        return self.role == "admin"
+
+    @property
     def shown_name(self):
-        """界面上显示的名字：优先用显示名称，没填就用账号名。"""
+        """界面上显示的名字：优先用昵称，没填就用账号名。"""
         return self.display_name or self.username
 
     @property
     def initial(self):
-        """没有头像时用首字母占位。"""
+        """没有头像时用首字占位。"""
         return (self.shown_name or "?")[0].upper()
 
     def to_dict(self):
         return {"id": self.id, "username": self.username,
-                "display_name": self.display_name,
+                "display_name": self.display_name, "gender": self.gender,
                 "role": self.role, "active": self.active}
 
 

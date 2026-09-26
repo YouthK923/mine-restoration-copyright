@@ -1,0 +1,57 @@
+{# 管理员的「账号」分类。由 auth/profile.html 内联引入，不单独成页。 #}
+<div class="acct-panel">
+  <div class="acct-panel__head">
+    <p class="acct-panel__count">共 {{ users|length }} 个账号</p>
+    <a class="btn btn--sm" href="{{ url_for('auth.add_user') }}">新增账号</a>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">账户名称</th>
+        <th scope="col">昵称</th>
+        <th scope="col">职务</th>
+        <th scope="col">状态</th>
+        <th scope="col">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td class="num">{{ u.id }}</td>
+        <td class="mono">
+          {{ u.username }}
+          {% if u.id == current_user.id %}<span class="muted">（当前登录）</span>{% endif %}
+        </td>
+        <td style="text-align:left;">
+          {% if u.display_name %}{{ u.display_name }}
+          {% else %}<span class="muted">—</span>{% endif %}
+        </td>
+        <td>
+          <span class="tag {{ 'tag--ok' if u.role == 'admin' else 'tag--muted' }}">
+            {{ role_labels.get(u.role, u.role) }}
+          </span>
+        </td>
+        <td>
+          {% if u.active %}<span class="tag tag--ok">启用</span>
+          {% else %}<span class="tag tag--muted">停用</span>{% endif %}
+        </td>
+        <td class="nowrap">
+          <span class="row-actions">
+            <a class="link-btn" href="{{ url_for('auth.edit_user', user_id=u.id) }}">编辑</a>
+            <form method="post"
+                  action="{{ url_for('auth.delete_user', user_id=u.id) }}"
+                  onsubmit="return confirm('确定删除账号「{{ u.username }}」吗？\n该操作无法恢复。');">
+              {{ form.hidden_tag() }}
+              <button type="submit" class="link-btn link-btn--danger"
+                      {% if u.id == current_user.id %}disabled
+                      title="不能删除当前登录的账号"{% endif %}>删除</button>
+            </form>
+          </span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

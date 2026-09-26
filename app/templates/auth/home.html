@@ -98,14 +98,25 @@
   <div class="section__head">
     <h2 class="section__title">系统管理</h2>
   </div>
-  <a class="row-card" href="/users">
-    <span class="row-card__icon">{{ icon("users", 19) }}</span>
+  <a class="row-card" href="/profile">
+    <span class="row-card__icon">{{ icon("user", 19) }}</span>
     <span class="row-card__main">
-      <span class="row-card__title">用户与操作日志</span>
-      <span class="row-card__desc">用户维护与角色权限；全部写操作自动留痕，可查询追溯</span>
+      <span class="row-card__title">个人设置</span>
+      <span class="row-card__desc">维护昵称、性别、邮箱、手机号与登录密码</span>
     </span>
     <span class="row-card__arrow">{{ icon("chevron", 17) }}</span>
   </a>
+
+  {% if current_user.is_admin %}
+  <a class="row-card" href="/profile?tab=users">
+    <span class="row-card__icon">{{ icon("users", 19) }}</span>
+    <span class="row-card__main">
+      <span class="row-card__title">账号与操作日志</span>
+      <span class="row-card__desc">新增账号并设置职务；全部写操作自动留痕，可查询追溯</span>
+    </span>
+    <span class="row-card__arrow">{{ icon("chevron", 17) }}</span>
+  </a>
+  {% endif %}
 </section>
 
 {% endblock %}

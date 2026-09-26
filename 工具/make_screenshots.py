@@ -94,10 +94,11 @@ def build_page_list(pid, rid):
         ("13_适宜性评价", "/evaluate/", 760),
         ("14_评价结果", "/evaluate/result/%d" % rid, 900),
         ("15_得分明细与图表", "/report/%d" % pid, 1700),
-        ("16_用户管理", "/users", 900),
-        ("16b_操作日志", "/logs", 900),
-        ("16c_个人设置", "/profile", 1100),
-        ("16d_个人设置_登录与安全性", "/profile?tab=security", 900),
+        ("16_个人设置", "/profile", 1100),
+        ("16b_个人设置_登录与安全性", "/profile?tab=security", 900),
+        ("16c_账号管理", "/profile?tab=users", 900),
+        ("16d_操作日志", "/profile?tab=logs", 900),
+        ("16e_注册账号", "/register", 1000),
     ]
 
 

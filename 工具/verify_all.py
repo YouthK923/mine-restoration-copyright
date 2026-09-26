@@ -35,7 +35,8 @@ rules = [x for x in app.url_map.iter_rules() if x.endpoint != "static"]
 print("  应用创建成功，路由 %d 条" % len(rules))
 
 modules = {
-    "用户与权限": ["auth.login", "auth.logout", "auth.users"],
+    "账号与权限": ["auth.login", "auth.register", "auth.logout", "auth.profile",
+               "auth.edit_user", "auth.logs"],
     "项目与矿山档案": ["project.index", "project.add", "project.patch_add",
                     "project.patch_delete"],
     "标准知识库": ["standard.index", "standard.rules", "standard.compare"],

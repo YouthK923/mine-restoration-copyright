@@ -1133,9 +1133,10 @@
                  placeholder="搜索项目、图斑、标准" value="{{ search_q }}">
           <button type="submit" aria-label="搜索">{{ ui.icon("chevron", 15) }}</button>
         </form>
-        <a class="icon-btn" href="/logs" title="操作日志" aria-label="操作日志">
-          {{ ui.icon("bell", 18) }}
-        </a>
+        {% if current_user.is_admin %}
+        <a class="icon-btn" href="/profile?tab=logs" title="操作日志"
+           aria-label="操作日志">{{ ui.icon("bell", 18) }}</a>
+        {% endif %}
       </header>
   {% else %}
   <div class="login-shell">

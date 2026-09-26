@@ -1,23 +1,40 @@
 # -*- coding: utf-8 -*-
-"""用户与权限管理 —— 登录、注销、用户维护、操作日志。"""
+"""账号与权限 —— 登录、注册、个人资料、用户维护、操作日志。
+
+页面组织：
+  /login      登录页（含「点我注册」入口）
+  /register   自助注册（默认「操作员」）
+  /profile    个人设置，分类切换：info / security / users / logs
+              后两个分类仅管理员可见，由本模块统一管控。
+"""
 from flask import (Blueprint, render_template, redirect, url_for, request,
                    flash, abort, current_app)
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.forms import (LoginForm, EmptyForm, ProfileForm, PasswordForm,
-                       email_ok)
+                       RegisterForm, email_ok)
 from app.models import db, User, OperationLog
 from app.utils import uploads as up
-from app.utils.constants import ROLE_LABELS
+from app.utils.constants import ROLE_LABELS, DEFAULT_ROLE, GENDERS
 
 bp = Blueprint("auth", __name__)
+
+# 「个人设置」的四个分类；后两个是管理员专属
+PROFILE_TABS = ("info", "security", "users", "logs")
+ADMIN_TABS = ("users", "logs")
 
 
 def require_admin():
     """非管理员直接 403，避免误操作基础数据。"""
     if current_user.role != "admin":
         abort(403)
+
+
+def _intro_data():
+    """登录页下方的系统介绍所用的静态内容。"""
+    from app.services import dashboard as dash
+    return {"modules": dash.MODULES}
 
 
 @bp.route("/")
@@ -49,10 +66,35 @@ def login():
     return render_template("auth/login.html", form=form, **_intro_data())
 
 
-def _intro_data():
-    """登录页下方的系统介绍所用的静态内容。"""
-    from app.services import dashboard as dash
-    return {"modules": dash.MODULES}
+@bp.route("/register", methods=["GET", "POST"])
+def register():
+    """自助注册。新账号一律为「操作员」，权限只能由管理员事后调整。"""
+    if current_user.is_authenticated:
+        return redirect(url_for("auth.index"))
+    form = RegisterForm()
+    if form.validate_on_submit():
+        username = form.username.data.strip()
+        if User.query.filter_by(username=username).first():
+            form.username.errors.append("该账户名称已被使用")
+        else:
+            user = User(username=username,
+                        role=DEFAULT_ROLE,
+                        password_hash=generate_password_hash(form.password.data),
+                        display_name=(form.display_name.data or "").strip() or None,
+                        gender=(form.gender.data or "").strip() or None,
+                        email=(form.email.data or "").strip() or None,
+                        phone=(form.phone.data or "").strip() or None)
+            rel, err = _save_avatar(request.files.get("avatar"))
+            if err:
+                flash(err, "error")
+            else:
+                user.avatar = rel
+                db.session.add(user)
+                db.session.commit()
+                login_user(user)
+                flash("注册成功，欢迎使用", "toast")
+                return redirect(url_for("auth.index"))
+    return render_template("auth/register.html", form=form)
 
 
 @bp.route("/logout")
@@ -64,17 +106,18 @@ def logout():
 
 
 # ---------------------------- 个人设置 ----------------------------
-# 与「用户管理」的区别：那里是管理员维护别人，这里是任何登录用户维护自己。
+# 任何登录用户在这里维护自己；管理员额外能管理账号与查看日志。
+# 「用户与操作日志」不再是独立菜单，而是本页的管理员分类。
 
 @bp.route("/profile", methods=["GET", "POST"])
 @login_required
 def profile():
-    # 左侧分类：个人信息 / 登录与安全性，用查询参数切换
+    is_admin = current_user.role == "admin"
     tab = request.values.get("tab") or "info"
-    if tab not in ("info", "security"):
+    if tab not in PROFILE_TABS or (tab in ADMIN_TABS and not is_admin):
         tab = "info"
 
-    # 两个表单放在同一页，用字段前缀区分，避免 submit / csrf_token 重名
+    # 表单放在同一页，用字段前缀区分，避免 submit / csrf_token 重名
     info_form = ProfileForm(prefix="info", obj=current_user)
     pwd_form = PasswordForm(prefix="pwd")
 
@@ -82,12 +125,14 @@ def profile():
         action = request.form.get("action")
         # 校验失败要重新渲染本页，此时必须回到提交表单所在的那个分类，
         # 否则错误提示会出现在另一个分类里，用户根本看不到。
-        if action in ("info", "password"):
-            tab = "security" if action == "password" else "info"
+        if action == "password":
+            tab = "security"
+        elif action == "info":
+            tab = "info"
 
         if action == "info" and info_form.validate_on_submit():
             current_user.display_name = (info_form.display_name.data or "").strip() or None
-            current_user.title = (info_form.title.data or "").strip() or None
+            current_user.gender = (info_form.gender.data or "").strip() or None
             current_user.email = (info_form.email.data or "").strip() or None
             current_user.phone = (info_form.phone.data or "").strip() or None
             db.session.commit()
@@ -104,10 +149,35 @@ def profile():
                 flash("密码已修改", "ok")
                 return redirect(url_for("auth.profile", tab="security"))
 
-    return render_template("auth/profile.html", info_form=info_form,
-                           pwd_form=pwd_form, avatar_form=EmptyForm(),
-                           tab=tab, role_labels=ROLE_LABELS)
+    ctx = dict(info_form=info_form, pwd_form=pwd_form, avatar_form=EmptyForm(),
+               tab=tab, role_labels=ROLE_LABELS, genders=GENDERS)
+    if tab == "users":
+        ctx.update(_users_context())
+    elif tab == "logs":
+        ctx.update(_logs_context())
+    return render_template("auth/profile.html", **ctx)
 
+
+def _users_context():
+    """管理员分类「账号」所需的数据。"""
+    return {"users": User.query.order_by(User.id).all(),
+            "form": EmptyForm()}
+
+
+def _logs_context():
+    """管理员分类「操作日志」所需的数据。"""
+    page = request.args.get("page", 1, type=int)
+    per_page = 50
+    q = OperationLog.query.order_by(OperationLog.id.desc())
+    total = q.count()
+    records = q.offset((page - 1) * per_page).limit(per_page).all()
+    users_map = {u.id: u.username for u in User.query.all()}
+    pages = max(1, (total + per_page - 1) // per_page)
+    return {"records": records, "page": page, "pages": pages,
+            "total": total, "users_map": users_map}
+
+
+# ---------------------------- 头像 ----------------------------
 
 def _avatar_length_ok(file_storage):
     """按字节检查头像大小。超限时 werkzeug 读到内存里的内容也能量出来。"""
@@ -120,6 +190,20 @@ def _avatar_length_ok(file_storage):
     return size <= limit, size
 
 
+def _save_avatar(file):
+    """保存头像文件，返回 (相对路径, 错误信息)。没有文件时返回 (None, None)。"""
+    if file is None or not file.filename:
+        return None, None
+    ok, size = _avatar_length_ok(file)
+    if not ok:
+        return None, ("头像不能超过 %.0f MB（当前 %.1f MB）"
+                      % (current_app.config["MAX_AVATAR_LENGTH"] / 1024 / 1024,
+                         size / 1024 / 1024))
+    return up.save_upload(file, "avatars",
+                          current_app.config["ALLOWED_AVATAR_EXT"],
+                          current_app.config["UPLOAD_FOLDER"])
+
+
 @bp.route("/profile/avatar", methods=["POST"])
 @login_required
 def upload_avatar():
@@ -129,23 +213,12 @@ def upload_avatar():
         flash("表单校验失败，请重试", "error")
         return redirect(back)
 
-    file = request.files.get("avatar")
-    if file is None or not file.filename:
-        flash("请选择头像图片", "error")
-        return redirect(back)
-
-    ok, size = _avatar_length_ok(file)
-    if not ok:
-        flash("头像不能超过 %.0f MB（当前 %.1f MB）"
-              % (current_app.config["MAX_AVATAR_LENGTH"] / 1024 / 1024,
-                 size / 1024 / 1024), "error")
-        return redirect(back)
-
-    rel, err = up.save_upload(file, "avatars",
-                              current_app.config["ALLOWED_AVATAR_EXT"],
-                              current_app.config["UPLOAD_FOLDER"])
+    rel, err = _save_avatar(request.files.get("avatar"))
     if err:
         flash(err, "error")
+        return redirect(back)
+    if rel is None:
+        flash("请选择头像图片", "error")
         return redirect(back)
 
     # 换新头像时删掉旧文件，避免残留
@@ -169,14 +242,13 @@ def delete_avatar():
     return redirect(back)
 
 
-# ---------------------------- 用户维护 ----------------------------
+# ---------------------------- 账号维护（仅管理员） ----------------------------
 
 @bp.route("/users")
 @login_required
 def users():
-    all_users = User.query.order_by(User.id).all()
-    return render_template("auth/users.html", users=all_users,
-                           role_labels=ROLE_LABELS, form=EmptyForm())
+    """旧地址保留，统一并入「个人设置 · 账号」。"""
+    return redirect(url_for("auth.profile", tab="users"))
 
 
 @bp.route("/users/add", methods=["GET", "POST"])
@@ -186,19 +258,28 @@ def add_user():
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
-        role = request.form.get("role", "viewer")
+        role = request.form.get("role", DEFAULT_ROLE)
+        if role not in ROLE_LABELS:
+            role = DEFAULT_ROLE
         if not username or not password:
-            flash("用户名和密码不能为空", "error")
+            flash("账户名称和密码不能为空", "error")
             return redirect(url_for("auth.add_user"))
         if User.query.filter_by(username=username).first():
-            flash("用户名已存在", "error")
+            flash("账户名称已存在", "error")
             return redirect(url_for("auth.add_user"))
-        db.session.add(User(username=username, role=role,
-                            password_hash=generate_password_hash(password)))
+        db.session.add(User(
+            username=username, role=role,
+            password_hash=generate_password_hash(password),
+            display_name=request.form.get("display_name", "").strip() or None,
+            gender=request.form.get("gender", "").strip() or None,
+            email=request.form.get("email", "").strip() or None,
+            phone=request.form.get("phone", "").strip() or None))
         db.session.commit()
-        flash("用户已添加", "ok")
-        return redirect(url_for("auth.users"))
-    return render_template("auth/add_user.html")
+        flash("账号已添加", "ok")
+        return redirect(url_for("auth.profile", tab="users"))
+    return render_template("auth/add_user.html", role_labels=ROLE_LABELS,
+                           genders=GENDERS, default_role=DEFAULT_ROLE,
+                           form=EmptyForm())
 
 
 @bp.route("/users/<int:user_id>/edit", methods=["GET", "POST"])
@@ -208,6 +289,8 @@ def edit_user(user_id):
     user = db.get_or_404(User, user_id)
     if request.method == "POST":
         role = request.form.get("role", user.role)
+        if role not in ROLE_LABELS:
+            role = user.role
         active = request.form.get("active") == "1"
 
         # 保护：不能把最后一个管理员降级或停用，否则无人能管理系统
@@ -228,7 +311,7 @@ def edit_user(user_id):
         user.role = role
         user.active = active
         user.display_name = request.form.get("display_name", "").strip() or None
-        user.title = request.form.get("title", "").strip() or None
+        user.gender = request.form.get("gender", "").strip() or None
         user.email = email or None
         user.phone = request.form.get("phone", "").strip() or None
 
@@ -236,10 +319,11 @@ def edit_user(user_id):
         if new_password:
             user.password_hash = generate_password_hash(new_password)
         db.session.commit()
-        flash("用户信息已保存", "ok")
-        return redirect(url_for("auth.users"))
+        flash("账号信息已保存", "ok")
+        return redirect(url_for("auth.profile", tab="users"))
     return render_template("auth/edit_user.html", user=user,
-                           role_labels=ROLE_LABELS, form=EmptyForm())
+                           role_labels=ROLE_LABELS, genders=GENDERS,
+                           form=EmptyForm())
 
 
 @bp.route("/users/<int:user_id>/delete", methods=["POST"])
@@ -249,31 +333,24 @@ def delete_user(user_id):
     user = db.get_or_404(User, user_id)
     if user.id == current_user.id:
         flash("不能删除当前登录的账号", "error")
-        return redirect(url_for("auth.users"))
+        return redirect(url_for("auth.profile", tab="users"))
     if user.role == "admin":
         others = User.query.filter(User.role == "admin",
                                    User.id != user.id,
                                    User.active.is_(True)).count()
         if others == 0:
             flash("系统至少需保留一名启用状态的管理员", "error")
-            return redirect(url_for("auth.users"))
+            return redirect(url_for("auth.profile", tab="users"))
     db.session.delete(user)
     db.session.commit()
-    flash("用户「%s」已删除" % user.username, "ok")
-    return redirect(url_for("auth.users"))
+    flash("账号「%s」已删除" % user.username, "ok")
+    return redirect(url_for("auth.profile", tab="users"))
 
 
-# ---------------------------- 操作日志 ----------------------------
+# ---------------------------- 操作日志（仅管理员） ----------------------------
 
 @bp.route("/logs")
 @login_required
 def logs():
-    page = request.args.get("page", 1, type=int)
-    per_page = 50
-    q = OperationLog.query.order_by(OperationLog.id.desc())
-    total = q.count()
-    records = q.offset((page - 1) * per_page).limit(per_page).all()
-    users_map = {u.id: u.username for u in User.query.all()}
-    pages = max(1, (total + per_page - 1) // per_page)
-    return render_template("auth/logs.html", records=records, page=page,
-                           pages=pages, total=total, users_map=users_map)
+    """旧地址保留，统一并入「个人设置 · 操作日志」。"""
+    return redirect(url_for("auth.profile", tab="logs"))

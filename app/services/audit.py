@@ -14,10 +14,11 @@ from app.models import db, OperationLog
 # 端点 → 可读动作名
 ACTION_NAMES = {
     "auth.login": "登录系统",
+    "auth.register": "注册账号",
     "auth.logout": "退出登录",
-    "auth.add_user": "新增用户",
-    "auth.edit_user": "编辑用户",
-    "auth.delete_user": "删除用户",
+    "auth.add_user": "新增账号",
+    "auth.edit_user": "编辑账号",
+    "auth.delete_user": "删除账号",
     "auth.reset_password": "重置用户密码",
     "auth.profile": "修改个人资料",
     "auth.upload_avatar": "更新头像",

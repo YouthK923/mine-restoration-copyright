@@ -74,31 +74,36 @@ ok(after == before + 1, "写操作被写入操作日志", "%d -> %d" % (before, 
 ok(last.action == "新建项目", "日志记录了可读动作名", last.action)
 ok("project" in (last.target_type or ""), "日志记录了对象类型", last.target_type)
 
-r = c.get("/logs")
+r = c.get("/profile?tab=logs")
 body = r.get_data(as_text=True)
-ok(r.status_code == 200 and "操作日志" in body, "操作日志查看页可访问")
+ok(r.status_code == 200 and "操作日志" in body, "操作日志分类可访问")
 ok("新建项目" in body, "日志页显示操作记录")
 
-# 用户编辑 / 删除
+# 账号编辑 / 删除（职务只有管理员与操作员两种）
 with app.app_context():
-    u = User(username="tmp_user", role="viewer",
+    u = User(username="tmp_user", role="operator",
              password_hash=User.query.first().password_hash)
     db.session.add(u); db.session.commit()
     uid = u.id
 r = c.get("/users/%d/edit" % uid)
-ok(r.status_code == 200, "用户编辑页可访问")
-c.post("/users/%d/edit" % uid, data={"role": "evaluator", "active": "1"})
-with app.app_context():
-    ok(db.session.get(User, uid).role == "evaluator", "角色已修改并保存")
-# 最后一个管理员保护
+ok(r.status_code == 200, "账号编辑页可访问")
+
+# 保护校验要趁系统里只有一名管理员时做：
+# 先降级唯一的 admin 应被拒绝，再把临时账号提为管理员看修改是否生效
 with app.app_context():
     admin_id = User.query.filter_by(role="admin").first().id
-c.post("/users/%d/edit" % admin_id, data={"role": "viewer", "active": "1"})
+c.post("/users/%d/edit" % admin_id,
+       data={"role": "operator", "active": "1"})
 with app.app_context():
     ok(db.session.get(User, admin_id).role == "admin", "拒绝把最后一个管理员降级")
+
+c.post("/users/%d/edit" % uid, data={"role": "admin", "active": "1"})
+with app.app_context():
+    ok(db.session.get(User, uid).role == "admin", "职务已修改并保存")
+
 c.post("/users/%d/delete" % uid, follow_redirects=True)
 with app.app_context():
-    ok(db.session.get(User, uid) is None, "用户删除生效")
+    ok(db.session.get(User, uid) is None, "账号删除生效")
 # 清理日志核对用的项目
 with app.app_context():
     for p in Project.query.filter_by(name="日志核对项目").all():

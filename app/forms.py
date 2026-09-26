@@ -10,7 +10,7 @@ from wtforms import SelectField, SubmitField, StringField, PasswordField, Boolea
 from wtforms.validators import (DataRequired, Length, Optional, EqualTo,
                                 ValidationError)
 
-from app.utils.constants import UNIT_TYPES, ASPECT_TYPES
+from app.utils.constants import UNIT_TYPES, ASPECT_TYPES, GENDERS
 
 # 邮箱格式：够用的轻量校验。
 # WTForms 自带的 Email() 需要额外安装 email_validator，
@@ -57,14 +57,42 @@ class LoginForm(FlaskForm):
     submit = SubmitField("登录")
 
 
+GENDER_CHOICES = [("", "不填")] + [(g, g) for g in GENDERS]
+
+
 class ProfileForm(FlaskForm):
-    """个人资料：显示名称、职务与联系方式。字段都可留空。"""
-    display_name = StringField("显示名称", validators=[Optional(), Length(max=64)])
-    title = StringField("职务", validators=[Optional(), Length(max=64)])
+    """个人资料：昵称、性别与联系方式。字段都可留空。
+
+    职务不在这里 —— 只能由管理员在「个人设置 · 账号」里改。
+    """
+    display_name = StringField("昵称", validators=[Optional(), Length(max=64)])
+    gender = SelectField("性别", choices=GENDER_CHOICES, validators=[Optional()])
     email = StringField("邮箱", validators=[Optional(), email_format,
                                         Length(max=128)])
     phone = StringField("手机号", validators=[Optional(), Length(max=32)])
     submit_info = SubmitField("保存资料")
+
+
+class RegisterForm(FlaskForm):
+    """注册：账号与密码必填，其余选填。注册后默认是操作员。"""
+    username = StringField("账号名称",
+                           validators=[DataRequired("请填写账号名称"),
+                                       Length(min=2, max=64,
+                                              message="账号名称 2–64 个字符")])
+    password = PasswordField("密码",
+                             validators=[DataRequired("请设置密码"),
+                                         Length(min=6, max=64,
+                                                message="密码至少 6 位")])
+    confirm = PasswordField("确认密码",
+                            validators=[DataRequired(),
+                                        EqualTo("password",
+                                                message="两次输入的密码不一致")])
+    display_name = StringField("昵称", validators=[Optional(), Length(max=64)])
+    gender = SelectField("性别", choices=GENDER_CHOICES, validators=[Optional()])
+    email = StringField("邮箱", validators=[Optional(), email_format,
+                                        Length(max=128)])
+    phone = StringField("手机号", validators=[Optional(), Length(max=32)])
+    submit_reg = SubmitField("注册并登录")
 
 
 class PasswordForm(FlaskForm):

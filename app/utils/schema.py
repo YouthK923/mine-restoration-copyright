@@ -20,31 +20,60 @@ REQUIRED_COLUMNS = [
     ("expert_matrices", "unit_type", "VARCHAR(32)"),
     ("expert_matrices", "l1_name", "VARCHAR(64)"),
     ("expert_matrices", "cr", "FLOAT"),
-    # 用户个人资料（个人设置页）
+    # 用户个人资料（账户页）
     ("users", "display_name", "VARCHAR(64)"),
-    ("users", "title", "VARCHAR(64)"),
     ("users", "email", "VARCHAR(128)"),
     ("users", "phone", "VARCHAR(32)"),
+    ("users", "gender", "VARCHAR(8)"),
     ("users", "avatar", "VARCHAR(256)"),
 ]
 
+# 职务体系由「管理员 / 评价员 / 查看者」三种收敛为「管理员 / 操作员」两种，
+# 旧数据里的后两种统一归为操作员。
+ROLE_MIGRATION = {"evaluator": "operator", "viewer": "operator"}
+
+
+def _add_columns(db):
+    added = []
+    with db.engine.connect() as conn:
+        for table, column, ddl in REQUIRED_COLUMNS:
+            rows = conn.execute(text("PRAGMA table_info(%s)" % table)).fetchall()
+            if not rows:
+                continue                      # 表还不存在，create_all 会建
+            existing = {r[1] for r in rows}
+            if column in existing:
+                continue
+            conn.execute(text(
+                "ALTER TABLE %s ADD COLUMN %s %s" % (table, column, ddl)))
+            conn.commit()
+            added.append("%s.%s" % (table, column))
+    return added
+
+
+def _migrate_roles(db):
+    """把旧角色名统一为新的两种，返回改动的行数。"""
+    changed = 0
+    with db.engine.connect() as conn:
+        rows = conn.execute(text("PRAGMA table_info(users)")).fetchall()
+        if not rows:
+            return 0
+        for old, new in ROLE_MIGRATION.items():
+            r = conn.execute(text("UPDATE users SET role = :new "
+                                  "WHERE role = :old"),
+                             {"new": new, "old": old})
+            changed += r.rowcount or 0
+        conn.commit()
+    return changed
+
 
 def ensure_schema(db):
-    """为已有表补齐缺失列。返回补列清单。"""
-    added = []
+    """为已有表补齐缺失列，并做必要的数据迁移。返回变更清单。"""
     try:
-        with db.engine.connect() as conn:
-            for table, column, ddl in REQUIRED_COLUMNS:
-                rows = conn.execute(text("PRAGMA table_info(%s)" % table)).fetchall()
-                if not rows:
-                    continue                      # 表还不存在，create_all 会建
-                existing = {r[1] for r in rows}
-                if column in existing:
-                    continue
-                conn.execute(text(
-                    "ALTER TABLE %s ADD COLUMN %s %s" % (table, column, ddl)))
-                conn.commit()
-                added.append("%s.%s" % (table, column))
+        changed = _add_columns(db)
+        n = _migrate_roles(db)
+        if n:
+            changed.append("用户角色归一为管理员/操作员 %d 条" % n)
+        return changed
     except Exception as e:                        # 迁移失败不应阻断启动
         print("[schema] 结构检查跳过：%s" % e)
-    return added
+        return []

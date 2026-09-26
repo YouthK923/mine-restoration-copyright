@@ -102,7 +102,10 @@ if not os.path.exists(MAN):
 else:
     doc = fitz.open(MAN)
     pages = doc.page_count
-    check(15 <= pages <= 25, "页数在 15–25 页区间", "共 %d 页" % pages)
+    # 官方口径：文档交前、后各连续 30 页，不足 60 页的全部提交；
+    # 「每页不少于 30 行」还有「有图除外」的补充说明，故此处只卡下限与总量。
+    check(15 <= pages <= 60, "页数不少于 15 页且不足 60 页时全部提交",
+          "共 %d 页" % pages)
     # 封面不编号，目录起为第 1 页
     cover = doc[0].get_text()
     check(NAME not in cover and "第 1 页" not in cover,

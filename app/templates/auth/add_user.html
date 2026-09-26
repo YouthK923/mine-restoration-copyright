@@ -1,15 +1,16 @@
 {% extends "base.html" %}
-{% block title %}新增用户{% endblock %}
+{% block title %}新增账号{% endblock %}
 {% block content %}
 <div class="card" style="max-width:560px;">
-  <h2>新增用户</h2>
+  <h2>新增账号</h2>
+
   <form method="post">
     {{ form.hidden_tag() }}
 
     <div class="field">
-      <label class="field__label" for="username">用户名</label>
+      <label class="field__label" for="username">账户名称</label>
       <input id="username" type="text" name="username" required
-             autocomplete="off" style="width:280px;">
+             maxlength="64" autocomplete="off" style="width:280px;">
     </div>
 
     <div class="field">
@@ -19,17 +20,48 @@
     </div>
 
     <div class="field">
-      <label class="field__label" for="role">角色</label>
+      <label class="field__label" for="role">职务</label>
       <select id="role" name="role">
-        <option value="viewer">查看者（仅可查阅）</option>
-        <option value="evaluator">评价员（可建项目、录数据、执行评价）</option>
-        <option value="admin">管理员（可维护用户与基础数据）</option>
+        {% for code, label in role_labels.items() %}
+        <option value="{{ code }}" {% if code == default_role %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
       </select>
+      <p class="muted" style="margin:6px 0 0;">
+        管理员可管理系统、维护基础数据并查看操作日志；操作员可使用全部业务功能。
+      </p>
+    </div>
+
+    <hr style="margin:22px 0;border:none;border-top:1px solid var(--line);">
+
+    <h3 style="margin:0 0 12px;font-size:15px;">个人资料（选填）</h3>
+
+    <div class="field">
+      <label class="field__label" for="display_name">昵称</label>
+      <input id="display_name" type="text" name="display_name" maxlength="64"
+             placeholder="留空则显示账户名称">
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="gender">性别</label>
+      <select id="gender" name="gender">
+        <option value="">不填</option>
+        {% for g in genders %}<option value="{{ g }}">{{ g }}</option>{% endfor %}
+      </select>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="email">邮箱</label>
+      <input id="email" type="text" name="email" maxlength="128">
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="phone">手机号</label>
+      <input id="phone" type="text" name="phone" maxlength="32">
     </div>
 
     <p class="actions" style="margin-top:18px;">
       <button type="submit" class="btn">保存</button>
-      <a class="btn btn--ghost" href="/users">返回</a>
+      <a class="btn btn--ghost" href="{{ url_for('auth.profile', tab='users') }}">返回</a>
     </p>
   </form>
 </div>
