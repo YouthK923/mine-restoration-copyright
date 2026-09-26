@@ -23,6 +23,7 @@
       <tr>
         <th scope="col">ID</th>
         <th scope="col">用户名</th>
+        <th scope="col">显示名称</th>
         <th scope="col">角色</th>
         <th scope="col">状态</th>
         {% if current_user.role == "admin" %}<th scope="col">操作</th>{% endif %}
@@ -35,6 +36,14 @@
         <td>
           {{ u.username }}
           {% if u.id == current_user.id %}<span class="muted">（当前登录）</span>{% endif %}
+        </td>
+        <td style="text-align:left;">
+          {% if u.display_name %}
+          {{ u.display_name }}
+          {% if u.title %}<span class="muted">· {{ u.title }}</span>{% endif %}
+          {% else %}
+          <span class="muted">—</span>
+          {% endif %}
         </td>
         <td>{{ role_labels.get(u.role, u.role) }}</td>
         <td>

@@ -5,7 +5,8 @@ from flask import (Blueprint, render_template, redirect, url_for, request,
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from app.forms import LoginForm, EmptyForm, ProfileForm, PasswordForm
+from app.forms import (LoginForm, EmptyForm, ProfileForm, PasswordForm,
+                       email_ok)
 from app.models import db, User, OperationLog
 from app.utils import uploads as up
 from app.utils.constants import ROLE_LABELS
@@ -206,8 +207,19 @@ def edit_user(user_id):
                 flash("系统至少需保留一名启用状态的管理员", "error")
                 return redirect(url_for("auth.edit_user", user_id=user.id))
 
+        # 个人资料字段（用户自己也能在「个人设置」里改，管理员在此代改）
+        email = request.form.get("email", "").strip()
+        if not email_ok(email):
+            flash("邮箱格式不正确", "error")
+            return redirect(url_for("auth.edit_user", user_id=user.id))
+
         user.role = role
         user.active = active
+        user.display_name = request.form.get("display_name", "").strip() or None
+        user.title = request.form.get("title", "").strip() or None
+        user.email = email or None
+        user.phone = request.form.get("phone", "").strip() or None
+
         new_password = request.form.get("password", "").strip()
         if new_password:
             user.password_hash = generate_password_hash(new_password)

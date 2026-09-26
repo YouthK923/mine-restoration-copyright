@@ -24,6 +24,12 @@ def email_format(form, field):
         raise ValidationError("邮箱格式不正确")
 
 
+def email_ok(value):
+    """邮箱格式判断，供不用 WTForms 的表单复用（如管理员编辑用户）。"""
+    v = (value or "").strip()
+    return (not v) or bool(EMAIL_RE.match(v))
+
+
 class AHPSelectForm(FlaskForm):
     """选择微地质单元类型与指标层级，以确定判断矩阵规模。"""
     unit_type = SelectField("微地质单元类型", validators=[DataRequired()])

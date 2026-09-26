@@ -184,7 +184,61 @@ ok(good.status_code == 200 and "用户名或密码错误" not in
 
 print()
 print(LINE)
-print("五、还原环境")
+print("五、管理员代改他人资料（用户管理页）")
+print(LINE)
+with app.app_context():
+    other = User.query.filter_by(username="prof_target").first()
+    if other is None:
+        other = User(username="prof_target",
+                     password_hash=generate_password_hash("target123"),
+                     role="evaluator")
+        db.session.add(other)
+        db.session.commit()
+    other_id = other.id
+
+r = client.get("/users")
+ok("显示名称" in r.get_data(as_text=True), "用户列表含「显示名称」列")
+
+r = client.post("/users/%d/edit" % other_id, data={
+    "role": "evaluator", "active": "1",
+    "display_name": "李四", "title": "评价员",
+    "email": "lisi@example.com", "phone": "13900000000",
+}, follow_redirects=True)
+ok("用户信息已保存" in r.get_data(as_text=True), "管理员保存他人资料成功")
+with app.app_context():
+    o = db.session.get(User, other_id)
+    ok(o.display_name == "李四" and o.title == "评价员",
+       "显示名称与职务已写入", o.display_name or "")
+    ok(o.email == "lisi@example.com" and o.phone == "13900000000",
+       "邮箱与手机号已写入")
+
+r = client.post("/users/%d/edit" % other_id, data={
+    "role": "evaluator", "active": "1", "display_name": "李四",
+    "email": "坏邮箱",
+}, follow_redirects=True)
+ok("邮箱格式不正确" in r.get_data(as_text=True), "管理员改错邮箱同样被拦下")
+with app.app_context():
+    o = db.session.get(User, other_id)
+    ok(o.email == "lisi@example.com", "非法邮箱未写入", o.email or "")
+
+# 被改的人登录后，界面上应显示新的显示名称
+c3 = app.test_client()
+body = c3.post("/login", data={"username": "prof_target",
+                               "password": "target123"},
+               follow_redirects=True).get_data(as_text=True)
+ok("李四" in body, "被改用户登录后侧边栏显示其显示名称")
+
+with app.app_context():
+    o = User.query.filter_by(username="prof_target").first()
+    if o:
+        db.session.delete(o)
+        db.session.commit()
+    ok(User.query.filter_by(username="prof_target").first() is None,
+       "临时用户已清理")
+
+print()
+print(LINE)
+print("六、还原环境")
 print(LINE)
 with app.app_context():
     u = User.query.filter_by(username="admin").first()
