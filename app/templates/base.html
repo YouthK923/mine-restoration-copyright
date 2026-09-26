@@ -570,8 +570,8 @@
     /* ---------- 浮层提示（登录成功、各类操作完成、登录失败） ----------
        外层 toast-stack 固定在页面中上方，内层每条各自淡入 → 停留 → 淡出，
        多条提示会依次排开而不重叠。
-       不铺底色、不加边框，只用一层浅色描边托住文字：
-       提示是告知性反馈，不该在页面上多出一块色块。
+       底色是浅绿半透明：既有一层底色把文字托住，又能透出后面的内容，
+       不用高饱和色块，提示不该比页面内容更抢眼。
        pointer-events: none 让它不拦截鼠标，出现期间也能正常操作。 */
     .toast-stack {
       position: fixed;
@@ -588,25 +588,30 @@
 
     .toast-center {
       max-width: min(620px, 82vw);
-      padding: 4px 14px;
-      background: transparent;                     /* 不铺底色 */
-      border: none;
-      color: #3f4447;
+      padding: 8px 22px;
+      border-radius: 999px;
+      /* 浅绿、半透明：不遮住背后的内容，也比纯透明更托得住文字 */
+      background: rgba(223, 241, 231, .76);
+      border: 1px solid rgba(31, 107, 69, .14);
+      color: #2f4a3c;
       font-size: 16px;
       font-weight: 500;
       line-height: 1.65;
       letter-spacing: .03em;
       text-align: center;
       text-wrap: pretty;
-      /* 透明底之上靠一圈浅色描边保证可读：压在白卡片、深色横幅上都清楚 */
-      text-shadow: 0 1px 0 rgba(255, 255, 255, .96),
-                   0 0 4px rgba(255, 255, 255, .96),
-                   0 0 12px rgba(255, 255, 255, .85);
+      backdrop-filter: blur(6px) saturate(1.1);
+      -webkit-backdrop-filter: blur(6px) saturate(1.1);
+      box-shadow: 0 4px 16px rgba(23, 32, 27, .07);
       animation: toast-fade 2.6s ease-in-out forwards;
     }
 
-    /* 失败类提示：同样不铺底色，只用颜色区分 */
-    .toast-center--error { color: #a32b22; }
+    /* 失败类提示：同一套观感，换成浅红底，一眼能区分成败 */
+    .toast-center--error {
+      background: rgba(252, 233, 230, .78);
+      border-color: rgba(163, 43, 34, .16);
+      color: #9c2b23;
+    }
 
     @keyframes toast-fade {
       0%       { opacity: 0; transform: translateY(-6px); }

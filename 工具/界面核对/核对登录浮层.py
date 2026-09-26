@@ -121,23 +121,29 @@ ok('class="flash ok"' not in made, "成功提示不再同时出现在顶部提�
 ok("项目已创建" not in visible_text(made), "顶部没有重复出现该提示")
 
 print()
-print("五、浮层样式：中上方、无底色、居中堆叠、不挡操作")
+print("五、浮层样式：中上方、浅绿半透明底、居中堆叠、不挡操作")
 base = io.open(os.path.join(BASE, "app", "templates", "base.html"),
                encoding="utf-8").read()
-# 浮层规则单独取出来，确认真的没有铺底色
+# 浮层规则单独取出来，确认底色是浅绿且半透明
 m_rule = re.search(r"\.toast-center\s*\{(.*?)\}", base, re.S)
 rule = m_rule.group(1) if m_rule else ""
-ok(bool(re.search(r"background:\s*transparent", rule)),
-   "浮层背景透明（不铺色块）", 
-   re.search(r"background:[^;]*", rule).group(0)
-   if re.search(r"background:[^;]*", rule) else "未找到 background")
-ok(not re.search(r"background:\s*rgba", rule), "没有半透明底色残留")
+m_bg = re.search(r"background:\s*rgba\(([^)]*)\)", rule)
+ok(bool(m_bg), "浮层带半透明底色",
+   m_bg.group(0) if m_bg else "未找到 rgba 底色")
+if m_bg:
+    parts = [p.strip() for p in m_bg.group(1).split(",")]
+    r, g, b = (int(float(p)) for p in parts[:3])
+    alpha = float(parts[3])
+    ok(alpha < 1, "底色是透明的（alpha < 1）", "alpha=%.2f" % alpha)
+    ok(g >= r and g >= b, "底色偏绿（G 通道最大）", "rgb(%d,%d,%d)" % (r, g, b))
+    ok(min(r, g, b) > 190, "底色是浅色（不是高饱和色块）",
+       "rgb(%d,%d,%d)" % (r, g, b))
 for key, label in ((".toast-stack", "外层为固定堆叠容器"),
                    ("position: fixed", "容器用 fixed 定位（悬浮于页面之上）"),
                    ("top: 16px", "位置在页面中上方"),
                    ("translateX(-50%)", "水平居中"),
                    ("flex-direction: column", "多条提示纵向排开不重叠"),
-                   ("text-shadow", "透明底之上用浅色描边保证可读"),
+                   ("backdrop-filter: blur", "半透明毛玻璃（透出背后内容）"),
                    ("@keyframes toast-fade", "定义了淡入淡出动画"),
                    ("forwards", "动画结束后保持透明（不会又冒出来）"),
                    ("pointer-events: none", "浮层不遮挡鼠标操作"),
