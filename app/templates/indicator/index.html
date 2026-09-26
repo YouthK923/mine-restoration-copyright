@@ -22,43 +22,64 @@
   </p>
   {% else %}
   {% for p in patches %}
-  <h3>{{ p.name }}
-    <span class="muted" style="font-weight:normal;font-size:0.85em;">
-      所属项目：{{ p.project.name if p.project else "—" }}
-    </span>
-  </h3>
-  {% if not p.units.count() %}
-  <p class="muted">该图斑尚未划分微地质单元，请先到「微地质单元」页面划分。</p>
-  {% else %}
-  <table>
-    <thead>
-      <tr>
-        <th scope="col">微地质单元</th>
-        <th scope="col">面积占比</th>
-        <th scope="col">数据状态</th>
-        <th scope="col">操作</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for u in p.units %}
-      <tr>
-        <td>{{ u.unit_type }}</td>
-        <td class="num">
-          {% if u.ratio is not none %}{{ "%.2f%%"|format(u.ratio * 100) }}{% else %}—{% endif %}
-        </td>
-        <td>
-          {% if u.indicator_data %}
-          <span class="tag tag--ok">已录入</span>
-          {% else %}
-          <span class="tag tag--muted">未录入</span>
-          {% endif %}
-        </td>
-        <td><a href="/indicator/{{ u.id }}">录入 / 编辑</a></td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% endif %}
+  <div class="patch-panel">
+    <div class="patch-panel__head">
+      <h3 class="patch-panel__name">{{ p.name }}</h3>
+      <span class="patch-panel__meta">
+        所属项目：{{ p.project.name if p.project else "—" }}
+      </span>
+      <span class="patch-panel__meta">
+        微地质单元：{{ p.units.count() }} 个
+      </span>
+      {% if p.units.count() %}
+      <span class="patch-panel__meta patch-panel__tail">
+        <a href="/indicator/import">批量导入本图斑数据</a>
+      </span>
+      {% endif %}
+    </div>
+
+    {% if not p.units.count() %}
+    <div class="notice notice--warn">
+      <p class="notice__title">该图斑尚未划分微地质单元，暂不能录入指标数据。</p>
+      <p style="margin:0;">
+        指标数据是按微地质单元（岩质边坡 / 碎石边坡 / 平台）分别组织的，
+        请先完成划分，再回到本页录入。
+      </p>
+      <p style="margin:10px 0 0;">
+        <a class="btn btn--sm" href="/unit/{{ p.id }}">去划分微地质单元</a>
+      </p>
+    </div>
+    {% else %}
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">微地质单元</th>
+          <th scope="col">面积占比</th>
+          <th scope="col">数据状态</th>
+          <th scope="col">操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in p.units %}
+        <tr>
+          <td>{{ u.unit_type }}</td>
+          <td class="num">
+            {% if u.ratio is not none %}{{ "%.2f%%"|format(u.ratio * 100) }}{% else %}—{% endif %}
+          </td>
+          <td>
+            {% if u.indicator_data %}
+            <span class="tag tag--ok">已录入</span>
+            {% else %}
+            <span class="tag tag--muted">未录入</span>
+            {% endif %}
+          </td>
+          <td><a href="/indicator/{{ u.id }}">录入 / 编辑</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+  </div>
   {% endfor %}
   {% endif %}
 </div>

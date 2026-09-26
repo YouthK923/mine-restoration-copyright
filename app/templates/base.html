@@ -290,46 +290,62 @@
       border-left-color: var(--ok);
     }
 
-    /* ---------- 居中浮层提示（登录成功等即时反馈） ----------
-       悬浮在页面正中心，淡入 → 停留 → 淡出，动画结束后保持透明。
-       pointer-events: none 让它不挡住下面的按钮，出现期间也能正常操作。 */
-    .toast-center {
+    /* ---------- 居中浮层提示（登录成功、各类操作完成） ----------
+       外层 toast-stack 固定在页面正中心并纵向排列，
+       内层每条各自淡入 → 停留 → 淡出，多条提示会依次排开而不重叠。
+       半透明底 + 背景模糊做出毛玻璃质感，不做成实心块；
+       pointer-events: none 让它不拦截鼠标，出现期间也能正常操作。 */
+    .toast-stack {
       position: fixed;
       top: 50%;
       left: 50%;
       z-index: 100;
-      padding: 14px 32px;
-      border-radius: 8px;
-      background: rgba(31, 58, 95, .94);      /* 主色，半透明 */
-      color: #fff;
-      font-size: 17px;
-      font-weight: 600;
-      letter-spacing: .04em;
-      white-space: nowrap;
-      box-shadow: 0 8px 28px rgba(0, 0, 0, .20);
-      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
       transform: translate(-50%, -50%);
-      animation: toast-fade 2.4s ease-in-out forwards;
+      pointer-events: none;
+    }
+
+    .toast-center {
+      max-width: min(560px, 78vw);
+      padding: 13px 28px;
+      border-radius: 999px;
+      background: rgba(31, 58, 95, .62);          /* 半透明，非实体 */
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.65;
+      letter-spacing: .03em;
+      text-align: center;
+      text-wrap: pretty;
+      border: 1px solid rgba(255, 255, 255, .28);
+      backdrop-filter: blur(9px) saturate(1.3);
+      -webkit-backdrop-filter: blur(9px) saturate(1.3);
+      box-shadow: 0 10px 34px rgba(19, 36, 58, .18);
+      animation: toast-fade 2.6s ease-in-out forwards;
     }
 
     @keyframes toast-fade {
-      0%   { opacity: 0; transform: translate(-50%, -50%) scale(.90); }
-      16%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-      72%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-      100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+      0%       { opacity: 0; transform: scale(.90); }
+      14%, 74% { opacity: 1; transform: scale(1); }
+      100%     { opacity: 0; transform: scale(1); }
     }
 
     /* 系统设置里要求「减少动态效果」时，去掉缩放，只做淡入淡出 */
     @media (prefers-reduced-motion: reduce) {
-      .toast-center {
-        animation: toast-fade-plain 2.4s linear forwards;
-      }
+      .toast-center { animation: toast-fade-plain 2.6s linear forwards; }
       @keyframes toast-fade-plain {
-        0%   { opacity: 0; }
-        16%  { opacity: 1; }
-        72%  { opacity: 1; }
-        100% { opacity: 0; }
+        0%       { opacity: 0; }
+        14%, 74% { opacity: 1; }
+        100%     { opacity: 0; }
       }
+    }
+
+    /* 不支持背景模糊时，加深底色保证文字仍然清楚 */
+    @supports not (backdrop-filter: blur(1px)) {
+      .toast-center { background: rgba(31, 58, 95, .88); }
     }
 
     /* ---------- 文字工具类 ---------- */
@@ -339,6 +355,9 @@
     .warn { color: var(--danger); font-weight: 600; }
     .ok { color: var(--ok); font-weight: 600; }
     .nowrap { white-space: nowrap; }
+    /* 表格操作列里常把删除按钮放在 <form> 中。form 默认是块级元素，
+       会把「删除」挤到下一行，导致操作列参差不齐，这里让它留在行内。 */
+    .nowrap form { display: inline; margin: 0; }
     .stack { display: flex; flex-direction: column; gap: 14px; }
 
     /* 状态标签：不依赖颜色单独表意 */
@@ -355,12 +374,44 @@
     .tag--muted { color: var(--ink-soft); background: #f1f3f6; border-color: #dde1e6; }
 
     /* ---------- 登录页 ---------- */
+    /* 背景：淡雅远山（SVG）+ 渐变兜底；卡片垂直水平都居中 */
+    .body--login {
+      background:
+        url("{{ url_for('static', filename='login-bg.svg') }}")
+        center / cover no-repeat fixed,
+        linear-gradient(180deg, #f6f9fc 0%, #e6eef5 100%);
+    }
+    .body--login .app-main {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 20px;
+    }
+    .body--login .container { max-width: none; width: 100%; }
+
     .login-wrap {
       display: flex;
       justify-content: center;
-      padding: 64px 20px;
+      width: 100%;
     }
-    .login-card { width: 100%; max-width: 380px; }
+    .login-card {
+      width: 100%;
+      max-width: 400px;
+      padding: 30px 32px 26px;
+      border-radius: 10px;
+      box-shadow: 0 14px 44px rgba(19, 36, 58, .13);
+    }
+    .login-card h2 {
+      margin: 0 0 6px;
+      text-align: center;
+      font-size: 20px;
+    }
+    .login-card__sub {
+      margin: 0 0 22px;
+      text-align: center;
+      font-size: 12.5px;
+      color: var(--ink-soft);
+    }
     .login-card .field__label { font-size: 14px; color: var(--ink); }
 
     /* ---------- 首页功能块 ---------- */
@@ -433,6 +484,38 @@
     .notice__list a { color: var(--accent); }
     .notice__hint { margin: 8px 0 0; font-size: 12.5px; color: var(--ink-soft); }
 
+    /* ---------- 图斑面板（按图斑分块展示，如指标数据采集） ---------- */
+    .patch-panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      padding: 14px 16px;
+      margin: 0 0 14px;
+    }
+    .patch-panel:last-child { margin-bottom: 0; }
+    .patch-panel__head {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 6px 14px;
+      margin: 0 0 12px;
+      padding-bottom: 9px;
+      border-bottom: 1px solid var(--line);
+    }
+    .patch-panel__name {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .patch-panel__meta {
+      font-size: 12.5px;
+      color: var(--ink-soft);
+    }
+    .patch-panel__meta a { color: var(--accent); }
+    .patch-panel__tail { margin-left: auto; }
+    .patch-panel .notice { margin: 0; }
+    .patch-panel table { margin: 0; }
+
     /* ---------- 窄屏适配 ---------- */
     @media (max-width: 860px) {
       .app-body { flex-direction: column; }
@@ -455,16 +538,22 @@
     }
   </style>
 </head>
-<body>
+<body class="{% if not current_user.is_authenticated %}body--login{% endif %}">
   <a class="skip-link" href="#main">跳到主要内容</a>
 
   {# 取一次即可（同一请求内重复调用返回相同内容）。
      类别为 toast 的渲染成居中浮层，其余仍是页面顶部的提示条 ——
      错误提示需要停下来细读，不适合做成会消失的浮层。 #}
   {% set flash_msgs = get_flashed_messages(with_categories=true) %}
-  {% for category, message in flash_msgs if category == "toast" %}
-  <div class="toast-center" role="status" aria-live="polite">{{ message }}</div>
-  {% endfor %}
+  {# 类别为 toast / ok 的渲染成页面正中的浮层（操作完成的即时反馈）；
+     其余（尤其 error）仍是页面顶部的提示条 ——
+     错误提示需要停下来细读，不适合做成会消失的浮层。
+     没有浮层时这个容器是空的，不占任何位置。 #}
+  <div class="toast-stack">
+    {% for category, message in flash_msgs if category in ("toast", "ok") %}
+    <div class="toast-center" role="status" aria-live="polite">{{ message }}</div>
+    {% endfor %}
+  </div>
 
   <header class="app-header">
     <span class="app-header__title">历史遗留废弃矿山自然恢复适宜性评价系统</span>
@@ -501,7 +590,7 @@
 
     <main id="main" class="app-main">
       <div class="container">
-        {% for category, message in flash_msgs if category != "toast" %}
+        {% for category, message in flash_msgs if category not in ("toast", "ok") %}
         <p class="flash {{ category }}" role="status">{{ message }}</p>
         {% endfor %}
         {% block content %}{% endblock %}

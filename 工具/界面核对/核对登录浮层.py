@@ -81,29 +81,36 @@ ok(not has_toast(body2), "第二次访问已无浮层")
 ok("登录成功" not in visible_text(body2), "文字也一并消失")
 
 print()
-print("四、其他提示不受影响，仍是顶部提示条")
+print("四、成功提示一律走居中浮层，错误提示仍是顶部提示条")
 c2 = app.test_client()
 bad = c2.post("/login", data={"username": "admin", "password": "wrong"},
               follow_redirects=True).get_data(as_text=True)
 ok('class="flash error"' in bad and "用户名或密码错误" in bad,
-   "登录失败仍是顶部错误提示条")
+   "登录失败仍是顶部错误提示条（需停下来细读）")
 ok(not has_toast(bad), "登录失败不出现浮层")
 
 c2.post("/login", data={"username": "admin", "password": "admin123"},
         follow_redirects=True)
 made = c2.post("/project/add", data={"name": "浮层核对", "code": "TOASTCHK"},
                follow_redirects=True).get_data(as_text=True)
-ok('class="flash ok"' in made and "项目已创建" in made,
-   "其他成功提示仍是顶部提示条")
-ok(not has_toast(made), "其他操作不出现浮层")
+m2 = TOAST_RE.search(made)
+ok(m2 is not None, "其他操作成功也出现居中浮层")
+ok(m2 is not None and "项目已创建" in m2.group(0), "浮层文字为操作结果")
+ok('class="flash ok"' not in made, "成功提示不再同时出现在顶部提示条里")
+ok("项目已创建" not in visible_text(made), "顶部没有重复出现该提示")
 
 print()
-print("五、CSS 动画与减弱动效分支都在")
+print("五、浮层样式：半透明毛玻璃、居中堆叠、不挡操作")
 base = io.open(os.path.join(BASE, "app", "templates", "base.html"),
                encoding="utf-8").read()
-for key, label in (("position: fixed", "浮层用 fixed 定位（悬浮于页面之上）"),
-                   ("top: 50%", "水平垂直居中：top 50%"),
-                   ("translate(-50%, -50%)", "水平垂直居中：反向平移"),
+for key, label in ((".toast-stack", "外层为固定居中的堆叠容器"),
+                   ("position: fixed", "容器用 fixed 定位（悬浮于页面之上）"),
+                   ("top: 50%", "居中：top 50%"),
+                   ("translate(-50%, -50%)", "居中：反向平移"),
+                   ("flex-direction: column", "多条提示纵向排开不重叠"),
+                   ("backdrop-filter: blur", "半透明毛玻璃效果"),
+                   ("rgba(31, 58, 95, .62)", "底色半透明（非实体色块）"),
+                   ("@supports not (backdrop-filter", "不支持模糊时加深底色兜底"),
                    ("@keyframes toast-fade", "定义了淡入淡出动画"),
                    ("forwards", "动画结束后保持透明（不会又冒出来）"),
                    ("pointer-events: none", "浮层不遮挡鼠标操作"),
