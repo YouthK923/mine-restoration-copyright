@@ -163,8 +163,11 @@ with app.app_context():
     pr = wf.patch_progress(pid)
 ok(not pr["constraint"]["passed"], "流程状态显示判定未通过")
 blocked = [b for b in pr["blocking"] if b["step"] == "constraint"]
-ok(bool(blocked) and "人工辅助" in blocked[0]["reason"],
-   "拦原因说明了按论文应判「人工辅助或生态重建」")
+# 提示只写「缺什么」：label 说明未通过，reason 直接引用判定记录里没过的项
+ok(bool(blocked) and "未通过" in blocked[0]["label"],
+   "拦提示指明限制性条件判定未通过", blocked[0]["label"] if blocked else "")
+ok(bool(blocked) and "区位约束" in (blocked[0]["reason"] or ""),
+   "并把具体没通过的条件带出来", blocked[0]["reason"] if blocked else "")
 cleanup(pid, "3")
 
 print()

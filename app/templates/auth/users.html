@@ -3,11 +3,6 @@
 {% block content %}
 <div class="card">
   <h2>用户管理</h2>
-  <p class="muted">
-    系统设有管理员、评价员、查看者三种角色：管理员可维护用户与基础数据，
-    评价员可建项目、录数据、执行评价，查看者仅可查阅。
-  </p>
-
   <p class="actions" style="margin-bottom:12px;">
     {% if current_user.role == "admin" %}
     <a class="btn btn--sm" href="/users/add">新增用户</a>

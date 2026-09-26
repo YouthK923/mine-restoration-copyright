@@ -3,11 +3,6 @@
 {% block content %}
 <div class="card" style="max-width:760px;">
   <h2>限制性条件判定 · {{ patch.name }}</h2>
-  <p class="muted">
-    五项条件全部通过方可进入定量评价；任一项不通过即判定为「人工辅助或生态重建」，
-    不再进行后续计算。
-  </p>
-
   <form method="post">
     {{ form.hidden_tag() }}
 

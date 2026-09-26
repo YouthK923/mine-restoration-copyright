@@ -88,39 +88,38 @@ def patch_progress(patch_id):
         units_step["detail"] += "（占比合计不等于 100%，请检查面积录入）"
 
     # ---- 汇总未满足的前置条件（按论文 4.1 节的流程顺序：限制性判定优先） ----
+    # reason 只写「缺什么」这一个事实，不写为什么重要的说明 ——
+    # 缺少什么由 label 指明，怎么补由 fix_label 给出，页面不必再解释一遍。
     blocking = []
     if not constraint_step["done"]:
         blocking.append({
-            "step": "constraint", "label": "执行限制性条件判定",
-            "reason": "尚未执行限制性条件判定。论文流程要求先判定政策、区位约束、"
-                      "土壤污染、地质灾害与耕地属性，通过后方可进入定量评价。",
-            "fix_url": "/constraint/%d" % patch_id, "fix_label": "去执行限制性判定",
+            "step": "constraint", "label": "限制性条件判定未执行",
+            "reason": "五项限制性条件尚未逐项判定。",
+            "fix_url": "/constraint/%d" % patch_id, "fix_label": "去执行判定",
         })
     elif not constraint_step["passed"]:
         blocking.append({
             "step": "constraint", "label": "限制性条件判定未通过",
-            "reason": "限制性条件判定未通过。按论文流程，此类矿山应直接判定为"
-                      "「人工辅助或生态重建」，不进入定量评价。",
+            "reason": cc.reason or "",
             "fix_url": "/constraint/%d" % patch_id, "fix_label": "去复核判定结果",
         })
     if not units_step["done"]:
         blocking.append({
-            "step": "units", "label": "划分微地质单元",
-            "reason": "该图斑尚未划分微地质单元，无法确定各单元的面积权重。",
-            "fix_url": "/unit/%d" % patch_id, "fix_label": "去划分微地质单元",
+            "step": "units", "label": "未划分微地质单元",
+            "reason": "该图斑下没有任何微地质单元。",
+            "fix_url": "/unit/%d" % patch_id, "fix_label": "去划分",
         })
     elif not ratio_ok:
         blocking.append({
-            "step": "units", "label": "补齐单元面积",
-            "reason": "各微地质单元面积占比合计不等于 100%，加权结果会失真。",
-            "fix_url": "/unit/%d" % patch_id, "fix_label": "去核对单元面积",
+            "step": "units", "label": "面积占比合计不为 100%",
+            "reason": "当前合计 %.2f%%。" % (ratio_sum * 100),
+            "fix_url": "/unit/%d" % patch_id, "fix_label": "去核对面积",
         })
     if units_step["done"] and not data_step["ready"]:
         blocking.append({
-            "step": "data", "label": "录入指标数据",
-            "reason": data_step["detail"] + "。缺少数据时计算会把空值按不适用跳过，"
-                      "得出的结论不能反映实际情况。",
-            "fix_url": "/indicator/", "fix_label": "去录入指标数据",
+            "step": "data", "label": "指标数据未录入完整",
+            "reason": data_step["detail"],
+            "fix_url": "/indicator/", "fix_label": "去录入",
         })
 
     return {
@@ -154,11 +153,10 @@ def report_progress(patch_id):
     record = latest_result(patch_id)
     if not blocking and record is None:
         blocking.append({
-            "step": "evaluate", "label": "执行适宜性评价",
-            "reason": "该图斑尚无评价记录。报告是评价结论的呈现，"
-                      "需先执行定量评价后才能生成。",
+            "step": "evaluate", "label": "尚未执行适宜性评价",
+            "reason": "该图斑还没有评价记录。",
             "fix_url": "/evaluate/%d" % patch_id,
-            "fix_label": "去执行适宜性评价",
+            "fix_label": "去执行评价",
         })
     return {
         "ready": not blocking,

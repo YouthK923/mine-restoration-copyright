@@ -4,12 +4,6 @@
 {% block content %}
 <div class="card">
   <h2>适宜性定量评价</h2>
-  <p class="muted">
-    系统按论文式(8) 对各项指标做标准化，按式(9) 分单元赋分并按面积占比加权合成，
-    最后按论文表 4 判定适宜性等级。未满足前置条件的图斑不能执行评价，
-    下表会列出所缺步骤。
-  </p>
-
   {{ patch_guide(projects_without_patch) }}
 
   {% if not patches %}

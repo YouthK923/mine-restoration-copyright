@@ -41,10 +41,18 @@ def create_app(config_class=Config):
     app.register_blueprint(search.bp)
 
     # 全局登录保护：除登录页与静态资源外，均需登录
-    from flask import request, redirect, url_for
+    from flask import request, redirect, url_for, send_from_directory
     from flask_login import current_user, login_user
 
-    PUBLIC_ENDPOINTS = {"auth.login", "static"}
+    PUBLIC_ENDPOINTS = {"auth.login", "static", "favicon"}
+
+    # 浏览器默认会请求根路径下的 /favicon.ico。
+    # 页面里虽已用 <link rel="icon"> 指向 static 目录，但出错页等场景仍会
+    # 回退到这个路径，补一条路由免得日志里一直刷 404。
+    @app.route("/favicon.ico")
+    def favicon():
+        return send_from_directory(app.static_folder, "favicon.ico",
+                                   mimetype="image/vnd.microsoft.icon")
 
     @app.before_request
     def require_login():

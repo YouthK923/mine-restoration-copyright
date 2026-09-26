@@ -4,11 +4,6 @@
 {% block content %}
 <div class="card">
   <h2>限制性指标判定</h2>
-  <p class="muted">
-    按论文表 2 与 4.1 节流程，对每项限制性条件逐项判定。
-    任一项不通过即判定为「人工辅助或生态重建」，不再进入定量评价。
-  </p>
-
   {{ patch_guide(projects_without_patch) }}
 
   {% if not patches %}

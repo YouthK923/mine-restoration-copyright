@@ -41,18 +41,36 @@ def to_code_pairs(unit_type, level, l1, names, weights):
     return pairs
 
 
+def normalize_l1(unit_type, level, l1):
+    """把 l1 参数规整为该单元类型下确实存在的一级指标名。
+
+    level=2 的页面（判断矩阵、多专家矩阵）都按 l1 取二级指标。
+    直接带 ?level=2 访问而没给 l1 时，原先会 KeyError: None 直接 500；
+    这里退回该单元类型的第一个一级指标，页面照常可用。
+    """
+    if level != 2:
+        return None
+    valid = list(DEFAULT_WEIGHTS.get(unit_type, {}).get("l2", {}))
+    if not valid:
+        return None
+    return l1 if l1 in valid else valid[0]
+
+
 def indicator_list(unit_type, level, l1=None):
     """返回 (指标名称列表, 默认权重列表)。
 
     level=1 时返回一级指标；level=2 时返回指定一级指标下的二级指标。
+    l1 缺失或不属于该单元类型时，退回第一个一级指标，不抛异常。
     """
     weights = DEFAULT_WEIGHTS[unit_type]
     if level == 1:
         names = list(weights["l1"].keys())
         vec = [weights["l1"][n] for n in names]
         return names, vec
-    # level == 2
-    l2 = weights["l2"][l1]
+    l2_all = weights["l2"]
+    if l1 not in l2_all:
+        l1 = next(iter(l2_all))
+    l2 = l2_all[l1]
     names = list(l2.keys())
     vec = [l2[n] for n in names]
     return names, vec
@@ -88,7 +106,7 @@ def index():
 def matrix():
     unit_type = request.values.get("unit_type")
     level = int(request.values.get("level", 1))
-    l1 = request.values.get("l1")
+    l1 = normalize_l1(unit_type, level, request.values.get("l1"))
 
     if unit_type not in DEFAULT_WEIGHTS:
         flash("无效的微地质单元类型", "error")
@@ -225,9 +243,12 @@ def indicators_reset():
 # ---------------------------- 多专家矩阵 ----------------------------
 
 def expert_scope():
+    """从请求中取（并规整）单元类型、层级与所属一级指标。"""
     unit_type = request.values.get("unit_type") or UNIT_TYPES[0]
+    if unit_type not in DEFAULT_WEIGHTS:
+        unit_type = UNIT_TYPES[0]
     level = int(request.values.get("level", 1))
-    l1 = request.values.get("l1") or None
+    l1 = normalize_l1(unit_type, level, request.values.get("l1"))
     return unit_type, level, l1
 
 

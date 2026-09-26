@@ -4,11 +4,6 @@
 {% block content %}
 <div class="card">
   <h2>报告与结果输出</h2>
-  <p class="muted">
-    可查看逐层得分明细与结果图表，并导出 PDF 或 Word 评价报告。
-    报告是评价结论的呈现，因此仅在评价所依赖的前置步骤全部完成后才可生成。
-  </p>
-
   {{ patch_guide(projects_without_patch) }}
 
   {% if not patches %}
@@ -45,7 +40,7 @@
             <a class="link-btn" href="/report/{{ p.id }}/word">导出 Word</a>
           </span>
           {% else %}
-          <span class="muted">请先完成前置步骤</span>
+          <span class="muted">—</span>
           {% endif %}
         </td>
       </tr>

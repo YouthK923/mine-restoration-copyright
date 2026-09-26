@@ -3,12 +3,6 @@
 {% block content %}
 <div class="card">
   <h2>多专家矩阵汇总 · {{ unit_type }} · {% if level == 1 %}一级指标{% else %}二级指标（{{ l1 }}）{% endif %}</h2>
-  <p class="muted">
-    对各位专家的判断矩阵按对应元素取几何平均：
-    a<sub>ij</sub> = (a<sub>ij</sub><sup>(1)</sup> × … × a<sub>ij</sub><sup>(k)</sup>)<sup>1/k</sup>。
-    该方式可保持矩阵的互反性，汇总后重新计算权重与一致性比例。
-  </p>
-
   {% if not result %}
   <p class="muted">
     该范围内尚未录入专家矩阵。
@@ -102,10 +96,5 @@
     <a class="btn btn--ghost" href="/ahp/experts?unit_type={{ unit_type }}&level={{ level }}{% if l1 %}&l1={{ l1 }}{% endif %}">返回录入</a>
     <a class="btn btn--ghost" href="/ahp/">返回权重计算</a>
   </p>
-  {% if not result.consistent %}
-  <p class="muted" style="margin-top:8px;">
-    汇总矩阵一致性未通过，暂不能保存为生效权重。
-  </p>
-  {% endif %}
 </div>
 {% endblock %}

@@ -4,11 +4,6 @@
 {% block content %}
 <div class="card" style="max-width:880px;">
   <h2>执行适宜性评价 · {{ patch.name }}</h2>
-  <p class="muted">
-    系统按论文式(8) 对各项指标做标准化，按式(9) 分单元赋分并按面积占比加权合成，
-    最后按论文表 4 判定适宜性等级。评价结果会保存，可随时回看。
-  </p>
-
   {{ ui.workflow_steps(progress) }}
   {{ ui.workflow_blocking(progress) }}
 
@@ -25,13 +20,11 @@
     <button type="button" class="btn" disabled>开始评价</button>
     <a class="btn btn--ghost" href="/evaluate/">返回</a>
   </p>
-  <p class="muted">前置步骤全部完成后，该按钮才可用。</p>
   {% endif %}
 </div>
 
 <div class="card" style="max-width:880px;">
   <h2>当前流程状态</h2>
-  <p class="muted">按论文 4.1 节的顺序列出，限制性条件判定在前。</p>
   <table>
     <thead>
       <tr><th scope="col">步骤</th><th scope="col">状态</th><th scope="col">说明</th></tr>
@@ -68,12 +61,7 @@
 
 {% if weight_sources %}
 <div class="card" style="max-width:880px;">
-  <h2>本次将采用的指标权重</h2>
-  <p class="muted">
-    权重决定各指标对评价结果的影响程度。默认采用论文表 3 的取值；
-    若已用层次分析法算出新权重并保存，则按新权重计算。
-  </p>
-  <table style="max-width:720px;">
+  <h2>本次将采用的指标权重</h2>  <table style="max-width:720px;">
     <thead>
       <tr><th scope="col">微地质单元</th><th scope="col">权重来源</th></tr>
     </thead>

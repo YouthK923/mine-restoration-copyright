@@ -73,23 +73,19 @@
 {% endmacro %}
 
 
-{# 前置条件未满足时的提示块，逐条给出原因与去处理入口 #}
+{# 前置条件未满足时的提示块：只列缺什么，并给出处理入口 #}
 {% macro workflow_blocking(progress) %}
 {% if progress.blocking %}
 <div class="notice notice--warn">
-  <p class="notice__title">尚不能执行本步骤，请先完成以下前置工作：</p>
+  <p class="notice__title">尚不能执行本步骤，需要先完成：</p>
   <ol class="notice__list">
     {% for b in progress.blocking %}
     <li>
-      <strong>{{ b.label }}</strong> —— {{ b.reason }}
+      <strong>{{ b.label }}</strong>{% if b.reason %}：{{ b.reason }}{% endif %}
       <a class="link-btn" href="{{ b.fix_url }}">{{ b.fix_label }}</a>
     </li>
     {% endfor %}
   </ol>
-  <p class="notice__hint">
-    说明：本系统按论文 4.1 节的评价流程设置前置检查，
-    避免在前置条件不具备时产出不合理的评价结论。
-  </p>
 </div>
 {% endif %}
 {% endmacro %}
@@ -107,27 +103,21 @@
 
 
 {# 层级引导：本系统是「项目 → 图斑」两级结构，评价针对的是图斑而非项目。
-   下游各页按图斑组织数据，故只要存在「还没建图斑的项目」，就提示下一步该做什么。 #}
+   下游各页按图斑组织数据，故只要存在「还没建图斑的项目」，就直接列出并给出入口。 #}
 {% macro patch_guide(projects_without_patch) %}
 {% if projects_without_patch %}
 <div class="notice notice--warn">
-  <p class="notice__title">有 {{ projects_without_patch|length }} 个项目下还没有图斑，本页不会出现它们。</p>
-  <p>
-    本系统是「项目 → 矿山图斑」两级结构：项目是归档单位，而
-    <strong>限制性条件判定、微地质单元划分、指标数据与适宜性评价都是针对图斑进行的</strong>。
+  <p class="notice__title">
+    以下 {{ projects_without_patch|length }} 个项目下还没有图斑，本页不会出现它们：
   </p>
   <ul class="notice__list">
     {% for p in projects_without_patch %}
     <li>
       {{ p.name }}
-      —— <a class="link-btn" href="/project/{{ p.id }}/patch/add">为它新建图斑</a>
+      <a class="link-btn" href="/project/{{ p.id }}/patch/add">新建图斑</a>
     </li>
     {% endfor %}
   </ul>
-  <p class="notice__hint">
-    也可以先进入 <a href="/project/">项目与矿山档案</a>，
-    点该项目右侧的「＋ 新建图斑」，建好之后本页就会出现该图斑。
-  </p>
 </div>
 {% endif %}
 {% endmacro %}

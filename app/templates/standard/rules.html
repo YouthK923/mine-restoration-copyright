@@ -3,11 +3,6 @@
 {% block content %}
 <div class="card">
   <h2>结构化规则 · {{ standard.province }} {{ standard.name }}</h2>
-  <p class="muted">
-    将标准条文拆解为「判定项 + 比较符 + 阈值 + 条件类型」的可执行规则，
-    使同一指标在各省的阈值差异可自动比对。
-  </p>
-
   {% if rules %}
   <table>
     <caption class="muted">共 {{ rules|length }} 条规则</caption>

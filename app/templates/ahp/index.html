@@ -3,11 +3,6 @@
 {% block content %}
 <div class="card" style="max-width:720px;">
   <h2>AHP 权重计算 · 选择指标层级</h2>
-  <p class="muted">
-    选择微地质单元类型与指标层级后，系统按论文表 3 确定判断矩阵的规模。
-    岩质边坡不设土壤指标、平台不设地形指标，系统会相应调整矩阵所包含的指标。
-  </p>
-
   <form method="post">
     {{ form.hidden_tag() }}
 
@@ -38,11 +33,6 @@
 
 <div class="card">
   <h2>各微地质单元当前生效权重</h2>
-  <p class="muted">
-    适宜性评价按此处列出的权重计算。默认采用论文表 3 的取值；
-    若在本系统中用层次分析法算出了新权重并保存，则改按新权重计算。
-  </p>
-
   <table>
     <thead>
       <tr>

@@ -4,11 +4,6 @@
 {% block content %}
 <div class="card">
   <h2>微地质单元</h2>
-  <p class="muted">
-    按论文 4.1 节将矿山图斑划分为岩质边坡、碎石边坡、平台三类微地质单元。
-    面积占比由面积自动计算，即论文式(9) 中决定各单元权重的系数。
-  </p>
-
   {{ patch_guide(projects_without_patch) }}
 
   {% if not rows %}
