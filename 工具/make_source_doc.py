@@ -96,6 +96,7 @@ SOURCE_ORDER = [
     "app/views/search.py",
     "app/templates/base.html",
     "app/templates/_macros.html",
+    "app/templates/_login_badge.svg",
     "app/templates/error.html",
     "app/templates/auth/login.html",
     "app/templates/auth/home.html",

@@ -6,8 +6,8 @@
 <style>
   /* ================= 登录页（仿 Apple 账户页） =================
      纯白底、居中、大量留白；色彩只用在徽标与按钮上。
-     首屏只放徽标、标题、一句话说明与一个登录按钮，
-     系统介绍放在下方滚动可见，登录表单点击后渐变浮现。 */
+     首屏放徽标、标题、一句话说明与登录按钮；系统介绍在下方，
+     随滚动逐条弹入、往回滚时弹回。 */
 
   .lp { color: #1d1d1f; }
 
@@ -21,12 +21,36 @@
     min-height: 100dvh;
     padding: 56px 20px 72px;
   }
+
+  /* 徽标：滚动时各圈向四周散开并淡出。
+     --p 为 0~1 的滚动进度，由页面脚本写入；
+     每圈自带 --k（散开倍数，由内向外递减），使各圈逐渐拉开距离 */
   .lp-badge {
     width: 212px;
     height: 212px;
     margin-bottom: 36px;
+    --p: 0;
     animation: lp-in .7s ease both;
   }
+  .lp-badge__svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;              /* 散开时圆点不被画布裁掉 */
+    opacity: calc(1 - var(--p) * .94);
+    filter: blur(calc(var(--p) * 2.6px));
+  }
+  .lp-ring {
+    transform-box: fill-box;
+    transform-origin: center;
+    transform: scale(calc(1 + (var(--k) - 1) * var(--p)));
+  }
+  .lp-badge__mark {
+    transform-box: fill-box;
+    transform-origin: center;
+    transform: scale(calc(1 + .18 * var(--p)));
+  }
+
   .lp-title {
     margin: 0 0 18px;
     font-size: clamp(28px, 4.2vw, 42px);
@@ -79,6 +103,34 @@
     to   { opacity: 1; transform: none; }
   }
 
+  /* ---------- 滚动进场 ----------
+     进入视口时按方向弹入，离开视口时弹回，可反复。
+     交错延迟只加在「进入」的规则上，退出时不延迟，否则会显得拖沓。 */
+  .lp-reveal {
+    opacity: 0;
+    transition: opacity .62s ease,
+                transform .62s cubic-bezier(.16, .84, .34, 1),
+                border-color .62s ease, background-color .62s ease;
+    transition-delay: 0s;
+    will-change: opacity, transform;
+  }
+  .lp-reveal[data-dir="left"]  { transform: translate3d(-48px, 0, 0); }
+  .lp-reveal[data-dir="right"] { transform: translate3d(48px, 0, 0); }
+  .lp-reveal[data-dir="up"]    { transform: translate3d(0, 36px, 0); }
+  .lp-reveal.is-in {
+    opacity: 1;
+    transform: none;
+    transition-delay: calc(var(--i, 0) * 85ms);
+  }
+
+  /* 标题颜色由淡到深，强化「浮现」的层次感 */
+  .lp-reveal h2,
+  .lp-reveal h3,
+  .lp-reveal .lp-mod__name { color: #c2d2c8; transition: color .7s ease; }
+  .lp-reveal.is-in h3,
+  .lp-reveal.is-in .lp-mod__name { color: var(--accent); }
+  .lp-reveal.is-in h2 { color: #1d1d1f; }
+
   /* ---------- 系统介绍 ---------- */
   .lp-intro {
     max-width: 980px;
@@ -122,10 +174,7 @@
     background: #fff;
     color: var(--accent);
   }
-  .lp-point h3 {
-    margin: 0 0 8px;
-    font-size: 16px;
-  }
+  .lp-point h3 { margin: 0 0 8px; font-size: 16px; }
   .lp-point p {
     margin: 0;
     font-size: 13.5px;
@@ -134,27 +183,35 @@
     text-wrap: pretty;
   }
 
-  .lp-sub-title {
-    margin: 0 0 16px;
-    font-size: 17px;
-  }
+  .lp-sub-title { margin: 0 0 16px; font-size: 17px; }
   .lp-mods {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(258px, 1fr));
     gap: 12px;
     margin-bottom: 46px;
+    align-items: start;
   }
+
+  /* 模块卡：默认只显示编号与名称，鼠标悬停或键盘聚焦时才展开职责说明 */
   .lp-mod {
     position: relative;
-    padding: 16px 18px 16px 46px;
+    padding: 17px 40px 17px 48px;
     background: #fff;
     border: 1px solid #e6e6e8;
     border-radius: 14px;
+    outline: none;
+    transition: border-color .3s ease, box-shadow .3s ease;
+  }
+  .lp-mod:hover,
+  .lp-mod:focus-within,
+  .lp-mod:focus {
+    border-color: rgba(31, 107, 69, .42);
+    box-shadow: 0 8px 22px rgba(19, 60, 43, .08);
   }
   .lp-mod__no {
     position: absolute;
-    left: 16px;
-    top: 16px;
+    left: 17px;
+    top: 17px;
     font-size: 13px;
     font-weight: 700;
     color: #c8d6cd;
@@ -162,43 +219,53 @@
   }
   .lp-mod__name {
     display: block;
-    margin-bottom: 5px;
     font-size: 14px;
     font-weight: 600;
+  }
+  .lp-mod__more {
+    position: absolute;
+    right: 15px;
+    top: 17px;
+    display: grid;
+    place-items: center;
+    color: #c3cfc8;
+    transition: transform .3s ease, color .3s ease;
+  }
+  .lp-mod:hover .lp-mod__more,
+  .lp-mod:focus-within .lp-mod__more {
+    transform: rotate(90deg);
     color: var(--accent);
   }
+  /* 用 grid-template-rows 0fr→1fr 展开，高度过渡自然 */
+  .lp-mod__body {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows .34s ease, margin-top .34s ease;
+  }
+  .lp-mod:hover .lp-mod__body,
+  .lp-mod:focus-within .lp-mod__body {
+    grid-template-rows: 1fr;
+    margin-top: 7px;
+  }
   .lp-mod__desc {
-    display: block;
+    overflow: hidden;
+    margin: 0;
     font-size: 12.5px;
     line-height: 1.7;
     color: #6e6e73;
+    opacity: 0;
+    transition: opacity .3s ease;
     text-wrap: pretty;
   }
+  .lp-mod:hover .lp-mod__desc,
+  .lp-mod:focus-within .lp-mod__desc { opacity: 1; }
 
-  .lp-flow {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin: 0 0 46px;
-    padding: 0;
-    list-style: none;
-    counter-reset: none;
-  }
-  .lp-flow li {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 7px 14px;
-    font-size: 13px;
-    background: #f5f5f7;
-    border-radius: 980px;
-    color: #1d1d1f;
-  }
-  .lp-flow li span {
-    font-size: 11.5px;
-    font-weight: 700;
-    color: var(--accent);
-    font-variant-numeric: tabular-nums;
+  /* 触摸设备没有悬停，直接把说明摊开 */
+  @media (hover: none) {
+    .lp-mod { padding-right: 18px; }
+    .lp-mod__more { display: none; }
+    .lp-mod__body { grid-template-rows: 1fr; margin-top: 7px; }
+    .lp-mod__desc { opacity: 1; }
   }
 
   .lp-foot {
@@ -252,10 +319,7 @@
     transition: transform .55s cubic-bezier(.16, .84, .34, 1) .05s,
                 opacity .55s ease .05s;
   }
-  .lp-auth.is-open .lp-auth__panel {
-    opacity: 1;
-    transform: none;
-  }
+  .lp-auth.is-open .lp-auth__panel { opacity: 1; transform: none; }
 
   .lp-auth__close {
     position: absolute;
@@ -360,9 +424,15 @@
     color: #a1a1a6;
   }
 
-  /* 系统设置里要求减少动态效果时，去掉位移与缩放 */
+  /* 系统设置里要求减少动态效果时，去掉位移、缩放与滚动特效 */
   @media (prefers-reduced-motion: reduce) {
     .lp-badge, .lp-title, .lp-sub, .lp-cta, .lp-more { animation: none; }
+    .lp-badge__svg { opacity: 1; filter: none; }
+    .lp-ring, .lp-badge__mark { transform: none; }
+    .lp-reveal { opacity: 1; transform: none !important; }
+    .lp-reveal h2, .lp-reveal h3, .lp-reveal .lp-mod__name { color: inherit; }
+    .lp-reveal.is-in h2 { color: #1d1d1f; }
+    .lp-reveal.is-in h3, .lp-reveal.is-in .lp-mod__name { color: var(--accent); }
     .lp-auth, .lp-auth__panel { transition: opacity .2s linear; }
     .lp-auth__panel { transform: none; }
   }
@@ -378,8 +448,9 @@
 
   {# ---------------- 首屏：徽标 + 标题 + 说明 + 登录入口 ---------------- #}
   <section class="lp-hero">
-    <img class="lp-badge" width="212" height="212" alt=""
-         src="{{ url_for('static', filename='login-badge.svg') }}">
+    <div class="lp-badge" id="lp-badge" aria-hidden="true">
+      {% include "_login_badge.svg" %}
+    </div>
 
     <h1 class="lp-title">历史遗留废弃矿山<br>自然恢复适宜性评价系统</h1>
 
@@ -397,55 +468,54 @@
     </a>
   </section>
 
-  {# ---------------- 系统介绍：向下滑动可见 ---------------- #}
+  {# ---------------- 系统介绍：随滚动逐条弹入 ---------------- #}
   <section class="lp-intro" id="intro">
-    <h2 class="lp-intro__title">一套把评价流程固定下来的工具</h2>
-    <p class="lp-intro__lead">
+    <h2 class="lp-intro__title lp-reveal" data-dir="up">一套把评价流程固定下来的工具</h2>
+    <p class="lp-intro__lead lp-reveal" data-dir="up" style="--i: 1">
       自然恢复适宜性评价的难点不在算公式，而在「先做什么、后做什么」以及
       「每一步用的什么口径」。系统把论文 4.1 节的流程写进程序，
       前一步没做完就不会放行后一步。
     </p>
 
     <div class="lp-points">
-      <div class="lp-point">
-        <span class="lp-point__icon">{{ icon("sliders", 20) }}</span>
-        <h3>方法可溯</h3>
-        <p>权重由层次分析法算出并做一致性检验，指标标准化、分单元赋分与面积加权
-           合成的每一步都留有记录，可逐层回看。</p>
+      {% set pdirs = ['left', 'up', 'right'] %}
+      {% set points = [
+        ('sliders', '方法可溯',
+         '权重由层次分析法算出并做一致性检验，指标标准化、分单元赋分与面积加权合成的每一步都留有记录，可逐层回看。'),
+        ('shield', '流程可控',
+         '政策、区位约束、土壤污染、地质灾害、耕地属性五项限制性条件一票否决；未通过即终止评价，直接给出生态重建或人工辅助的结论。'),
+        ('file', '结果可复算',
+         '评价结果与逐层得分明细一并留存，报告取自已保存的评价记录，事后修改数据不会让报告与结论对不上。')
+      ] %}
+      {% for ic, title, text in points %}
+      <div class="lp-point lp-reveal" data-dir="{{ pdirs[loop.index0 % 3] }}"
+           style="--i: {{ loop.index0 }}">
+        <span class="lp-point__icon">{{ icon(ic, 20) }}</span>
+        <h3>{{ title }}</h3>
+        <p>{{ text }}</p>
       </div>
-      <div class="lp-point">
-        <span class="lp-point__icon">{{ icon("shield", 20) }}</span>
-        <h3>流程可控</h3>
-        <p>政策、区位约束、土壤污染、地质灾害、耕地属性五项限制性条件一票否决；
-           未通过即终止评价，直接给出生态重建或人工辅助的结论。</p>
-      </div>
-      <div class="lp-point">
-        <span class="lp-point__icon">{{ icon("file", 20) }}</span>
-        <h3>结果可复算</h3>
-        <p>评价结果与逐层得分明细一并留存，报告取自已保存的评价记录，
-           事后修改数据不会让报告与结论对不上。</p>
-      </div>
+      {% endfor %}
     </div>
 
-    <h3 class="lp-sub-title">九个功能模块</h3>
+    <h3 class="lp-sub-title lp-reveal" data-dir="up">九个功能模块</h3>
+    <p class="lp-intro__lead lp-reveal" data-dir="up" style="--i: 1">
+      把鼠标移到卡片上可查看该模块的职责
+    </p>
+
     <div class="lp-mods">
+      {% set mdirs = ['left', 'up', 'right'] %}
       {% for no, name, desc in modules %}
-      <div class="lp-mod">
+      <div class="lp-mod lp-reveal" data-dir="{{ mdirs[loop.index0 % 3] }}"
+           style="--i: {{ loop.index0 % 3 }}" tabindex="0">
         <span class="lp-mod__no">{{ no }}</span>
         <span class="lp-mod__name">{{ name }}</span>
-        <span class="lp-mod__desc">{{ desc }}</span>
+        <span class="lp-mod__more">{{ icon("chevron", 15) }}</span>
+        <div class="lp-mod__body"><p class="lp-mod__desc">{{ desc }}</p></div>
       </div>
       {% endfor %}
     </div>
 
-    <h3 class="lp-sub-title">评价流程</h3>
-    <ol class="lp-flow">
-      {% for s in steps %}
-      <li><span>{{ s.no }}</span>{{ s.title }}</li>
-      {% endfor %}
-    </ol>
-
-    <p class="lp-foot">
+    <p class="lp-foot lp-reveal" data-dir="up">
       历史遗留废弃矿山自然恢复适宜性评价系统 V1.0 ·
       运行于浏览器，数据保存在本机 SQLite 数据库
     </p>
@@ -500,13 +570,15 @@
 {% block scripts %}
 <script>
 (function () {
+  var reduce = window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- 登录面板 ---------- */
   var btn = document.getElementById('lp-open');
   var auth = document.getElementById('lp-auth');
-  if (!btn || !auth) return;
-
   var lastFocus = null;
 
-  function open() {
+  function openPanel() {
     lastFocus = document.activeElement;
     auth.classList.add('is-open');
     auth.setAttribute('aria-hidden', 'false');
@@ -520,7 +592,7 @@
     if (first) window.setTimeout(function () { first.focus(); }, 300);
   }
 
-  function close() {
+  function closePanel() {
     auth.classList.remove('is-open');
     auth.setAttribute('aria-hidden', 'true');
     btn.setAttribute('aria-expanded', 'false');
@@ -531,19 +603,61 @@
     if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
 
-  btn.addEventListener('click', open);
-  Array.prototype.forEach.call(
-    auth.querySelectorAll('[data-lp-close]'),
-    function (el) { el.addEventListener('click', close); }
-  );
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && auth.classList.contains('is-open')) close();
-  });
-
-  // 登录失败回到本页、或直接带 #login 访问时，直接展开登录框
-  if (location.hash === '#login' || document.querySelector('.flash.error')) {
-    open();
+  if (btn && auth) {
+    btn.addEventListener('click', openPanel);
+    Array.prototype.forEach.call(
+      auth.querySelectorAll('[data-lp-close]'),
+      function (el) { el.addEventListener('click', closePanel); }
+    );
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && auth.classList.contains('is-open')) closePanel();
+    });
+    // 登录失败回到本页、或直接带 #login 访问时，直接展开登录框
+    if (location.hash === '#login' || document.querySelector('.flash.error')) {
+      openPanel();
+    }
   }
+
+  /* ---------- 内容进场：进入视口弹入，离开视口弹回 ---------- */
+  var items = document.querySelectorAll('.lp-reveal');
+  if (reduce || !('IntersectionObserver' in window)) {
+    Array.prototype.forEach.call(items, function (el) {
+      el.classList.add('is-in');
+    });
+    return;
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) e.classList.add('is-in');
+      else e.classList.remove('is-in');   // 往回滚时弹回
+    });
+  }, { threshold: 0.16, rootMargin: '0px 0px -6% 0px' });
+  Array.prototype.forEach.call(items, function (el) { io.observe(el); });
+
+  /* ---------- 徽标：随滚动向四周散开并淡出 ----------
+     把进度写成 CSS 变量 --p，具体的缩放与透明度交给样式算，
+     脚本每帧只做一次赋值。 */
+  var badge = document.getElementById('lp-badge');
+  if (!badge) return;
+  var ticking = false;
+
+  function applyProgress() {
+    ticking = false;
+    var range = window.innerHeight * 0.62;
+    var p = range > 0 ? window.scrollY / range : 0;
+    badge.style.setProperty('--p', Math.min(1, Math.max(0, p)).toFixed(3));
+  }
+
+  function onScroll() {
+    if (!ticking) {
+      ticking = true;
+      window.requestAnimationFrame(applyProgress);
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  applyProgress();
 })();
 </script>
 {% endblock %}

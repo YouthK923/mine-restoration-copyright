@@ -50,7 +50,7 @@ def login():
 def _intro_data():
     """登录页下方的系统介绍所用的静态内容。"""
     from app.services import dashboard as dash
-    return {"modules": dash.MODULES, "steps": dash.STEPS}
+    return {"modules": dash.MODULES}
 
 
 @bp.route("/logout")
