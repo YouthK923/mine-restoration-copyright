@@ -59,15 +59,6 @@
     letter-spacing: -.4px;
     animation: lp-in .7s ease .06s both;
   }
-  .lp-sub {
-    margin: 0 0 32px;
-    max-width: 640px;
-    font-size: 16px;
-    line-height: 1.9;
-    color: #6e6e73;
-    text-wrap: pretty;
-    animation: lp-in .7s ease .12s both;
-  }
   .lp-cta {
     padding: 13px 52px;
     font-family: inherit;
@@ -426,7 +417,7 @@
 
   /* 系统设置里要求减少动态效果时，去掉位移、缩放与滚动特效 */
   @media (prefers-reduced-motion: reduce) {
-    .lp-badge, .lp-title, .lp-sub, .lp-cta, .lp-more { animation: none; }
+    .lp-badge, .lp-title, .lp-cta, .lp-more { animation: none; }
     .lp-badge__svg { opacity: 1; filter: none; }
     .lp-ring, .lp-badge__mark { transform: none; }
     .lp-reveal { opacity: 1; transform: none !important; }
@@ -453,12 +444,6 @@
     </div>
 
     <h1 class="lp-title">历史遗留废弃矿山<br>自然恢复适宜性评价系统</h1>
-
-    <p class="lp-sub">
-      以论文建立的评价方法与指标体系为算法内核，把项目建档、限制性条件判定、
-      微地质单元划分、指标数据采集、定量评价与报告输出串成一条闭环流程，
-      让自然恢复适宜性的判定有据可依、结果可复算。
-    </p>
 
     <button type="button" class="lp-cta" id="lp-open"
             aria-expanded="false" aria-controls="lp-auth">登录</button>
@@ -618,46 +603,58 @@
     }
   }
 
-  /* ---------- 内容进场：进入视口弹入，离开视口弹回 ---------- */
+  /* ---------- 内容进场 + 徽标散开：同一套滚动计算 ----------
+     原先用 IntersectionObserver，实测在滚动到位置后回调并未生效，
+     内容始终停在 opacity:0。改为直接按元素与视口的相对位置判断，
+     与徽标用同一次滚动回调，行为可预期、也便于排查。 */
   var items = document.querySelectorAll('.lp-reveal');
-  if (reduce || !('IntersectionObserver' in window)) {
-    Array.prototype.forEach.call(items, function (el) {
-      el.classList.add('is-in');
-    });
-    return;
-  }
-  var io = new IntersectionObserver(function (entries) {
-    entries.forEach(function (e) {
-      if (e.isIntersecting) e.classList.add('is-in');
-      else e.classList.remove('is-in');   // 往回滚时弹回
-    });
-  }, { threshold: 0.16, rootMargin: '0px 0px -6% 0px' });
-  Array.prototype.forEach.call(items, function (el) { io.observe(el); });
-
-  /* ---------- 徽标：随滚动向四周散开并淡出 ----------
-     把进度写成 CSS 变量 --p，具体的缩放与透明度交给样式算，
-     脚本每帧只做一次赋值。 */
   var badge = document.getElementById('lp-badge');
-  if (!badge) return;
   var ticking = false;
 
-  function applyProgress() {
+  function applyScroll() {
     ticking = false;
-    var range = window.innerHeight * 0.62;
-    var p = range > 0 ? window.scrollY / range : 0;
-    badge.style.setProperty('--p', Math.min(1, Math.max(0, p)).toFixed(3));
+    var vh = window.innerHeight || 800;
+
+    /* 徽标：滚动前约三分之一屏内完成散开淡出 */
+    if (badge) {
+      var range = vh * 0.34;
+      var p = range > 0 ? window.scrollY / range : 0;
+      badge.style.setProperty('--p', Math.min(1, Math.max(0, p)).toFixed(3));
+    }
+
+    /* 内容：先批量测量，再改类名，避免读写交替触发反复重排 */
+    if (reduce || !items.length) return;
+    var box = [];
+    for (var i = 0; i < items.length; i++) {
+      box.push(items[i].getBoundingClientRect());
+    }
+    for (var j = 0; j < items.length; j++) {
+      var r = box[j];
+      // 上沿进入视口下部、下沿尚未越出视口上部 → 视为在视野内
+      var shown = r.top < vh * 0.88 && r.bottom > vh * 0.06;
+      if (shown) items[j].classList.add('is-in');
+      else items[j].classList.remove('is-in');
+    }
   }
 
   function onScroll() {
     if (!ticking) {
       ticking = true;
-      window.requestAnimationFrame(applyProgress);
+      window.requestAnimationFrame(applyScroll);
     }
   }
 
-  window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('resize', onScroll);
-  applyProgress();
+  // 减少动态效果时不做滚动特效，内容直接显示
+  if (reduce) {
+    Array.prototype.forEach.call(items, function (el) {
+      el.classList.add('is-in');
+    });
+    if (badge) badge.style.setProperty('--p', '0');
+  } else {
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    applyScroll();
+  }
 })();
 </script>
 {% endblock %}
