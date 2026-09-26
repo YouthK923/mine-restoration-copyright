@@ -318,6 +318,23 @@
     color: #86868b;
   }
 
+  /* 登录失败原因：淡红底的小条，落在登录框里面 */
+  .lp-auth__err {
+    margin: -14px 0 18px;
+    padding: 10px 14px;
+    text-align: center;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #9c2b23;
+    background: #fdeeec;
+    border-radius: 11px;
+    animation: lp-err-in .28s ease both;
+  }
+  @keyframes lp-err-in {
+    from { opacity: 0; transform: translateY(-5px); }
+    to   { opacity: 1; transform: none; }
+  }
+
   .lp-field { margin-bottom: 15px; }
   .lp-field label {
     display: block;
@@ -496,6 +513,11 @@
       <h2 class="lp-auth__title" id="lp-auth-title">登录</h2>
       <p class="lp-auth__sub">使用系统账号登录</p>
 
+      {# 失败原因渲染在登录框内部：放在正文顶部会被遮罩盖住，等于没提示 #}
+      {% if error %}
+      <p class="lp-auth__err" role="alert">{{ error }}</p>
+      {% endif %}
+
       <form method="post" novalidate>
         {{ form.hidden_tag() }}
 
@@ -579,7 +601,7 @@
       if (e.key === 'Escape' && auth.classList.contains('is-open')) closePanel();
     });
     // 登录失败回到本页、或直接带 #login 访问时，直接展开登录框
-    if (location.hash === '#login' || document.querySelector('.flash.error')) {
+    if (location.hash === '#login' || document.querySelector('.lp-auth__err')) {
       openPanel();
     }
   }

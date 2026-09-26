@@ -50,20 +50,24 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for("auth.index"))
     form = LoginForm()
+    # 登录失败的原因直接交给模板，渲染在登录框内部。
+    # 不用 flash：flash 的提示条在正文顶部，会被登录框的渐变遮罩盖住，用户看不到。
+    error = None
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user and check_password_hash(user.password_hash, form.password.data):
             if not user.active:
-                flash("该账号已停用，请联系管理员", "error")
-                return render_template("auth/login.html", form=form,
-                                       **_intro_data())
-            login_user(user, remember=form.remember.data)
-            # 用 toast 类别：渲染为页面正中的浮层，淡入停留后淡出。
-            # 登录成功只是告知性反馈，不需要用户停下来阅读。
-            flash("登录成功", "toast")
-            return redirect(url_for("auth.index"))
-        flash("账户名称或密码错误", "error")
-    return render_template("auth/login.html", form=form, **_intro_data())
+                error = "该账号已停用，请联系管理员"
+            else:
+                login_user(user, remember=form.remember.data)
+                # 用 toast 类别：渲染为页面正中的浮层，淡入停留后淡出。
+                # 登录成功只是告知性反馈，不需要用户停下来阅读。
+                flash("登录成功", "toast")
+                return redirect(url_for("auth.index"))
+        else:
+            error = "账户名称或密码错误"
+    return render_template("auth/login.html", form=form, error=error,
+                           **_intro_data())
 
 
 @bp.route("/register", methods=["GET", "POST"])

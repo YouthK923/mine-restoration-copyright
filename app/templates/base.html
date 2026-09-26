@@ -570,7 +570,8 @@
     /* ---------- 居中浮层提示（登录成功、各类操作完成） ----------
        外层 toast-stack 固定在页面正中心并纵向排列，
        内层每条各自淡入 → 停留 → 淡出，多条提示会依次排开而不重叠。
-       半透明底 + 背景模糊做出毛玻璃质感，不做成实心块；
+       淡灰半透明底 + 背景模糊做出毛玻璃质感，不做成实心块，也不用高饱和色：
+       提示只是告知性反馈，不该比页面内容更抢眼。
        pointer-events: none 让它不拦截鼠标，出现期间也能正常操作。 */
     .toast-stack {
       position: fixed;
@@ -589,18 +590,18 @@
       max-width: min(560px, 78vw);
       padding: 13px 28px;
       border-radius: 999px;
-      background: rgba(31, 107, 69, .62);          /* 半透明，非实体 */
-      color: #fff;
+      background: rgba(244, 245, 246, .82);        /* 淡灰、半透明，非实体 */
+      color: #4a4f52;
       font-size: 16px;
-      font-weight: 600;
+      font-weight: 500;
       line-height: 1.65;
       letter-spacing: .03em;
       text-align: center;
       text-wrap: pretty;
-      border: 1px solid rgba(255, 255, 255, .28);
-      backdrop-filter: blur(9px) saturate(1.3);
-      -webkit-backdrop-filter: blur(9px) saturate(1.3);
-      box-shadow: 0 10px 34px rgba(19, 36, 58, .18);
+      border: 1px solid rgba(0, 0, 0, .06);
+      backdrop-filter: blur(9px) saturate(1.1);
+      -webkit-backdrop-filter: blur(9px) saturate(1.1);
+      box-shadow: 0 8px 26px rgba(23, 32, 27, .10);
       animation: toast-fade 2.6s ease-in-out forwards;
     }
 
@@ -620,9 +621,9 @@
       }
     }
 
-    /* 不支持背景模糊时，加深底色保证文字仍然清楚 */
+    /* 不支持背景模糊时，把底色加实一些保证文字仍然清楚 */
     @supports not (backdrop-filter: blur(1px)) {
-      .toast-center { background: rgba(31, 107, 69, .88); }
+      .toast-center { background: rgba(240, 241, 242, .96); }
     }
 
     /* ---------- 文字工具类 ---------- */

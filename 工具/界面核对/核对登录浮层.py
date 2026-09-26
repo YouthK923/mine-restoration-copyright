@@ -81,13 +81,17 @@ ok(not has_toast(body2), "第二次访问已无浮层")
 ok("登录成功" not in visible_text(body2), "文字也一并消失")
 
 print()
-print("四、成功提示一律走居中浮层，错误提示仍是顶部提示条")
+print("四、成功提示一律走居中浮层，错误提示落在登录框里")
 c2 = app.test_client()
 bad = c2.post("/login", data={"username": "admin", "password": "wrong"},
               follow_redirects=True).get_data(as_text=True)
-ok('class="flash error"' in bad and "账户名称或密码错误" in bad,
-   "登录失败仍是顶部错误提示条（需停下来细读）")
-ok(not has_toast(bad), "登录失败不出现浮层")
+ok('class="lp-auth__err"' in bad and "账户名称或密码错误" in bad,
+   "登录失败的原因显示在登录框内部（不会被遮罩盖住）")
+ok(not has_toast(bad), "登录失败不出现居中浮层")
+ok(0 < bad.find('class="lp-auth__panel"') < bad.find('class="lp-auth__err"'),
+   "提示确实在登录框面板之内")
+ok(bad.count("账户名称或密码错误") == 1, "该提示全页只出现一次（顶部不重复）",
+   "%d 次" % bad.count("账户名称或密码错误"))
 
 c2.post("/login", data={"username": "admin", "password": "admin123"},
         follow_redirects=True)
