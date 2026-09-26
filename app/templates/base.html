@@ -8,23 +8,23 @@
   <style>
     /* ---------- 设计变量：绿色主色 + 中性灰阶 ---------- */
     :root {
-      --accent: #1f6b45;            /* 主色：深绿，呼应自然恢复主题 */
-      --accent-hover: #185738;
-      --accent-soft: #e9f4ee;
-      --side-1: #17503a;            /* 侧边栏渐变起止色 */
-      --side-2: #113c2b;
-      --danger: #b3261e;
-      --danger-soft: #fdecea;
-      --ok: #1e6b3a;
-      --ok-soft: #eaf6ef;
-      --todo: #d98324;              /* 待办角标 */
-      --ink: #23262b;
-      --ink-soft: #6b7280;
-      --line: #e3e7ea;
-      --surface: #ffffff;
-      --canvas: #f4f7f5;
+      --accent: #2c6b5a;            /* 主色：青绿，千里江山石绿偏青 */
+      --accent-hover: #1e5548;
+      --accent-soft: #e6f0ec;
+      --side-1: #1a4a4a;            /* 侧边栏：深青墨 */
+      --side-2: #0f3338;
+      --danger: #a0392a;            /* 朱砂红 */
+      --danger-soft: #fbeae6;
+      --ok: #2c6b5a;
+      --ok-soft: #e6f0ec;
+      --todo: #c08a3e;              /* 赭石色待办 */
+      --ink: #2a2520;               /* 深褐墨色 */
+      --ink-soft: #6b5d4f;          /* 褐灰 */
+      --line: #e0d8c8;              /* 绢本边线 */
+      --surface: #fdfaf2;           /* 暖白绢本 */
+      --canvas: #f5efe0;            /* 绢本米黄背景 */
       --radius: 10px;
-      --shadow: 0 1px 2px rgba(0, 0, 0, .05);
+      --shadow: 0 2px 8px rgba(42, 37, 32, .06);
       --header-h: 60px;
       --nav-w: 226px;
     }
@@ -33,7 +33,7 @@
     html, body { margin: 0; padding: 0; }
 
     body {
-      font-family: "Microsoft YaHei", "PingFang SC", "SimSun", sans-serif;
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Serif SC", "SimSun", serif;
       font-size: 14px;
       line-height: 1.6;
       color: var(--ink);
@@ -326,7 +326,7 @@
       min-width: 0;
       padding: 22px 26px 26px;
     }
-    .container { max-width: 1120px; }
+    .container { max-width: none; width: 100%; }
 
     /* ---------- 页脚 ---------- */
     .app-foot {
@@ -690,11 +690,11 @@
       /* 左侧压深保证文字可读，右侧透出远山插画；
          背景按底部对齐，避免远山被居中裁掉 */
       background:
-        linear-gradient(100deg, rgba(9, 40, 27, .92) 0%,
-                                rgba(11, 48, 33, .68) 50%,
-                                rgba(11, 48, 33, .06) 100%),
-        url("{{ url_for('static', filename='hero.svg') }}")
-        center bottom / cover no-repeat;
+        linear-gradient(100deg, rgba(15, 40, 45, .90) 0%,
+                                rgba(20, 55, 58, .55) 45%,
+                                rgba(20, 55, 58, .12) 100%),
+        url("{{ url_for('static', filename='hero_landscape.jpg') }}")
+        center center / cover no-repeat;
       color: #fff;
     }
     .hero__body { max-width: 720px; }
