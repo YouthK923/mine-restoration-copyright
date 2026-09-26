@@ -38,7 +38,9 @@ def login():
                 flash("该账号已停用，请联系管理员", "error")
                 return render_template("auth/login.html", form=form)
             login_user(user, remember=form.remember.data)
-            flash("登录成功", "ok")
+            # 用 toast 类别：渲染为页面正中的浮层，淡入停留后淡出。
+            # 登录成功只是告知性反馈，不需要用户停下来阅读。
+            flash("登录成功", "toast")
             return redirect(url_for("auth.index"))
         flash("用户名或密码错误", "error")
     return render_template("auth/login.html", form=form)

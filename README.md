@@ -31,6 +31,7 @@ app/                    应用代码（详见下方「系统代码结构」）
     生成Word中文模板.py         生成 pandoc 中文排版模板
     修正Word标题配色.py         修正 docx 标题样式为「黑体 + 纯黑」
     数值核对/                   案例数值的独立复算与正确性验证脚本
+    界面核对/                   界面行为、文档用词的自检脚本
 
 测试/                   ★ 自检脚本（10 套，均从仓库根运行）
     test_ahp.py test_evaluate.py test_web_ahp.py test_web_modules.py
