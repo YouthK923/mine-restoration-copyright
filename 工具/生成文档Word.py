@@ -15,7 +15,7 @@ PANDOC = r"D:\Pandoc\pandoc.exe"
 DOC_DIR = os.path.join(ROOT, "文档")
 
 # 需要出 Word 的文稿；联网核实报告只作存档，不转 Word
-SOURCES = ["软著功能计划.md", "制作步骤与分工.md", "演示脚本.md"]
+SOURCES = ["软著功能计划.md", "制作步骤与分工.md", "演示脚本.md", "开发日志.md"]
 
 
 def build_reference():

@@ -17,6 +17,7 @@ app/                    应用代码（详见下方「系统代码结构」）
     软著功能计划.md / .docx
     制作步骤与分工.md / .docx
     演示脚本.md / .docx
+    开发日志.md / .docx         ★ 每一次改动的人话版记录，改完代码就来这里补一条
     软著登记申请材料形式要求_联网核实报告.md
 
 工具/                   ★ 材料生成与校验脚本
@@ -26,18 +27,20 @@ app/                    应用代码（详见下方「系统代码结构」）
     check_materials.py          申请材料形式要求自检（21 项）
     verify_all.py               项目最终验收汇总
     生成图标.py                 生成 app/static/favicon.ico（网页图标 + 快捷方式图标）
-    生成登录徽标.py             生成 app/static/login-badge.svg（登录页系统徽标）
+    生成登录徽标.py             生成 app/templates/_login_badge.svg（登录页系统徽标）
     创建桌面快捷方式.py         在桌面/开始菜单创建快捷方式
     提取论文与模板文本.py        从论文/模板 PDF 提取全文到 参考资料/论文与模板解析文本/
     生成Word中文模板.py         生成 pandoc 中文排版模板
+    生成文档Word.py             把 文档/ 下的 Markdown 批量转成 docx
     修正Word标题配色.py         修正 docx 标题样式为「黑体 + 纯黑」
     数值核对/                   案例数值的独立复算与正确性验证脚本
     界面核对/                   界面行为、文档用词的自检脚本
 
-测试/                   ★ 自检脚本（10 套，均从仓库根运行）
+测试/                   ★ 自检脚本（13 套，均从仓库根运行）
     test_ahp.py test_evaluate.py test_web_ahp.py test_web_modules.py
     test_web_evaluate.py test_web_report.py test_ui_fixes.py
     test_new_features.py test_workflow.py test_weights.py
+    test_profile.py test_register.py test_login.py
 
 验证数据/               ★ 系统正确性验证数据（8 个带手算期望值的算例）
     使用说明.md                 ★ 使用文档：两种核对方式、逐步操作、常见问题
@@ -185,12 +188,23 @@ python 工具/make_source_doc.py     # 3) 生成源程序 PDF
 
 ## 约定
 
-1. **文档以 Markdown 为源文件协作**；需要送阅时用 `工具/生成Word中文模板.py` + pandoc 导出 docx。
-2. 已提交的 `文档/软著功能计划.docx` 为对外版本，改动 md 后请同步重新导出。
-3. 提交前先拉取远程更新，避免冲突堆积。
-4. 提交信息写清做了什么，不要用 "update" 之类的空话。
+1. **每改一次就在 `文档/开发日志.md` 里补一条**，写清「做了什么 / 为什么 / 影响哪些文件 / 怎么验证的」。
+   `git log` 只记录改了什么文件，说明不了动机；日志是给人看的版本。
+2. **文档以 Markdown 为源文件协作**；需要送阅时用 `工具/生成文档Word.py` 批量导出 docx。
+3. 已提交的 `文档/*.docx` 为对外版本，改动 md 后请同步重新导出。
+4. 提交前先拉取远程更新，避免冲突堆积。
+5. 提交信息写清做了什么，不要用 "update" 之类的空话。
+6. **临时脚本不要留在仓库里**：名字以 `_` 开头的辅助脚本已被 `.git/info/exclude` 忽略，
+   用完请删除，不要提交。
 
 ## 文档导出方式
+
+```bash
+# 一键把 文档/ 下所有 md 转成 docx（内部会先生成中文排版模板）
+python 工具/生成文档Word.py
+```
+
+单篇转换：
 
 ```bash
 # 1) 生成中文排版模板（标题黑体、纯黑）
