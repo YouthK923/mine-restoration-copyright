@@ -9,7 +9,14 @@
      首屏放徽标、标题、一句话说明与登录按钮；系统介绍在下方，
      随滚动逐条弹入、往回滚时弹回。 */
 
-  .lp { color: #1d1d1f; }
+  .lp {
+    color: #1d1d1f;
+    background:
+      linear-gradient(180deg, rgba(245, 239, 224, .88) 0%,
+                              rgba(245, 239, 224, .92) 100%),
+      url("../static/hero_qinglv.jpg")
+      center top / cover no-repeat fixed;
+  }
 
   /* ---------- 首屏 ---------- */
   .lp-hero {
@@ -20,6 +27,13 @@
     text-align: center;
     min-height: 100dvh;
     padding: 56px 20px 72px;
+    position: relative;
+    background:
+      linear-gradient(180deg, rgba(15, 40, 45, .72) 0%,
+                              rgba(20, 55, 58, .50) 50%,
+                              rgba(15, 40, 45, .76) 100%),
+      url("../static/hero_qinglv.jpg")
+      center center / cover no-repeat;
   }
 
   /* 徽标：滚动时各圈向四周散开并淡出。
@@ -57,6 +71,8 @@
     font-weight: 700;
     line-height: 1.3;
     letter-spacing: -.4px;
+    color: #fff;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, .3);
     animation: lp-in .7s ease .06s both;
   }
   .lp-cta {
@@ -75,7 +91,7 @@
   }
   .lp-cta:hover {
     background: var(--accent-hover);
-    box-shadow: 0 10px 26px rgba(31, 107, 69, .26);
+    box-shadow: 0 10px 26px rgba(44, 107, 90, .4);
   }
   .lp-cta:active { transform: translateY(1px); box-shadow: none; }
   .lp-cta:focus-visible { outline: 3px solid rgba(31, 107, 69, .40); outline-offset: 3px; }
@@ -83,11 +99,11 @@
   .lp-more {
     margin-top: 38px;
     font-size: 13px;
-    color: #86868b;
+    color: rgba(255, 255, 255, .7);
     text-decoration: none;
     animation: lp-in .7s ease .24s both;
   }
-  .lp-more:hover { color: var(--accent); }
+  .lp-more:hover { color: #fff; }
 
   @keyframes lp-in {
     from { opacity: 0; transform: translateY(12px); }
@@ -124,10 +140,12 @@
 
   /* ---------- 系统介绍 ---------- */
   .lp-intro {
-    max-width: 980px;
-    margin: 0 auto;
-    padding: 20px 24px 72px;
+    max-width: none;
+    margin: 0;
+    padding: 56px 24px 72px;
+    background: transparent;
   }
+  .lp-intro > * { max-width: 1200px; margin-left: auto; margin-right: auto; }
   .lp-intro__title {
     margin: 0 0 26px;
     font-size: clamp(22px, 2.6vw, 30px);
@@ -142,18 +160,27 @@
     margin-bottom: 46px;
   }
   .lp-point {
-    padding: 24px 22px;
-    background: #f5f5f7;
-    border-radius: 18px;
+    padding: 30px 26px;
+    background: rgba(253, 250, 242, .82);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(224, 216, 200, .6);
+    border-radius: 22px;
+    box-shadow: 0 24px 60px rgba(42, 37, 32, .10), 0 8px 20px rgba(42, 37, 32, .05);
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+  .lp-point:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 32px 72px rgba(42, 37, 32, .14), 0 12px 28px rgba(42, 37, 32, .07);
   }
   .lp-point__icon {
     display: grid;
     place-items: center;
-    width: 38px;
-    height: 38px;
-    margin-bottom: 14px;
-    border-radius: 11px;
-    background: #fff;
+    width: 40px;
+    height: 40px;
+    margin-bottom: 16px;
+    border-radius: 12px;
+    background: rgba(44, 107, 90, .1);
     color: var(--accent);
   }
   .lp-point h3 { margin: 0 0 8px; font-size: 16px; }
@@ -178,8 +205,10 @@
   .lp-mod {
     position: relative;
     padding: 17px 18px 17px 48px;
-    background: #fff;
-    border: 1px solid #e6e6e8;
+    background: rgba(253, 250, 242, .75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(224, 216, 200, .6);
     border-radius: 14px;
     outline: none;
     transition: border-color .3s ease, box-shadow .3s ease;
@@ -187,8 +216,8 @@
   .lp-mod:hover,
   .lp-mod:focus-within,
   .lp-mod:focus {
-    border-color: rgba(31, 107, 69, .42);
-    box-shadow: 0 8px 22px rgba(19, 60, 43, .08);
+    border-color: rgba(44, 107, 90, .5);
+    box-shadow: 0 8px 22px rgba(42, 37, 32, .08);
   }
   .lp-mod__no {
     position: absolute;
