@@ -567,51 +567,54 @@
       border-left-color: var(--ok);
     }
 
-    /* ---------- 居中浮层提示（登录成功、各类操作完成） ----------
-       外层 toast-stack 固定在页面正中心并纵向排列，
-       内层每条各自淡入 → 停留 → 淡出，多条提示会依次排开而不重叠。
-       淡灰半透明底 + 背景模糊做出毛玻璃质感，不做成实心块，也不用高饱和色：
-       提示只是告知性反馈，不该比页面内容更抢眼。
+    /* ---------- 浮层提示（登录成功、各类操作完成、登录失败） ----------
+       外层 toast-stack 固定在页面中上方，内层每条各自淡入 → 停留 → 淡出，
+       多条提示会依次排开而不重叠。
+       不铺底色、不加边框，只用一层浅色描边托住文字：
+       提示是告知性反馈，不该在页面上多出一块色块。
        pointer-events: none 让它不拦截鼠标，出现期间也能正常操作。 */
     .toast-stack {
       position: fixed;
-      top: 50%;
+      top: 16px;
       left: 50%;
       z-index: 100;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
-      transform: translate(-50%, -50%);
+      gap: 6px;
+      transform: translateX(-50%);
       pointer-events: none;
     }
 
     .toast-center {
-      max-width: min(560px, 78vw);
-      padding: 13px 28px;
-      border-radius: 999px;
-      background: rgba(244, 245, 246, .82);        /* 淡灰、半透明，非实体 */
-      color: #4a4f52;
+      max-width: min(620px, 82vw);
+      padding: 4px 14px;
+      background: transparent;                     /* 不铺底色 */
+      border: none;
+      color: #3f4447;
       font-size: 16px;
       font-weight: 500;
       line-height: 1.65;
       letter-spacing: .03em;
       text-align: center;
       text-wrap: pretty;
-      border: 1px solid rgba(0, 0, 0, .06);
-      backdrop-filter: blur(9px) saturate(1.1);
-      -webkit-backdrop-filter: blur(9px) saturate(1.1);
-      box-shadow: 0 8px 26px rgba(23, 32, 27, .10);
+      /* 透明底之上靠一圈浅色描边保证可读：压在白卡片、深色横幅上都清楚 */
+      text-shadow: 0 1px 0 rgba(255, 255, 255, .96),
+                   0 0 4px rgba(255, 255, 255, .96),
+                   0 0 12px rgba(255, 255, 255, .85);
       animation: toast-fade 2.6s ease-in-out forwards;
     }
 
+    /* 失败类提示：同样不铺底色，只用颜色区分 */
+    .toast-center--error { color: #a32b22; }
+
     @keyframes toast-fade {
-      0%       { opacity: 0; transform: scale(.90); }
-      14%, 74% { opacity: 1; transform: scale(1); }
-      100%     { opacity: 0; transform: scale(1); }
+      0%       { opacity: 0; transform: translateY(-6px); }
+      14%, 74% { opacity: 1; transform: none; }
+      100%     { opacity: 0; transform: none; }
     }
 
-    /* 系统设置里要求「减少动态效果」时，去掉缩放，只做淡入淡出 */
+    /* 系统设置里要求「减少动态效果」时，去掉位移，只做淡入淡出 */
     @media (prefers-reduced-motion: reduce) {
       .toast-center { animation: toast-fade-plain 2.6s linear forwards; }
       @keyframes toast-fade-plain {
@@ -619,11 +622,6 @@
         14%, 74% { opacity: 1; }
         100%     { opacity: 0; }
       }
-    }
-
-    /* 不支持背景模糊时，把底色加实一些保证文字仍然清楚 */
-    @supports not (backdrop-filter: blur(1px)) {
-      .toast-center { background: rgba(240, 241, 242, .96); }
     }
 
     /* ---------- 文字工具类 ---------- */
@@ -1051,16 +1049,14 @@
   <a class="skip-link" href="#main">跳到主要内容</a>
 
   {# 取一次即可（同一请求内重复调用返回相同内容）。
-     类别为 toast 的渲染成居中浮层，其余仍是页面顶部的提示条 ——
-     错误提示需要停下来细读，不适合做成会消失的浮层。 #}
+     类别为 toast / ok / toast-error 的渲染成中上方浮层，出现后自动淡出；
+     其余仍是页面顶部的提示条 ——
+     需要对照着改表单的错误，留在页面上比一闪而过更有用。 #}
   {% set flash_msgs = get_flashed_messages(with_categories=true) %}
-  {# 类别为 toast / ok 的渲染成页面正中的浮层（操作完成的即时反馈）；
-     其余（尤其 error）仍是页面顶部的提示条 ——
-     错误提示需要停下来细读，不适合做成会消失的浮层。
-     没有浮层时这个容器是空的，不占任何位置。 #}
   <div class="toast-stack">
-    {% for category, message in flash_msgs if category in ("toast", "ok") %}
-    <div class="toast-center" role="status" aria-live="polite">{{ message }}</div>
+    {% for category, message in flash_msgs if category in ("toast", "ok", "toast-error") %}
+    <div class="toast-center{% if category == 'toast-error' %} toast-center--error{% endif %}"
+         role="status" aria-live="polite">{{ message }}</div>
     {% endfor %}
   </div>
 
@@ -1145,7 +1141,7 @@
 
     <main id="main" class="app-main">
       <div class="container">
-        {% for category, message in flash_msgs if category not in ("toast", "ok") %}
+        {% for category, message in flash_msgs if category not in ("toast", "ok", "toast-error") %}
         <p class="flash {{ category }}" role="status">{{ message }}</p>
         {% endfor %}
         {% block content %}{% endblock %}

@@ -50,9 +50,17 @@ class EmptyForm(FlaskForm):
 
 
 class LoginForm(FlaskForm):
-    """登录表单。支持「记住我」以在关闭浏览器后保持登录状态。"""
-    username = StringField("账户名称", validators=[DataRequired(), Length(max=64)])
-    password = PasswordField("密码", validators=[DataRequired()])
+    """登录表单。支持「记住我」以在关闭浏览器后保持登录状态。
+
+    校验消息用中文写明：登录框带 novalidate，浏览器不会代填提示，
+    字段为空时若不自己给消息，用户点了「登录」会以为没反应。
+    """
+    username = StringField("账户名称",
+                           validators=[DataRequired(message="请输入账户名称"),
+                                       Length(max=64,
+                                              message="账户名称不能超过 64 个字符")])
+    password = PasswordField("密码",
+                             validators=[DataRequired(message="请输入密码")])
     remember = BooleanField("记住我")
     submit = SubmitField("登录")
 

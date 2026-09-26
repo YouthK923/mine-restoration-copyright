@@ -318,21 +318,16 @@
     color: #86868b;
   }
 
-  /* 登录失败原因：淡红底的小条，落在登录框里面 */
-  .lp-auth__err {
-    margin: -14px 0 18px;
-    padding: 10px 14px;
-    text-align: center;
-    font-size: 13px;
-    line-height: 1.6;
+  /* 字段校验错误：贴着输入框显示，不做成会消失的浮层 ——
+     这类消息要对着输入框看，一闪而过会让人以为「点了没反应」 */
+  .lp-field__error {
+    margin: 7px 0 0;
+    font-size: 12.5px;
     color: #9c2b23;
-    background: #fdeeec;
-    border-radius: 11px;
-    animation: lp-err-in .28s ease both;
   }
-  @keyframes lp-err-in {
-    from { opacity: 0; transform: translateY(-5px); }
-    to   { opacity: 1; transform: none; }
+  .lp-field input[aria-invalid="true"] {
+    background: #fdeeec;
+    border-color: rgba(156, 43, 35, .35);
   }
 
   .lp-field { margin-bottom: 15px; }
@@ -513,24 +508,27 @@
       <h2 class="lp-auth__title" id="lp-auth-title">登录</h2>
       <p class="lp-auth__sub">使用系统账号登录</p>
 
-      {# 失败原因渲染在登录框内部：放在正文顶部会被遮罩盖住，等于没提示 #}
-      {% if error %}
-      <p class="lp-auth__err" role="alert">{{ error }}</p>
-      {% endif %}
-
       <form method="post" novalidate>
         {{ form.hidden_tag() }}
 
         <div class="lp-field">
           <label for="{{ form.username.id }}">账户名称</label>
           {{ form.username(id=form.username.id, autocomplete="username",
-                           placeholder="请输入账户名称") }}
+                           placeholder="请输入账户名称",
+                           **({'aria-invalid': 'true'} if form.username.errors else {})) }}
+          {% for e in form.username.errors %}
+          <p class="lp-field__error">{{ e }}</p>
+          {% endfor %}
         </div>
 
         <div class="lp-field">
           <label for="{{ form.password.id }}">密码</label>
           {{ form.password(id=form.password.id, autocomplete="current-password",
-                           placeholder="请输入密码") }}
+                           placeholder="请输入密码",
+                           **({'aria-invalid': 'true'} if form.password.errors else {})) }}
+          {% for e in form.password.errors %}
+          <p class="lp-field__error">{{ e }}</p>
+          {% endfor %}
         </div>
 
         <label class="lp-remember" for="{{ form.remember.id }}">
@@ -600,8 +598,11 @@
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && auth.classList.contains('is-open')) closePanel();
     });
-    // 登录失败回到本页、或直接带 #login 访问时，直接展开登录框
-    if (location.hash === '#login' || document.querySelector('.lp-auth__err')) {
+    // 登录失败回到本页、或直接带 #login 访问时，直接展开登录框。
+    // 失败可能落在两处：字段校验错误在表单里，凭据错误在浮层里。
+    if (location.hash === '#login'
+        || document.querySelector('.lp-field__error')
+        || document.querySelector('.toast-center')) {
       openPanel();
     }
   }

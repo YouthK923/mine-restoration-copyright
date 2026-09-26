@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""核对「登录成功」居中浮层：渲染位置、只出现一次、其他提示不受影响。
+"""核对「登录成功」中上方浮层：渲染位置、只出现一次、其他提示不受影响。
 
 注意：base.html 的内联 <style> 里本来就写着 .toast-center 和
 「登录成功」字样的注释，所以不能直接在整页 HTML 里搜这些字符串，
@@ -18,7 +18,7 @@ if BASE not in sys.path:
 
 from app import create_app
 
-TOAST_RE = re.compile(r'<div class="toast-center".*?</div>', re.S)
+TOAST_RE = re.compile(r'<div class="toast-center[^"]*".*?</div>', re.S)
 STYLE_RE = re.compile(r"<style>.*?</style>", re.S)
 
 
@@ -51,13 +51,13 @@ def visible_text(html):
     return STYLE_RE.sub("", TOAST_RE.sub("", html))
 
 
-print("一、登录成功后，首页应出现居中浮层")
+print("一、登录成功后，首页应出现中上方浮层")
 c = app.test_client()
 r = c.post("/login", data={"username": "admin", "password": "admin123"},
            follow_redirects=True)
 body = r.get_data(as_text=True)
 ok(r.status_code == 200, "登录并跳转成功", "HTTP %d" % r.status_code)
-ok(has_toast(body), "页面渲染出居中浮层元素")
+ok(has_toast(body), "页面渲染出中上方浮层元素")
 m = TOAST_RE.search(body)
 ok(m is not None and "登录成功" in m.group(0), "浮层文字为「登录成功」")
 ok(len(TOAST_RE.findall(body)) == 1, "浮层恰好出现一次",
@@ -81,51 +81,68 @@ ok(not has_toast(body2), "第二次访问已无浮层")
 ok("登录成功" not in visible_text(body2), "文字也一并消失")
 
 print()
-print("四、成功提示一律走居中浮层，错误提示落在登录框里")
+print("四、登录失败的提示（凭据错误走浮层、必填未填就地提示）")
 c2 = app.test_client()
+# 凭据错误：走中上方浮层，会自动淡出，不再常驻页面
 bad = c2.post("/login", data={"username": "admin", "password": "wrong"},
-              follow_redirects=True).get_data(as_text=True)
-ok('class="lp-auth__err"' in bad and "账户名称或密码错误" in bad,
-   "登录失败的原因显示在登录框内部（不会被遮罩盖住）")
-ok(not has_toast(bad), "登录失败不出现居中浮层")
-ok(0 < bad.find('class="lp-auth__panel"') < bad.find('class="lp-auth__err"'),
-   "提示确实在登录框面板之内")
-ok(bad.count("账户名称或密码错误") == 1, "该提示全页只出现一次（顶部不重复）",
+              ).get_data(as_text=True)
+m_bad = TOAST_RE.search(bad)
+ok(m_bad is not None and "账户名称或密码错误" in m_bad.group(0),
+   "凭据错误渲染成浮层（会自动淡出，不常驻）")
+ok("toast-center--error" in bad, "失败浮层用错误配色与成功提示区分")
+ok(bad.count("账户名称或密码错误") == 1, "该提示全页只出现一次",
    "%d 次" % bad.count("账户名称或密码错误"))
+
+# 用户名不存在：同样有提示
+ghost = c2.post("/login", data={"username": "no_such_user",
+                                "password": "whatever"}).get_data(as_text=True)
+ok("账户名称或密码错误" in ghost, "用户名不存在时同样给出提示")
+
+# 必填未填：错误留在表单里逐项显示（以前点了「登录」什么反应都没有）
+empty = c2.post("/login", data={"username": "no_such_user",
+                                "password": ""}).get_data(as_text=True)
+ok("请输入密码" in empty and 'class="lp-field__error"' in empty,
+   "密码留空时给出「请输入密码」")
+ok("aria-invalid" in empty, "出错的输入框带 aria-invalid 标记")
+ok(not has_toast(empty), "字段校验错误不占用浮层（要对着输入框看）")
+blank = c2.post("/login", data={"username": "", "password": ""},
+                ).get_data(as_text=True)
+ok("请输入账户名称" in blank and "请输入密码" in blank,
+   "账户名称与密码都为空时两条都提示")
 
 c2.post("/login", data={"username": "admin", "password": "admin123"},
         follow_redirects=True)
 made = c2.post("/project/add", data={"name": "浮层核对", "code": "TOASTCHK"},
                follow_redirects=True).get_data(as_text=True)
 m2 = TOAST_RE.search(made)
-ok(m2 is not None, "其他操作成功也出现居中浮层")
+ok(m2 is not None, "其他操作成功也出现中上方浮层")
 ok(m2 is not None and "项目已创建" in m2.group(0), "浮层文字为操作结果")
 ok('class="flash ok"' not in made, "成功提示不再同时出现在顶部提示条里")
 ok("项目已创建" not in visible_text(made), "顶部没有重复出现该提示")
 
 print()
-print("五、浮层样式：半透明毛玻璃、居中堆叠、不挡操作")
+print("五、浮层样式：中上方、无底色、居中堆叠、不挡操作")
 base = io.open(os.path.join(BASE, "app", "templates", "base.html"),
                encoding="utf-8").read()
-# 浮层规则单独取出来判断底色是否真的半透明
+# 浮层规则单独取出来，确认真的没有铺底色
 m_rule = re.search(r"\.toast-center\s*\{(.*?)\}", base, re.S)
 rule = m_rule.group(1) if m_rule else ""
-alpha = re.search(r"background:\s*rgba\([^)]*?,\s*\.?(\d+)\s*\)", rule)
-semi = bool(alpha) and int(alpha.group(1)) < 100
-for key, label in ((".toast-stack", "外层为固定居中的堆叠容器"),
+ok(bool(re.search(r"background:\s*transparent", rule)),
+   "浮层背景透明（不铺色块）", 
+   re.search(r"background:[^;]*", rule).group(0)
+   if re.search(r"background:[^;]*", rule) else "未找到 background")
+ok(not re.search(r"background:\s*rgba", rule), "没有半透明底色残留")
+for key, label in ((".toast-stack", "外层为固定堆叠容器"),
                    ("position: fixed", "容器用 fixed 定位（悬浮于页面之上）"),
-                   ("top: 50%", "居中：top 50%"),
-                   ("translate(-50%, -50%)", "居中：反向平移"),
+                   ("top: 16px", "位置在页面中上方"),
+                   ("translateX(-50%)", "水平居中"),
                    ("flex-direction: column", "多条提示纵向排开不重叠"),
-                   ("backdrop-filter: blur", "半透明毛玻璃效果"),
-                   ("@supports not (backdrop-filter", "不支持模糊时加深底色兜底"),
+                   ("text-shadow", "透明底之上用浅色描边保证可读"),
                    ("@keyframes toast-fade", "定义了淡入淡出动画"),
                    ("forwards", "动画结束后保持透明（不会又冒出来）"),
                    ("pointer-events: none", "浮层不遮挡鼠标操作"),
                    ("prefers-reduced-motion", "尊重系统「减少动态效果」设置")):
     ok(key in base, label)
-ok(semi, "浮层底色为半透明（非实体色块）",
-   alpha.group(0) if alpha else "未找到 rgba 底色")
 
 print()
 print("六、清理测试数据")
@@ -141,4 +158,4 @@ print()
 if fails:
     print("未通过：%s" % "、".join(fails))
     sys.exit(1)
-print("居中浮层自检全部通过 ✓")
+print("浮层自检全部通过 ✓")
