@@ -55,11 +55,15 @@
     }
     .skip-link:focus { top: 12px; }
 
-    /* ---------- 整体骨架：左侧深绿导航 + 右侧内容 ---------- */
+    /* ---------- 整体骨架：左侧深绿导航 + 右侧内容 ----------
+       固定为一屏高，页面滚动交给右侧内容区，
+       这样左侧导航栏（含底部用户区）不会随长页面一起被拉到下面去。 */
     .app-shell {
       display: flex;
       align-items: stretch;
-      min-height: 100dvh;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
     }
 
     /* ---------- 侧边栏 ---------- */
@@ -211,16 +215,24 @@
     }
     .app-user__out:hover { color: #fff; background: rgba(255, 255, 255, .12); }
 
-    /* ---------- 右侧内容区 ---------- */
+    /* ---------- 右侧内容区 ----------
+       整个骨架固定一屏高，滚动只发生在内容区内部：
+       左侧导航栏（含底部用户区）始终留在原位，右侧页面自己滚。 */
     .app-content {
       flex: 1;
       min-width: 0;
       display: flex;
       flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
     }
 
-    /* ---------- 顶栏：面包屑 + 搜索 ---------- */
+    /* ---------- 顶栏：面包屑 + 搜索 ----------
+       粘在内容区顶部，滚动时面包屑与搜索框始终可用 */
     .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
       display: flex;
       align-items: center;
       gap: 14px;
@@ -990,7 +1002,17 @@
 
     /* ---------- 窄屏适配 ---------- */
     @media (max-width: 960px) {
-      .app-shell { flex-direction: column; }
+      /* 上下布局时取消「一屏高 + 内容区内部滚动」，
+         否则导航会占掉半屏、内容被挤在剩下的小格子里滚动 */
+      .app-shell {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+        min-height: 100dvh;
+        overflow: visible;
+      }
+      .app-content { overflow: visible; }
+      .app-header { position: static; }
       .app-side { width: auto; flex: none; }
       .app-brand { padding: 12px 14px; }
       .app-nav { padding: 4px 10px 10px; }
