@@ -33,15 +33,16 @@
         <td>{{ p.mineral_type or "—" }}</td>
         <td class="num">{{ p.units.count() }}</td>
         <td class="nowrap">
-          <a href="/unit/{{ p.id }}">微地质单元</a>
-          &nbsp;|&nbsp;<a href="/constraint/{{ p.id }}">限制性判定</a>
-          &nbsp;|&nbsp;<a href="/project/patch/{{ p.id }}/edit">编辑</a>
-          &nbsp;|&nbsp;
-          <form method="post" action="/project/patch/{{ p.id }}/delete"
-                onsubmit="return confirm('确定删除图斑「{{ p.name }}」吗？\n该图斑的微地质单元、指标数据与评价结果将一并删除，且无法恢复。');">
-            {{ form.hidden_tag() }}
-            <button type="submit" class="btn btn--sm btn--danger">删除</button>
-          </form>
+          <span class="row-actions">
+            <a class="link-btn" href="/unit/{{ p.id }}">微地质单元</a>
+            <a class="link-btn" href="/constraint/{{ p.id }}">限制性判定</a>
+            <a class="link-btn" href="/project/patch/{{ p.id }}/edit">编辑</a>
+            <form method="post" action="/project/patch/{{ p.id }}/delete"
+                  onsubmit="return confirm('确定删除图斑「{{ p.name }}」吗？\n该图斑的微地质单元、指标数据与评价结果将一并删除，且无法恢复。');">
+              {{ form.hidden_tag() }}
+              <button type="submit" class="link-btn link-btn--danger">删除</button>
+            </form>
+          </span>
         </td>
       </tr>
       {% endfor %}

@@ -48,10 +48,12 @@
           {% endif %}
         </td>
         <td class="nowrap">
-          <a href="/evaluate/{{ p.id }}">执行评价</a>
-          {% if latest.get(p.id) %}
-          &nbsp;|&nbsp;<a href="/evaluate/result/{{ latest[p.id].id }}">查看结果</a>
-          {% endif %}
+          <span class="row-actions">
+            <a class="link-btn" href="/evaluate/{{ p.id }}">执行评价</a>
+            {% if latest.get(p.id) %}
+            <a class="link-btn" href="/evaluate/result/{{ latest[p.id].id }}">查看结果</a>
+            {% endif %}
+          </span>
         </td>
       </tr>
       {% endfor %}

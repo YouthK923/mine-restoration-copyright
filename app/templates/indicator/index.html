@@ -33,7 +33,7 @@
       </span>
       {% if p.units.count() %}
       <span class="patch-panel__meta patch-panel__tail">
-        <a href="/indicator/import">批量导入本图斑数据</a>
+        <a class="link-btn" href="/indicator/import">批量导入本图斑数据</a>
       </span>
       {% endif %}
     </div>
@@ -73,7 +73,11 @@
             <span class="tag tag--muted">未录入</span>
             {% endif %}
           </td>
-          <td><a href="/indicator/{{ u.id }}">录入 / 编辑</a></td>
+          <td class="nowrap">
+            <span class="row-actions">
+              <a class="link-btn" href="/indicator/{{ u.id }}">录入 / 编辑</a>
+            </span>
+          </td>
         </tr>
         {% endfor %}
       </tbody>

@@ -47,7 +47,7 @@
     {% for b in progress.blocking %}
     <li>
       <strong>{{ b.label }}</strong> —— {{ b.reason }}
-      <a href="{{ b.fix_url }}">{{ b.fix_label }}</a>
+      <a class="link-btn" href="{{ b.fix_url }}">{{ b.fix_label }}</a>
     </li>
     {% endfor %}
   </ol>
@@ -85,7 +85,7 @@
     {% for p in projects_without_patch %}
     <li>
       {{ p.name }}
-      —— <a href="/project/{{ p.id }}/patch/add">为它新建图斑</a>
+      —— <a class="link-btn" href="/project/{{ p.id }}/patch/add">为它新建图斑</a>
     </li>
     {% endfor %}
   </ul>

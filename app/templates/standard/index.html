@@ -32,14 +32,15 @@
         <td class="mono">{{ s.doc_number or "—" }}</td>
         <td class="num">{{ s.rules|length }}</td>
         <td class="nowrap">
-          <a href="/standard/{{ s.id }}/rules">规则</a>
-          &nbsp;|&nbsp;<a href="/standard/{{ s.id }}/edit">编辑</a>
-          &nbsp;|&nbsp;
-          <form method="post" action="/standard/{{ s.id }}/delete"
-                onsubmit="return confirm('确定删除「{{ s.province }} {{ s.name }}」吗？\n该标准下的 {{ s.rules|length }} 条规则将一并删除，且无法恢复。');">
-            {{ form.hidden_tag() }}
-            <button type="submit" class="btn btn--sm btn--danger">删除</button>
-          </form>
+          <span class="row-actions">
+            <a class="link-btn" href="/standard/{{ s.id }}/rules">规则</a>
+            <a class="link-btn" href="/standard/{{ s.id }}/edit">编辑</a>
+            <form method="post" action="/standard/{{ s.id }}/delete"
+                  onsubmit="return confirm('确定删除「{{ s.province }} {{ s.name }}」吗？\n该标准下的 {{ s.rules|length }} 条规则将一并删除，且无法恢复。');">
+              {{ form.hidden_tag() }}
+              <button type="submit" class="link-btn link-btn--danger">删除</button>
+            </form>
+          </span>
         </td>
       </tr>
       {% endfor %}
@@ -69,14 +70,15 @@
         <td class="mono">{{ s.doc_number or "—" }}</td>
         <td class="num">{{ s.rules|length }}</td>
         <td class="nowrap">
-          <a href="/standard/{{ s.id }}/rules">规则</a>
-          &nbsp;|&nbsp;<a href="/standard/{{ s.id }}/edit">编辑</a>
-          &nbsp;|&nbsp;
-          <form method="post" action="/standard/{{ s.id }}/delete"
-                onsubmit="return confirm('确定删除「{{ s.province }} {{ s.name }}」吗？\n该文件下的 {{ s.rules|length }} 条规则将一并删除，且无法恢复。');">
-            {{ form.hidden_tag() }}
-            <button type="submit" class="btn btn--sm btn--danger">删除</button>
-          </form>
+          <span class="row-actions">
+            <a class="link-btn" href="/standard/{{ s.id }}/rules">规则</a>
+            <a class="link-btn" href="/standard/{{ s.id }}/edit">编辑</a>
+            <form method="post" action="/standard/{{ s.id }}/delete"
+                  onsubmit="return confirm('确定删除「{{ s.province }} {{ s.name }}」吗？\n该文件下的 {{ s.rules|length }} 条规则将一并删除，且无法恢复。');">
+              {{ form.hidden_tag() }}
+              <button type="submit" class="link-btn link-btn--danger">删除</button>
+            </form>
+          </span>
         </td>
       </tr>
       {% endfor %}

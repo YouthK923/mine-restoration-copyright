@@ -235,7 +235,8 @@
     }
     .checkbox input { width: 16px; height: 16px; margin: 0; cursor: pointer; }
 
-    /* ---------- 按钮 ---------- */
+    /* ---------- 按钮 ----------
+       统一为圆角矩形：默认半透明底色，鼠标悬停时填充为实色。 */
     .btn {
       display: inline-flex;
       align-items: center;
@@ -246,28 +247,104 @@
       font-size: 14px;
       line-height: 1.4;
       color: #fff;
-      background: var(--accent);
-      border: 1px solid transparent;
-      border-radius: 4px;
+      background: rgba(31, 58, 95, .80);
+      border: 1px solid rgba(31, 58, 95, .30);
+      border-radius: 8px;
       cursor: pointer;
       text-decoration: none;
+      transition: background-color .16s ease, border-color .16s ease,
+                  color .16s ease, box-shadow .16s ease, transform .16s ease;
     }
-    .btn:hover { background: var(--accent-hover); }
+    .btn:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 3px 12px rgba(31, 58, 95, .22);
+    }
+    .btn:active { transform: translateY(1px); box-shadow: none; }
     .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
     .btn--ghost {
-      color: var(--ink);
-      background: #fff;
-      border-color: #c6ccd4;
+      color: var(--accent);
+      background: rgba(31, 58, 95, .06);
+      border-color: rgba(31, 58, 95, .22);
     }
-    .btn--ghost:hover { background: #f1f3f6; }
+    .btn--ghost:hover {
+      color: #fff;
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
     .btn--danger {
       color: var(--danger);
-      background: #fff;
-      border-color: #e6b4b0;
+      background: rgba(179, 38, 30, .07);
+      border-color: rgba(179, 38, 30, .26);
     }
-    .btn--danger:hover { background: var(--danger-soft); }
-    .btn--sm { padding: 4px 12px; font-size: 13px; }
-    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn--danger:hover {
+      color: #fff;
+      background: var(--danger);
+      border-color: var(--danger);
+      box-shadow: 0 3px 12px rgba(179, 38, 30, .20);
+    }
+
+    .btn--sm { padding: 5px 13px; font-size: 13px; border-radius: 7px; }
+
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+    .btn:disabled:hover {
+      background: rgba(31, 58, 95, .80);
+      border-color: rgba(31, 58, 95, .30);
+      box-shadow: none;
+    }
+    .btn--ghost:disabled:hover { background: rgba(31, 58, 95, .06); color: var(--accent); }
+
+    /* ---------- 表格操作列的行内小按钮 ----------
+       取代原来「文字 | 文字 | 文字」的写法：
+       圆角矩形 + 半透明底色，悬停时变实色。 */
+    .row-actions {
+      display: inline-flex;
+      flex-wrap: nowrap;        /* 按钮不折行；宁可让旁边长名称换行 */
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .row-actions form { display: inline-flex; margin: 0; }
+
+    .link-btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 11px;
+      font-family: inherit;
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--accent);
+      background: rgba(31, 58, 95, .07);
+      border: 1px solid rgba(31, 58, 95, .20);
+      border-radius: 7px;
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background-color .16s ease, border-color .16s ease,
+                  color .16s ease, box-shadow .16s ease, transform .16s ease;
+    }
+    .link-btn:hover {
+      color: #fff;
+      background: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 2px 8px rgba(31, 58, 95, .20);
+    }
+    .link-btn:active { transform: translateY(1px); box-shadow: none; }
+    .link-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .link-btn--danger {
+      color: var(--danger);
+      background: rgba(179, 38, 30, .07);
+      border-color: rgba(179, 38, 30, .24);
+    }
+    .link-btn--danger:hover {
+      color: #fff;
+      background: var(--danger);
+      border-color: var(--danger);
+      box-shadow: 0 2px 8px rgba(179, 38, 30, .22);
+    }
 
     .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
     .actions form { display: inline; }

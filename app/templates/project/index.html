@@ -44,16 +44,15 @@
           {% endif %}
         </td>
         <td class="nowrap">
-          <a href="/project/{{ p.id }}/patches">
-            {% if p.patches.count() %}矿山图斑{% else %}＋ 新建图斑{% endif %}
-          </a>
-          &nbsp;|&nbsp;<a href="/project/{{ p.id }}/edit">编辑</a>
-          &nbsp;|&nbsp;
-          <form method="post" action="/project/{{ p.id }}/delete"
-                onsubmit="return confirm('确定删除项目「{{ p.name }}」吗？\n该项目下的图斑、微地质单元与评价数据将一并删除，且无法恢复。');">
-            {{ form.hidden_tag() }}
-            <button type="submit" class="btn btn--sm btn--danger">删除</button>
-          </form>
+          <span class="row-actions">
+            <a class="link-btn" href="/project/{{ p.id }}/patches">{% if p.patches.count() %}矿山图斑{% else %}＋ 新建图斑{% endif %}</a>
+            <a class="link-btn" href="/project/{{ p.id }}/edit">编辑</a>
+            <form method="post" action="/project/{{ p.id }}/delete"
+                  onsubmit="return confirm('确定删除项目「{{ p.name }}」吗？\n该项目下的图斑、微地质单元与评价数据将一并删除，且无法恢复。');">
+              {{ form.hidden_tag() }}
+              <button type="submit" class="link-btn link-btn--danger">删除</button>
+            </form>
+          </span>
         </td>
       </tr>
       {% endfor %}

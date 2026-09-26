@@ -48,15 +48,16 @@
         </td>
         {% if current_user.role == "admin" %}
         <td class="nowrap">
-          <a href="/users/{{ u.id }}/edit">编辑</a>
-          &nbsp;|&nbsp;
-          <form method="post" action="/users/{{ u.id }}/delete"
-                onsubmit="return confirm('确定删除用户「{{ u.username }}」吗？\n该操作无法恢复。');">
-            {{ form.hidden_tag() }}
-            <button type="submit" class="btn btn--sm btn--danger"
-                    {% if u.id == current_user.id %}disabled
-                    title="不能删除当前登录的账号"{% endif %}>删除</button>
-          </form>
+          <span class="row-actions">
+            <a class="link-btn" href="/users/{{ u.id }}/edit">编辑</a>
+            <form method="post" action="/users/{{ u.id }}/delete"
+                  onsubmit="return confirm('确定删除用户「{{ u.username }}」吗？\n该操作无法恢复。');">
+              {{ form.hidden_tag() }}
+              <button type="submit" class="link-btn link-btn--danger"
+                      {% if u.id == current_user.id %}disabled
+                      title="不能删除当前登录的账号"{% endif %}>删除</button>
+            </form>
+          </span>
         </td>
         {% endif %}
       </tr>

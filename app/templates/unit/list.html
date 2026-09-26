@@ -41,8 +41,10 @@
           {% else %}—{% endif %}
         </td>
         <td class="nowrap">
-          <a href="/unit/{{ r.patch.id }}">划分与维护</a>
-          &nbsp;|&nbsp;<a href="/indicator/">录入指标数据</a>
+          <span class="row-actions">
+            <a class="link-btn" href="/unit/{{ r.patch.id }}">划分与维护</a>
+            <a class="link-btn" href="/indicator/">录入指标数据</a>
+          </span>
         </td>
       </tr>
       {% endfor %}

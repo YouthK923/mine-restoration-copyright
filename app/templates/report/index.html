@@ -39,9 +39,11 @@
         </td>
         <td class="nowrap">
           {% if pr and pr.ready %}
-          <a href="/report/{{ p.id }}">查看得分明细</a>
-          &nbsp;|&nbsp;<a href="/report/{{ p.id }}/pdf">导出 PDF</a>
-          &nbsp;|&nbsp;<a href="/report/{{ p.id }}/word">导出 Word</a>
+          <span class="row-actions">
+            <a class="link-btn" href="/report/{{ p.id }}">查看得分明细</a>
+            <a class="link-btn" href="/report/{{ p.id }}/pdf">导出 PDF</a>
+            <a class="link-btn" href="/report/{{ p.id }}/word">导出 Word</a>
+          </span>
           {% else %}
           <span class="muted">请先完成前置步骤</span>
           {% endif %}

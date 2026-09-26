@@ -37,13 +37,14 @@
         </td>
         <td style="text-align:left;">{{ u.description or "—" }}</td>
         <td class="nowrap">
-          <a href="/unit/edit/{{ u.id }}">编辑</a>
-          &nbsp;|&nbsp;
-          <form method="post" action="/unit/delete/{{ u.id }}"
-                onsubmit="return confirm('确定删除微地质单元「{{ u.unit_type }}」吗？\n该单元已录入的指标数据将一并删除，且无法恢复。');">
-            {{ form.hidden_tag() }}
-            <button type="submit" class="btn btn--sm btn--danger">删除</button>
-          </form>
+          <span class="row-actions">
+            <a class="link-btn" href="/unit/edit/{{ u.id }}">编辑</a>
+            <form method="post" action="/unit/delete/{{ u.id }}"
+                  onsubmit="return confirm('确定删除微地质单元「{{ u.unit_type }}」吗？\n该单元已录入的指标数据将一并删除，且无法恢复。');">
+              {{ form.hidden_tag() }}
+              <button type="submit" class="link-btn link-btn--danger">删除</button>
+            </form>
+          </span>
         </td>
       </tr>
       {% endfor %}
