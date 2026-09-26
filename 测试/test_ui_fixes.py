@@ -36,8 +36,10 @@ print(LINE)
 
 html = client.get("/login").get_data(as_text=True)
 # 1) 复选框必须有可点击关联的 label（这是原先失效的根因）
-wrapped = re.search(r'<label[^>]*class="checkbox"[^>]*>\s*<input[^>]*name="remember"',
-                    html) is not None
+#    只判断「复选框与文字是否落在同一个 <label> 内」，不绑定具体类名 ——
+#    否则换个样式类就会误报，而真正的回归点其实与类名无关。
+labels = re.findall(r"<label[^>]*>(.*?)</label>", html, re.S)
+wrapped = any(('name="remember"' in b and "记住我" in b) for b in labels)
 print("  %s 「记住我」文字与复选框包在同一 label 内" % ("[符合]" if wrapped else "[不符合]"))
 assert wrapped, "复选框未与文字关联，点击文字不会勾选"
 

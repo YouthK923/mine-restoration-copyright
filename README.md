@@ -26,6 +26,7 @@ app/                    应用代码（详见下方「系统代码结构」）
     check_materials.py          申请材料形式要求自检（21 项）
     verify_all.py               项目最终验收汇总
     生成图标.py                 生成 app/static/favicon.ico（网页图标 + 快捷方式图标）
+    生成登录徽标.py             生成 app/static/login-badge.svg（登录页系统徽标）
     创建桌面快捷方式.py         在桌面/开始菜单创建快捷方式
     提取论文与模板文本.py        从论文/模板 PDF 提取全文到 参考资料/论文与模板解析文本/
     生成Word中文模板.py         生成 pandoc 中文排版模板

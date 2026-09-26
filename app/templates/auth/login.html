@@ -1,35 +1,549 @@
 {% extends "base.html" %}
+{% from "_macros.html" import icon %}
 {% block title %}登录 · 历史遗留废弃矿山自然恢复适宜性评价系统{% endblock %}
+
 {% block content %}
-<div class="login-wrap">
-  <div class="card login-card">
-    <h2>用户登录</h2>
-    <p class="login-card__sub">历史遗留废弃矿山自然恢复适宜性评价系统 V1.0</p>
-    <form method="post" novalidate>
-      {{ form.hidden_tag() }}
+<style>
+  /* ================= 登录页（仿 Apple 账户页） =================
+     纯白底、居中、大量留白；色彩只用在徽标与按钮上。
+     首屏只放徽标、标题、一句话说明与一个登录按钮，
+     系统介绍放在下方滚动可见，登录表单点击后渐变浮现。 */
 
-      <div class="field">
-        <label class="field__label" for="{{ form.username.id }}">用户名</label>
-        {{ form.username(id=form.username.id, autocomplete="username") }}
+  .lp { color: #1d1d1f; }
+
+  /* ---------- 首屏 ---------- */
+  .lp-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 100dvh;
+    padding: 56px 20px 72px;
+  }
+  .lp-badge {
+    width: 212px;
+    height: 212px;
+    margin-bottom: 36px;
+    animation: lp-in .7s ease both;
+  }
+  .lp-title {
+    margin: 0 0 18px;
+    font-size: clamp(28px, 4.2vw, 42px);
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -.4px;
+    animation: lp-in .7s ease .06s both;
+  }
+  .lp-sub {
+    margin: 0 0 32px;
+    max-width: 640px;
+    font-size: 16px;
+    line-height: 1.9;
+    color: #6e6e73;
+    text-wrap: pretty;
+    animation: lp-in .7s ease .12s both;
+  }
+  .lp-cta {
+    padding: 13px 52px;
+    font-family: inherit;
+    font-size: 17px;
+    font-weight: 500;
+    color: #fff;
+    background: var(--accent);
+    border: none;
+    border-radius: 980px;
+    cursor: pointer;
+    animation: lp-in .7s ease .18s both;
+    transition: background-color .2s ease, box-shadow .2s ease,
+                transform .2s ease;
+  }
+  .lp-cta:hover {
+    background: var(--accent-hover);
+    box-shadow: 0 10px 26px rgba(31, 107, 69, .26);
+  }
+  .lp-cta:active { transform: translateY(1px); box-shadow: none; }
+  .lp-cta:focus-visible { outline: 3px solid rgba(31, 107, 69, .40); outline-offset: 3px; }
+
+  .lp-more {
+    margin-top: 38px;
+    font-size: 13px;
+    color: #86868b;
+    text-decoration: none;
+    animation: lp-in .7s ease .24s both;
+  }
+  .lp-more:hover { color: var(--accent); }
+
+  @keyframes lp-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* ---------- 系统介绍 ---------- */
+  .lp-intro {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 20px 24px 72px;
+  }
+  .lp-intro__title {
+    margin: 0 0 14px;
+    font-size: clamp(22px, 2.6vw, 30px);
+    text-align: center;
+    letter-spacing: -.3px;
+  }
+  .lp-intro__lead {
+    max-width: 680px;
+    margin: 0 auto 40px;
+    text-align: center;
+    font-size: 15px;
+    line-height: 1.9;
+    color: #6e6e73;
+    text-wrap: pretty;
+  }
+
+  .lp-points {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin-bottom: 46px;
+  }
+  .lp-point {
+    padding: 24px 22px;
+    background: #f5f5f7;
+    border-radius: 18px;
+  }
+  .lp-point__icon {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    margin-bottom: 14px;
+    border-radius: 11px;
+    background: #fff;
+    color: var(--accent);
+  }
+  .lp-point h3 {
+    margin: 0 0 8px;
+    font-size: 16px;
+  }
+  .lp-point p {
+    margin: 0;
+    font-size: 13.5px;
+    line-height: 1.85;
+    color: #6e6e73;
+    text-wrap: pretty;
+  }
+
+  .lp-sub-title {
+    margin: 0 0 16px;
+    font-size: 17px;
+  }
+  .lp-mods {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(258px, 1fr));
+    gap: 12px;
+    margin-bottom: 46px;
+  }
+  .lp-mod {
+    position: relative;
+    padding: 16px 18px 16px 46px;
+    background: #fff;
+    border: 1px solid #e6e6e8;
+    border-radius: 14px;
+  }
+  .lp-mod__no {
+    position: absolute;
+    left: 16px;
+    top: 16px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #c8d6cd;
+    font-variant-numeric: tabular-nums;
+  }
+  .lp-mod__name {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .lp-mod__desc {
+    display: block;
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: #6e6e73;
+    text-wrap: pretty;
+  }
+
+  .lp-flow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 46px;
+    padding: 0;
+    list-style: none;
+    counter-reset: none;
+  }
+  .lp-flow li {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 14px;
+    font-size: 13px;
+    background: #f5f5f7;
+    border-radius: 980px;
+    color: #1d1d1f;
+  }
+  .lp-flow li span {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .lp-foot {
+    margin: 0;
+    padding-top: 26px;
+    border-top: 1px solid #e6e6e8;
+    text-align: center;
+    font-size: 12.5px;
+    color: #86868b;
+  }
+
+  /* ---------- 登录面板：点击后渐变浮现 ---------- */
+  .lp-auth {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .42s ease, visibility 0s linear .42s;
+  }
+  .lp-auth.is-open {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity .42s ease, visibility 0s;
+  }
+  /* 遮罩用绿色径向渐变，形成「渐变渗出来」的观感 */
+  .lp-auth__scrim {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(1000px 640px at 50% 0%,
+                      rgba(31, 107, 69, .22), rgba(31, 107, 69, 0) 70%),
+      linear-gradient(180deg, rgba(255, 255, 255, .84),
+                              rgba(246, 250, 247, .95));
+    backdrop-filter: blur(16px) saturate(1.25);
+    -webkit-backdrop-filter: blur(16px) saturate(1.25);
+  }
+  .lp-auth__panel {
+    position: relative;
+    width: 100%;
+    max-width: 396px;
+    padding: 36px 36px 26px;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 28px 80px rgba(14, 46, 32, .18);
+    opacity: 0;
+    transform: translateY(18px) scale(.975);
+    transition: transform .55s cubic-bezier(.16, .84, .34, 1) .05s,
+                opacity .55s ease .05s;
+  }
+  .lp-auth.is-open .lp-auth__panel {
+    opacity: 1;
+    transform: none;
+  }
+
+  .lp-auth__close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    color: #86868b;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color .18s ease, color .18s ease;
+  }
+  .lp-auth__close:hover { background: #f5f5f7; color: #1d1d1f; }
+
+  .lp-auth__title {
+    margin: 0 0 6px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -.2px;
+  }
+  .lp-auth__sub {
+    margin: 0 0 26px;
+    text-align: center;
+    font-size: 13px;
+    color: #86868b;
+  }
+
+  .lp-field { margin-bottom: 15px; }
+  .lp-field label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 13px;
+    color: #6e6e73;
+  }
+  .lp-field input {
+    width: 100%;
+    padding: 13px 16px;
+    font-family: inherit;
+    font-size: 16px;           /* 不小于 16px，避免手机端聚焦时自动放大 */
+    color: #1d1d1f;
+    background: #f5f5f7;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    outline: none;
+    transition: background-color .18s ease, border-color .18s ease,
+                box-shadow .18s ease;
+  }
+  .lp-field input::placeholder { color: #a1a1a6; }
+  .lp-field input:focus {
+    background: #fff;
+    border-color: rgba(31, 107, 69, .55);
+    box-shadow: 0 0 0 3px rgba(31, 107, 69, .14);
+  }
+
+  .lp-remember {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0 20px;
+    font-size: 13px;
+    color: #6e6e73;
+    cursor: pointer;
+  }
+  .lp-remember input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  .lp-submit {
+    width: 100%;
+    padding: 13px 20px;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 500;
+    color: #fff;
+    background: var(--accent);
+    border: none;
+    border-radius: 980px;
+    cursor: pointer;
+    transition: background-color .2s ease, box-shadow .2s ease,
+                transform .2s ease;
+  }
+  .lp-submit:hover {
+    background: var(--accent-hover);
+    box-shadow: 0 10px 24px rgba(31, 107, 69, .26);
+  }
+  .lp-submit:active { transform: translateY(1px); box-shadow: none; }
+  .lp-submit:focus-visible { outline: 3px solid rgba(31, 107, 69, .40); outline-offset: 3px; }
+
+  .lp-auth__hint {
+    margin: 18px 0 0;
+    text-align: center;
+    font-size: 12.5px;
+    color: #a1a1a6;
+  }
+
+  /* 系统设置里要求减少动态效果时，去掉位移与缩放 */
+  @media (prefers-reduced-motion: reduce) {
+    .lp-badge, .lp-title, .lp-sub, .lp-cta, .lp-more { animation: none; }
+    .lp-auth, .lp-auth__panel { transition: opacity .2s linear; }
+    .lp-auth__panel { transform: none; }
+  }
+
+  @media (max-width: 560px) {
+    .lp-hero { padding: 36px 18px 48px; min-height: auto; }
+    .lp-badge { width: 160px; height: 160px; margin-bottom: 26px; }
+    .lp-auth__panel { padding: 30px 24px 22px; }
+  }
+</style>
+
+<div class="lp">
+
+  {# ---------------- 首屏：徽标 + 标题 + 说明 + 登录入口 ---------------- #}
+  <section class="lp-hero">
+    <img class="lp-badge" width="212" height="212" alt=""
+         src="{{ url_for('static', filename='login-badge.svg') }}">
+
+    <h1 class="lp-title">历史遗留废弃矿山<br>自然恢复适宜性评价系统</h1>
+
+    <p class="lp-sub">
+      以论文建立的评价方法与指标体系为算法内核，把项目建档、限制性条件判定、
+      微地质单元划分、指标数据采集、定量评价与报告输出串成一条闭环流程，
+      让自然恢复适宜性的判定有据可依、结果可复算。
+    </p>
+
+    <button type="button" class="lp-cta" id="lp-open"
+            aria-expanded="false" aria-controls="lp-auth">登录</button>
+
+    <a class="lp-more" href="#intro">
+      向下滑动，了解系统 <span aria-hidden="true">↓</span>
+    </a>
+  </section>
+
+  {# ---------------- 系统介绍：向下滑动可见 ---------------- #}
+  <section class="lp-intro" id="intro">
+    <h2 class="lp-intro__title">一套把评价流程固定下来的工具</h2>
+    <p class="lp-intro__lead">
+      自然恢复适宜性评价的难点不在算公式，而在「先做什么、后做什么」以及
+      「每一步用的什么口径」。系统把论文 4.1 节的流程写进程序，
+      前一步没做完就不会放行后一步。
+    </p>
+
+    <div class="lp-points">
+      <div class="lp-point">
+        <span class="lp-point__icon">{{ icon("sliders", 20) }}</span>
+        <h3>方法可溯</h3>
+        <p>权重由层次分析法算出并做一致性检验，指标标准化、分单元赋分与面积加权
+           合成的每一步都留有记录，可逐层回看。</p>
       </div>
-
-      <div class="field">
-        <label class="field__label" for="{{ form.password.id }}">密码</label>
-        {{ form.password(id=form.password.id, autocomplete="current-password") }}
+      <div class="lp-point">
+        <span class="lp-point__icon">{{ icon("shield", 20) }}</span>
+        <h3>流程可控</h3>
+        <p>政策、区位约束、土壤污染、地质灾害、耕地属性五项限制性条件一票否决；
+           未通过即终止评价，直接给出生态重建或人工辅助的结论。</p>
       </div>
+      <div class="lp-point">
+        <span class="lp-point__icon">{{ icon("file", 20) }}</span>
+        <h3>结果可复算</h3>
+        <p>评价结果与逐层得分明细一并留存，报告取自已保存的评价记录，
+           事后修改数据不会让报告与结论对不上。</p>
+      </div>
+    </div>
 
-      <div class="field">
-        <label class="checkbox" for="{{ form.remember.id }}">
+    <h3 class="lp-sub-title">九个功能模块</h3>
+    <div class="lp-mods">
+      {% for no, name, desc in modules %}
+      <div class="lp-mod">
+        <span class="lp-mod__no">{{ no }}</span>
+        <span class="lp-mod__name">{{ name }}</span>
+        <span class="lp-mod__desc">{{ desc }}</span>
+      </div>
+      {% endfor %}
+    </div>
+
+    <h3 class="lp-sub-title">评价流程</h3>
+    <ol class="lp-flow">
+      {% for s in steps %}
+      <li><span>{{ s.no }}</span>{{ s.title }}</li>
+      {% endfor %}
+    </ol>
+
+    <p class="lp-foot">
+      历史遗留废弃矿山自然恢复适宜性评价系统 V1.0 ·
+      运行于浏览器，数据保存在本机 SQLite 数据库
+    </p>
+  </section>
+
+  {# ---------------- 登录面板：点击「登录」后渐变浮现 ---------------- #}
+  <div class="lp-auth" id="lp-auth" aria-hidden="true">
+    <div class="lp-auth__scrim" data-lp-close></div>
+
+    <div class="lp-auth__panel" role="dialog" aria-modal="true"
+         aria-labelledby="lp-auth-title">
+      <button type="button" class="lp-auth__close" data-lp-close
+              aria-label="关闭登录框">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round"
+             aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+
+      <h2 class="lp-auth__title" id="lp-auth-title">登录</h2>
+      <p class="lp-auth__sub">使用系统账号登录</p>
+
+      <form method="post" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="lp-field">
+          <label for="{{ form.username.id }}">用户名</label>
+          {{ form.username(id=form.username.id, autocomplete="username",
+                           placeholder="请输入用户名") }}
+        </div>
+
+        <div class="lp-field">
+          <label for="{{ form.password.id }}">密码</label>
+          {{ form.password(id=form.password.id, autocomplete="current-password",
+                           placeholder="请输入密码") }}
+        </div>
+
+        <label class="lp-remember" for="{{ form.remember.id }}">
           {{ form.remember(id=form.remember.id) }}
           <span>记住我（下次自动登录，一个月内有效）</span>
         </label>
-      </div>
 
-      <p style="margin:18px 0 0;">
-        {{ form.submit(class_="btn", style="width:100%;") }}
-      </p>
-    </form>
-    <p class="muted" style="margin:14px 0 0;">演示账号：admin / admin123</p>
+        {{ form.submit(class_="lp-submit") }}
+      </form>
+
+      <p class="lp-auth__hint">演示账号：admin　密码：admin123</p>
+    </div>
   </div>
 </div>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+(function () {
+  var btn = document.getElementById('lp-open');
+  var auth = document.getElementById('lp-auth');
+  if (!btn || !auth) return;
+
+  var lastFocus = null;
+
+  function open() {
+    lastFocus = document.activeElement;
+    auth.classList.add('is-open');
+    auth.setAttribute('aria-hidden', 'false');
+    btn.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+    // 记到地址栏，直接访问 /login#login 也能展开登录框
+    if (location.hash !== '#login') {
+      history.replaceState(null, '', location.pathname + '#login');
+    }
+    var first = auth.querySelector('input');
+    if (first) window.setTimeout(function () { first.focus(); }, 300);
+  }
+
+  function close() {
+    auth.classList.remove('is-open');
+    auth.setAttribute('aria-hidden', 'true');
+    btn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+    if (location.hash === '#login') {
+      history.replaceState(null, '', location.pathname);
+    }
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+
+  btn.addEventListener('click', open);
+  Array.prototype.forEach.call(
+    auth.querySelectorAll('[data-lp-close]'),
+    function (el) { el.addEventListener('click', close); }
+  );
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && auth.classList.contains('is-open')) close();
+  });
+
+  // 登录失败回到本页、或直接带 #login 访问时，直接展开登录框
+  if (location.hash === '#login' || document.querySelector('.flash.error')) {
+    open();
+  }
+})();
+</script>
 {% endblock %}

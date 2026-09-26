@@ -35,6 +35,8 @@ CHROME_ARGS = [
     "--headless=new", "--disable-gpu", "--no-sandbox",
     "--hide-scrollbars", "--no-first-run", "--no-default-browser-check",
     "--force-device-scale-factor=1",
+    # 等页面动画（登录框淡入、提示浮层等）走完再截图，避免抓到中间态
+    "--virtual-time-budget=2500",
 ]
 
 
@@ -69,6 +71,8 @@ def prepare_data(app):
 def build_page_list(pid, rid):
     return [
         ("01_登录", "/login", 900),
+        # 带 #login 访问会直接展开登录框（见 auth/login.html 的脚本）
+        ("01b_登录框", "/login#login", 900),
         ("02_系统首页", "/", 900),
         ("03_项目与档案", "/project/", 820),
         ("04_矿山图斑", "/project/%d/patches" % pid, 820),
