@@ -97,7 +97,7 @@
     <figcaption class="muted" style="margin-top:6px;">
       {{ patch.image_note or "遥感影像" }}
       {% if patch.image_uploaded_at %}
-      · 上传于 {{ patch.image_uploaded_at.strftime("%Y-%m-%d %H:%M") }}
+      · 上传于 {{ patch.image_uploaded_at | localdt }}
       {% endif %}
     </figcaption>
   </figure>

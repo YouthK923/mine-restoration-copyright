@@ -5,12 +5,13 @@
 标题 → 图斑信息 → 评价结论 → 各微地质单元得分 → 完整得分明细 → 生成时间。
 """
 import io
-from datetime import datetime
 
 from docx import Document
 from docx.shared import Pt, Cm
 from docx.oxml.ns import qn
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+
+from app.utils.timefmt import to_local, now_utc
 
 
 def _set_run(run, text=None, size=12, bold=False):
@@ -73,7 +74,7 @@ def build_report(patch, mine_result):
     _heading(doc, "历史遗留废弃矿山自然恢复适宜性评价报告", 0)
     _para(doc, "软件：历史遗留废弃矿山自然恢复适宜性评价系统 V1.0",
           size=10.5, align=WD_ALIGN_PARAGRAPH.CENTER)
-    _para(doc, "生成时间：%s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    _para(doc, "生成时间：%s" % to_local(now_utc(), "%Y-%m-%d %H:%M:%S"),
           size=10.5, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=12)
 
     # 图斑信息

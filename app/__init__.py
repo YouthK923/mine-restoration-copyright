@@ -26,6 +26,10 @@ def create_app(config_class=Config):
     db.init_app(app)
     login_manager.init_app(app)
 
+    # 模板里展示时间统一走 localdt：库里存 UTC，展示成本地时间
+    from app.utils.timefmt import to_local
+    app.jinja_env.filters["localdt"] = to_local
+
     # 注册视图（各模块路由）
     from app.views import auth, project, unit, standard, constraint, \
         ahp, indicator, evaluate, report, search

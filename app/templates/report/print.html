@@ -39,7 +39,7 @@
     {{ patch.name }}
     {% if patch.admin_region %} · {{ patch.admin_region }}{% endif %}
     <br>历史遗留废弃矿山自然恢复适宜性评价系统 V1.0 ·
-    生成时间 {{ generated_at }}
+    生成时间 {{ generated_at | localdt }}
   </p>
 
   <h2>一、图斑基本信息</h2>

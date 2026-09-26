@@ -51,7 +51,7 @@
           {% if r.cr is not none and r.cr < 0.1 %}<span class="tag tag--ok">通过</span>
           {% else %}<span class="tag tag--warn">不通过</span>{% endif %}
         </td>
-        <td class="mono nowrap">{{ r.created_at.strftime("%Y-%m-%d %H:%M") if r.created_at else "—" }}</td>
+        <td class="mono nowrap">{{ r.created_at | localdt }}</td>
         <td>
           <form method="post" action="/ahp/experts/{{ r.id }}/delete"
                 onsubmit="return confirm('确定删除专家「{{ r.expert_name }}」的矩阵吗？');">

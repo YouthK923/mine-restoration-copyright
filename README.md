@@ -36,7 +36,7 @@ app/                    应用代码（详见下方「系统代码结构」）
     数值核对/                   案例数值的独立复算与正确性验证脚本
     界面核对/                   界面行为、文档用词的自检脚本
 
-测试/                   ★ 自检脚本（13 套，均从仓库根运行）
+测试/                   ★ 自检脚本（14 套，均从仓库根运行）
     test_ahp.py test_evaluate.py test_web_ahp.py test_web_modules.py
     test_web_evaluate.py test_web_report.py test_ui_fixes.py
     test_new_features.py test_workflow.py test_weights.py
@@ -147,6 +147,7 @@ python run.py --dev          # 开发模式：开启热重载与调试器
 ```bash
 python 测试/test_workflow.py    # 评价流程门禁、数据保护、重复单元拦截
 python 测试/test_weights.py     # AHP 权重生效链路
+python 测试/test_timefmt.py     # 时间显示：库里存 UTC、页面显示本地时间
 python 工具/check_materials.py  # 申请材料形式要求自检（21 项）
 python 工具/verify_all.py       # 项目最终验收汇总
 ```

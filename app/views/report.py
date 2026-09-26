@@ -12,6 +12,7 @@ from app.services import workflow as wf
 from app.utils import charts
 from app.utils import browser
 from app.utils.constants import grade_of
+from app.utils.timefmt import now_utc
 
 bp = Blueprint("report", __name__, url_prefix="/report")
 
@@ -109,7 +110,7 @@ def pdf(patch_id):
     html = render_template(
         "report/print.html", patch=patch, reference=reference, result=result,
         chart_units=chart_units, chart_weight=chart_weight,
-        generated_at=datetime.now().strftime("%Y-%m-%d %H:%M"))
+        generated_at=now_utc())
     data, err = browser.html_to_pdf(html)
     if err:
         flash("PDF 导出失败：%s" % err, "error")
