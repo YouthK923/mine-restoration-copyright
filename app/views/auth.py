@@ -69,12 +69,22 @@ def logout():
 @bp.route("/profile", methods=["GET", "POST"])
 @login_required
 def profile():
+    # 左侧分类：个人信息 / 登录与安全性，用查询参数切换
+    tab = request.values.get("tab") or "info"
+    if tab not in ("info", "security"):
+        tab = "info"
+
     # 两个表单放在同一页，用字段前缀区分，避免 submit / csrf_token 重名
     info_form = ProfileForm(prefix="info", obj=current_user)
     pwd_form = PasswordForm(prefix="pwd")
 
     if request.method == "POST":
         action = request.form.get("action")
+        # 校验失败要重新渲染本页，此时必须回到提交表单所在的那个分类，
+        # 否则错误提示会出现在另一个分类里，用户根本看不到。
+        if action in ("info", "password"):
+            tab = "security" if action == "password" else "info"
+
         if action == "info" and info_form.validate_on_submit():
             current_user.display_name = (info_form.display_name.data or "").strip() or None
             current_user.title = (info_form.title.data or "").strip() or None
@@ -82,7 +92,7 @@ def profile():
             current_user.phone = (info_form.phone.data or "").strip() or None
             db.session.commit()
             flash("个人资料已保存", "ok")
-            return redirect(url_for("auth.profile"))
+            return redirect(url_for("auth.profile", tab="info"))
         if action == "password" and pwd_form.validate_on_submit():
             if not check_password_hash(current_user.password_hash,
                                        pwd_form.old_password.data):
@@ -92,11 +102,11 @@ def profile():
                     pwd_form.new_password.data)
                 db.session.commit()
                 flash("密码已修改", "ok")
-                return redirect(url_for("auth.profile"))
+                return redirect(url_for("auth.profile", tab="security"))
 
     return render_template("auth/profile.html", info_form=info_form,
                            pwd_form=pwd_form, avatar_form=EmptyForm(),
-                           role_labels=ROLE_LABELS)
+                           tab=tab, role_labels=ROLE_LABELS)
 
 
 def _avatar_length_ok(file_storage):
@@ -114,47 +124,49 @@ def _avatar_length_ok(file_storage):
 @login_required
 def upload_avatar():
     form = EmptyForm()
+    back = url_for("auth.profile", tab=request.form.get("tab") or "info")
     if not form.validate_on_submit():
         flash("表单校验失败，请重试", "error")
-        return redirect(url_for("auth.profile"))
+        return redirect(back)
 
     file = request.files.get("avatar")
     if file is None or not file.filename:
         flash("请选择头像图片", "error")
-        return redirect(url_for("auth.profile"))
+        return redirect(back)
 
     ok, size = _avatar_length_ok(file)
     if not ok:
         flash("头像不能超过 %.0f MB（当前 %.1f MB）"
               % (current_app.config["MAX_AVATAR_LENGTH"] / 1024 / 1024,
                  size / 1024 / 1024), "error")
-        return redirect(url_for("auth.profile"))
+        return redirect(back)
 
     rel, err = up.save_upload(file, "avatars",
                               current_app.config["ALLOWED_AVATAR_EXT"],
                               current_app.config["UPLOAD_FOLDER"])
     if err:
         flash(err, "error")
-        return redirect(url_for("auth.profile"))
+        return redirect(back)
 
     # 换新头像时删掉旧文件，避免残留
     up.remove_upload(current_user.avatar, current_app.config["UPLOAD_FOLDER"])
     current_user.avatar = rel
     db.session.commit()
     flash("头像已更新", "ok")
-    return redirect(url_for("auth.profile"))
+    return redirect(back)
 
 
 @bp.route("/profile/avatar/delete", methods=["POST"])
 @login_required
 def delete_avatar():
     form = EmptyForm()
+    back = url_for("auth.profile", tab=request.form.get("tab") or "info")
     if form.validate_on_submit():
         up.remove_upload(current_user.avatar, current_app.config["UPLOAD_FOLDER"])
         current_user.avatar = None
         db.session.commit()
         flash("头像已移除", "ok")
-    return redirect(url_for("auth.profile"))
+    return redirect(back)
 
 
 # ---------------------------- 用户维护 ----------------------------

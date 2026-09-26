@@ -97,6 +97,7 @@ def build_page_list(pid, rid):
         ("16_用户管理", "/users", 900),
         ("16b_操作日志", "/logs", 900),
         ("16c_个人设置", "/profile", 1100),
+        ("16d_个人设置_登录与安全性", "/profile?tab=security", 900),
     ]
 
 

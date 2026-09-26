@@ -225,6 +225,21 @@
       flex-direction: column;
       overflow-y: auto;
       overflow-x: hidden;
+      /* 细滚动条：默认半透明，悬停时加深，不抢视线 */
+      scrollbar-width: thin;
+      scrollbar-color: rgba(31, 107, 69, .28) transparent;
+    }
+    .app-content::-webkit-scrollbar { width: 12px; }
+    .app-content::-webkit-scrollbar-track { background: transparent; }
+    .app-content::-webkit-scrollbar-thumb {
+      background: rgba(31, 107, 69, .26);
+      border: 3px solid transparent;
+      background-clip: content-box;
+      border-radius: 999px;
+    }
+    .app-content::-webkit-scrollbar-thumb:hover {
+      background: rgba(31, 107, 69, .46);
+      background-clip: content-box;
     }
 
     /* ---------- 顶栏：面包屑 + 搜索 ----------

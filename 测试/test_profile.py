@@ -57,8 +57,13 @@ client.post("/login", data={"username": "admin", "password": "admin123"},
 r = client.get("/profile")
 body = r.get_data(as_text=True)
 ok(r.status_code == 200, "登录后可访问个人设置", "HTTP %d" % r.status_code)
-ok("个人资料" in body and "修改密码" in body and "上传头像" in body,
-   "页面含资料、密码、头像三块")
+ok("个人信息" in body and "登录与安全性" in body, "左栏含两个分类入口")
+ok("姓名" in body and "邮箱" in body and 'class="acct-card"' in body,
+   "个人信息页为可展开的功能卡")
+sec = client.get("/profile?tab=security").get_data(as_text=True)
+ok("密码" in sec and "登录账号" in sec, "登录与安全性页含密码与账号两张卡")
+ok("更换头像" in body, "左栏含更换头像入口")
+ok("name=\"pwd-old_password\"" in sec, "密码卡内含当前密码输入框")
 
 print()
 print(LINE)
