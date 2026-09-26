@@ -129,19 +129,10 @@
     padding: 20px 24px 72px;
   }
   .lp-intro__title {
-    margin: 0 0 14px;
+    margin: 0 0 26px;
     font-size: clamp(22px, 2.6vw, 30px);
     text-align: center;
     letter-spacing: -.3px;
-  }
-  .lp-intro__lead {
-    max-width: 680px;
-    margin: 0 auto 40px;
-    text-align: center;
-    font-size: 15px;
-    line-height: 1.9;
-    color: #6e6e73;
-    text-wrap: pretty;
   }
 
   .lp-points {
@@ -174,7 +165,7 @@
     text-wrap: pretty;
   }
 
-  .lp-sub-title { margin: 0 0 16px; font-size: 17px; }
+  .lp-sub-title { margin: 0 0 20px; font-size: 17px; }
   .lp-mods {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(258px, 1fr));
@@ -456,11 +447,6 @@
   {# ---------------- 系统介绍：随滚动逐条弹入 ---------------- #}
   <section class="lp-intro" id="intro">
     <h2 class="lp-intro__title lp-reveal" data-dir="up">一套把评价流程固定下来的工具</h2>
-    <p class="lp-intro__lead lp-reveal" data-dir="up" style="--i: 1">
-      自然恢复适宜性评价的难点不在算公式，而在「先做什么、后做什么」以及
-      「每一步用的什么口径」。系统把论文 4.1 节的流程写进程序，
-      前一步没做完就不会放行后一步。
-    </p>
 
     <div class="lp-points">
       {% set pdirs = ['left', 'up', 'right'] %}
@@ -483,9 +469,6 @@
     </div>
 
     <h3 class="lp-sub-title lp-reveal" data-dir="up">九个功能模块</h3>
-    <p class="lp-intro__lead lp-reveal" data-dir="up" style="--i: 1">
-      把鼠标移到卡片上可查看该模块的职责
-    </p>
 
     <div class="lp-mods">
       {% set mdirs = ['left', 'up', 'right'] %}
