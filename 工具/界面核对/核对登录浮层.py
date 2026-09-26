@@ -151,7 +151,40 @@ for key, label in ((".toast-stack", "外层为固定堆叠容器"),
     ok(key in base, label)
 
 print()
-print("六、清理测试数据")
+print("六、介绍区排版：两个标题居中、九个模块 3×3 居中")
+
+
+def rule_of(src, selector):
+    """取出某个选择器的声明块（取文件中第一处，即主规则）。"""
+    m = re.search(re.escape(selector) + r"\s*\{(.*?)\}", src, re.S)
+    return m.group(1) if m else ""
+
+
+lp = io.open(os.path.join(BASE, "app", "templates", "auth", "login.html"),
+             encoding="utf-8").read()
+intro = rule_of(lp, ".lp-intro > *")
+ok("margin-left: auto" in intro and "margin-right: auto" in intro,
+   "介绍区各块整体水平居中")
+ok("max-width" in intro, "介绍区有统一最大宽度",
+   intro.split(";")[0].strip())
+title = rule_of(lp, ".lp-intro__title")
+ok("text-align: center" in title, "「一套把评价流程固定下来的工具」居中")
+ok("margin: 0 auto" in title, "标题块自身也居中（不是只把文字居中）")
+sub = rule_of(lp, ".lp-sub-title")
+ok("text-align: center" in sub, "「九个功能模块」居中")
+mods = rule_of(lp, ".lp-mods")
+ok("repeat(3" in mods, "模块卡排成三列", mods.split(";")[1].strip()
+   if ";" in mods else "")
+points = rule_of(lp, ".lp-points")
+ok("repeat(3" in points, "特点卡排成三列")
+from app.services import dashboard as dash
+n_mod = len(dash.MODULES)
+ok(n_mod == 9, "模块数为 9（三列即 3×3）", "%d 个" % n_mod)
+ok("@media (max-width: 900px)" in lp and "@media (max-width: 620px)" in lp,
+   "窄屏退为两列、一列")
+
+print()
+print("七、清理测试数据")
 with app.app_context():
     from app.models import db, Project
     p = Project.query.filter_by(code="TOASTCHK").first()

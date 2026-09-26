@@ -145,17 +145,18 @@
     padding: 56px 24px 72px;
     background: transparent;
   }
-  .lp-intro > * { max-width: 1200px; margin-left: auto; margin-right: auto; }
+  .lp-intro > * { max-width: 1040px; margin-left: auto; margin-right: auto; }
   .lp-intro__title {
-    margin: 0 0 26px;
+    margin: 0 auto 26px;
     font-size: clamp(22px, 2.6vw, 30px);
     text-align: center;
     letter-spacing: -.3px;
   }
 
+  /* 三张特点卡与九个模块卡都按三等分排版，并整体居中 */
   .lp-points {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 16px;
     margin-bottom: 46px;
   }
@@ -192,10 +193,14 @@
     text-wrap: pretty;
   }
 
-  .lp-sub-title { margin: 0 0 20px; font-size: 17px; }
+  .lp-sub-title {
+    margin: 0 auto 20px;
+    font-size: 17px;
+    text-align: center;
+  }
   .lp-mods {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(258px, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
     margin-bottom: 46px;
     align-items: start;
@@ -450,6 +455,14 @@
     .lp-reveal.is-in h3, .lp-reveal.is-in .lp-mod__name { color: var(--accent); }
     .lp-auth, .lp-auth__panel { transition: opacity .2s linear; }
     .lp-auth__panel { transform: none; }
+  }
+
+  /* 窄屏退成两列、一列，避免卡片被挤变形 */
+  @media (max-width: 900px) {
+    .lp-points, .lp-mods { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 620px) {
+    .lp-points, .lp-mods { grid-template-columns: minmax(0, 1fr); }
   }
 
   @media (max-width: 560px) {
