@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% from "_macros.html" import patch_guide %}
 {% block title %}指标数据采集{% endblock %}
 {% block content %}
 <div class="card">
@@ -7,8 +6,6 @@
   <p class="actions" style="margin-bottom:12px;">
     <a class="btn btn--sm" href="/indicator/import">批量导入（CSV / Excel）</a>
   </p>
-
-  {{ patch_guide(projects_without_patch) }}
 
   {% if not patches %}
   <p class="muted">

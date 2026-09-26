@@ -1,10 +1,8 @@
 {% extends "base.html" %}
-{% from "_macros.html" import patch_guide %}
 {% block title %}微地质单元{% endblock %}
 {% block content %}
 <div class="card">
   <h2>微地质单元</h2>
-  {{ patch_guide(projects_without_patch) }}
 
   {% if not rows %}
   <p class="muted">

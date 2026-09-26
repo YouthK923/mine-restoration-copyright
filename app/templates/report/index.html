@@ -1,10 +1,8 @@
 {% extends "base.html" %}
-{% from "_macros.html" import patch_guide %}
 {% block title %}报告输出{% endblock %}
 {% block content %}
 <div class="card">
   <h2>报告与结果输出</h2>
-  {{ patch_guide(projects_without_patch) }}
 
   {% if not patches %}
   <p class="muted">暂无矿山图斑。请先到「项目与矿山档案」建立图斑。</p>
