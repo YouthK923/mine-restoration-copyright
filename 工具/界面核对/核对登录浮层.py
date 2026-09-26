@@ -85,7 +85,7 @@ print("四、成功提示一律走居中浮层，错误提示仍是顶部提示�
 c2 = app.test_client()
 bad = c2.post("/login", data={"username": "admin", "password": "wrong"},
               follow_redirects=True).get_data(as_text=True)
-ok('class="flash error"' in bad and "用户名或密码错误" in bad,
+ok('class="flash error"' in bad and "账户名称或密码错误" in bad,
    "登录失败仍是顶部错误提示条（需停下来细读）")
 ok(not has_toast(bad), "登录失败不出现浮层")
 

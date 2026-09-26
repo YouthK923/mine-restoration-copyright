@@ -194,10 +194,10 @@ with app.app_context():
 c2 = app.test_client()
 bad = c2.post("/login", data={"username": "admin", "password": "admin123"},
               follow_redirects=True).get_data(as_text=True)
-ok("用户名或密码错误" in bad, "旧密码已无法登录")
+ok("账户名称或密码错误" in bad, "旧密码已无法登录")
 good = c2.post("/login", data={"username": "admin", "password": "newpass123"},
                follow_redirects=True)
-ok(good.status_code == 200 and "用户名或密码错误" not in
+ok(good.status_code == 200 and "账户名称或密码错误" not in
    good.get_data(as_text=True), "新密码可以登录")
 
 print()

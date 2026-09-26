@@ -62,7 +62,7 @@ def login():
             # 登录成功只是告知性反馈，不需要用户停下来阅读。
             flash("登录成功", "toast")
             return redirect(url_for("auth.index"))
-        flash("用户名或密码错误", "error")
+        flash("账户名称或密码错误", "error")
     return render_template("auth/login.html", form=form, **_intro_data())
 
 

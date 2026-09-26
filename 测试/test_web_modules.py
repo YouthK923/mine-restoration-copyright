@@ -42,7 +42,7 @@ r = client.post("/login", data={"username": "admin", "password": "admin123"},
 body = r.get_data(as_text=True)
 # 工作台：页首横幅 + 评价流程分区 + 数据概览
 print("  登录后含「评价流程」:", "评价流程" in body)
-print("  含用户名 admin:", "admin" in body)
+print("  含账户 admin:", "admin" in body)
 print("  含页首横幅:", 'class="hero"' in body)
 print("  含数据概览:", 'class="stat-card"' in body)
 assert "评价流程" in body and 'class="hero"' in body
