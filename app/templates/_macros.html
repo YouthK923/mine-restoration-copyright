@@ -78,35 +78,29 @@
 {% endmacro %}
 
 
-{# 前置条件的统一外壳：一张中性卡片 + 一个清单。
-   缺什么、去哪补都写在每一行里，不用整块警示色压页面。 #}
-{% macro prereq_card(title, desc, icon_name="warn") %}
-<section class="prereq">
-  <div class="prereq__head">
-    <span class="prereq__icon">{{ icon(icon_name, 18) }}</span>
-    <div>
-      <p class="prereq__title">{{ title }}</p>
-      {% if desc %}<p class="prereq__desc">{{ desc }}</p>{% endif %}
-    </div>
-  </div>
-  <ul class="prereq__list">{{ caller() }}</ul>
-</section>
-{% endmacro %}
-
-
-{# 前置条件未满足时的提示：只列缺什么，并给出处理入口 #}
+{# 前置条件未满足时的提示：做成与页面主表同款的表格，只把待处理的那几行标成浅红，
+   说明写在 caption 里，缺什么、去哪补都在行内。 #}
 {% macro workflow_blocking(progress) %}
 {% if progress.blocking %}
-{% call prereq_card("前置条件未满足，本步骤暂不能执行",
-                    "按论文 4.1 节的流程顺序，先把下面这些补上。") %}
-  {% for b in progress.blocking %}
-  <li class="prereq__item">
-    <span class="prereq__name">{{ b.label }}</span>
-    <span class="prereq__need">{{ b.reason }}</span>
-    <a class="btn btn--sm" href="{{ b.fix_url }}">{{ b.fix_label }}</a>
-  </li>
-  {% endfor %}
-{% endcall %}
+<table class="prereq-table">
+  <caption>本步骤的前置条件尚未满足，按论文 4.1 节的流程顺序先补上：</caption>
+  <thead>
+    <tr>
+      <th scope="col">前置步骤</th>
+      <th scope="col">说明</th>
+      <th scope="col">操作</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for b in progress.blocking %}
+    <tr class="prereq-row">
+      <td>{{ b.label }}</td>
+      <td class="muted">{{ b.reason }}</td>
+      <td><a class="btn btn--sm" href="{{ b.fix_url }}">{{ b.fix_label }}</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 {% endif %}
 {% endmacro %}
 
@@ -123,21 +117,33 @@
 
 
 {# 层级引导：本系统是「项目 → 图斑」两级结构，评价针对的是图斑而非项目。
-   下游各页按图斑组织数据，故只要存在「还没建图斑的项目」，就逐条列出并给出入口。 #}
+   下游各页按图斑组织数据，故把「还没建图斑的项目」按同一张表的样式列出来并给出入口。 #}
 {% macro patch_guide(projects_without_patch) %}
 {% if projects_without_patch %}
-{% call prereq_card("前置条件未满足",
-                    "本页按矿山图斑组织数据：项目下先建立图斑，才会出现在这里。",
-                    "mountain") %}
-  {% for p in projects_without_patch %}
-  <li class="prereq__item">
-    <span class="prereq__name">项目「{{ p.name }}」</span>
-    <span class="prereq__need">缺少：矿山图斑</span>
-    <a class="btn btn--sm" href="/project/{{ p.id }}/patch/add">
-      {{ icon("plus", 14) }}去新建图斑
-    </a>
-  </li>
-  {% endfor %}
-{% endcall %}
+<table class="prereq-table">
+  <caption>以下项目下尚未建立矿山图斑，补齐后即可进入本页流程：</caption>
+  <thead>
+    <tr>
+      <th scope="col">所属项目</th>
+      <th scope="col">矿山图斑</th>
+      <th scope="col">状态</th>
+      <th scope="col">操作</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in projects_without_patch %}
+    <tr class="prereq-row">
+      <td>项目「{{ p.name }}」</td>
+      <td class="muted">未建立</td>
+      <td><span class="prereq-flag">缺少矿山图斑</span></td>
+      <td>
+        <a class="btn btn--sm" href="/project/{{ p.id }}/patch/add">
+          {{ icon("plus", 14) }}去新建图斑
+        </a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 {% endif %}
 {% endmacro %}

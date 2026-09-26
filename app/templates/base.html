@@ -940,45 +940,13 @@
     }
     .notice__title { margin: 0 0 8px; font-weight: 600; }
 
-    /* ---------- 前置条件清单（缺什么 + 去哪补，逐条一行） ---------- */
-    .prereq {
-      margin: 0 0 16px;
-      padding: 16px 18px;
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-    .prereq__head { display: flex; align-items: flex-start; gap: 12px; }
-    .prereq__icon {
-      display: grid;
-      place-items: center;
-      width: 34px;
-      height: 34px;
-      flex: none;
-      border-radius: 10px;
-      background: var(--accent-soft);
-      color: var(--accent);
-    }
-    .prereq__title { margin: 0; font-size: 14px; font-weight: 600; }
-    .prereq__desc {
-      margin: 4px 0 0;
-      font-size: 12.5px;
-      line-height: 1.7;
-      color: var(--ink-soft);
-    }
-    .prereq__list { margin: 14px 0 0; padding: 0; list-style: none; }
-    .prereq__item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 0;
-      border-top: 1px solid var(--line);
-      font-size: 13px;
-    }
-    .prereq__name { font-weight: 600; }
-    .prereq__need { flex: 1; min-width: 0; color: var(--ink-soft); }
-    .prereq__item .btn { flex: none; }
+    /* ---------- 前置条件表（与页面主表同款，只把待处理的行标成浅红） ---------- */
+    .prereq-table { margin: 0 0 18px; }
+    .prereq-table > caption { padding-bottom: 7px; }
+    .prereq-row > td { background: var(--danger-soft); }
+    .prereq-row:hover > td { background: #f6dcd7; }
+    .prereq-flag { color: var(--danger); font-weight: 600; }
+    .prereq-row .muted { color: #9a6b62; }
 
     /* ---------- 图斑面板（按图斑分块展示，如指标数据采集） ---------- */
     .patch-panel {

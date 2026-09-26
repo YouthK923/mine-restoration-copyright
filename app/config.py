@@ -14,6 +14,11 @@ class Config:
     # 禁止跨站请求伪造（CSRF），登录与表单提交依赖此项
     WTF_CSRF_ENABLED = True
 
+    # 模板改动立即生效，不必重启服务。
+    # Flask 在非 debug 下默认把模板缓存到进程里，改完模板刷新浏览器还是旧页面，
+    # 容易被误当成「改了没生效」。本系统只在本机运行，这点开销可以忽略。
+    TEMPLATES_AUTO_RELOAD = True
+
     # 「记住我」：登录时勾选则下发持久 cookie，关闭浏览器后仍可自动登录
     REMEMBER_COOKIE_DURATION = timedelta(days=30)
     REMEMBER_COOKIE_HTTPONLY = True
