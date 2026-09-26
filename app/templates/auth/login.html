@@ -177,7 +177,7 @@
   /* 模块卡：默认只显示编号与名称，鼠标悬停或键盘聚焦时才展开职责说明 */
   .lp-mod {
     position: relative;
-    padding: 17px 40px 17px 48px;
+    padding: 17px 18px 17px 48px;
     background: #fff;
     border: 1px solid #e6e6e8;
     border-radius: 14px;
@@ -203,20 +203,6 @@
     display: block;
     font-size: 14px;
     font-weight: 600;
-  }
-  .lp-mod__more {
-    position: absolute;
-    right: 15px;
-    top: 17px;
-    display: grid;
-    place-items: center;
-    color: #c3cfc8;
-    transition: transform .3s ease, color .3s ease;
-  }
-  .lp-mod:hover .lp-mod__more,
-  .lp-mod:focus-within .lp-mod__more {
-    transform: rotate(90deg);
-    color: var(--accent);
   }
   /* 用 grid-template-rows 0fr→1fr 展开，高度过渡自然 */
   .lp-mod__body {
@@ -244,8 +230,6 @@
 
   /* 触摸设备没有悬停，直接把说明摊开 */
   @media (hover: none) {
-    .lp-mod { padding-right: 18px; }
-    .lp-mod__more { display: none; }
     .lp-mod__body { grid-template-rows: 1fr; margin-top: 7px; }
     .lp-mod__desc { opacity: 1; }
   }
@@ -477,7 +461,6 @@
            style="--i: {{ loop.index0 % 3 }}" tabindex="0">
         <span class="lp-mod__no">{{ no }}</span>
         <span class="lp-mod__name">{{ name }}</span>
-        <span class="lp-mod__more">{{ icon("chevron", 15) }}</span>
         <div class="lp-mod__body"><p class="lp-mod__desc">{{ desc }}</p></div>
       </div>
       {% endfor %}
