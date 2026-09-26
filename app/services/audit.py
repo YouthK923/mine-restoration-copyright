@@ -19,6 +19,9 @@ ACTION_NAMES = {
     "auth.edit_user": "编辑用户",
     "auth.delete_user": "删除用户",
     "auth.reset_password": "重置用户密码",
+    "auth.profile": "修改个人资料",
+    "auth.upload_avatar": "更新头像",
+    "auth.delete_avatar": "移除头像",
 
     "project.add": "新建项目",
     "project.edit": "编辑项目",
@@ -56,6 +59,10 @@ SKIP_ENDPOINTS = {"static", "auth.index"}
 
 
 def action_name(endpoint):
+    # 个人设置页的两个表单共用一个端点，按提交的动作区分
+    if endpoint == "auth.profile":
+        return "修改密码" if request.form.get("action") == "password" \
+            else "修改个人资料"
     if endpoint in ACTION_NAMES:
         return ACTION_NAMES[endpoint]
     return "写操作 %s %s" % (request.method, request.path)

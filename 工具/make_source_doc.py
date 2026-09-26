@@ -103,6 +103,7 @@ SOURCE_ORDER = [
     "app/templates/auth/users.html",
     "app/templates/auth/add_user.html",
     "app/templates/auth/edit_user.html",
+    "app/templates/auth/profile.html",
     "app/templates/auth/logs.html",
     "app/templates/project/index.html",
     "app/templates/project/edit.html",

@@ -24,3 +24,6 @@ class Config:
     MAX_CONTENT_LENGTH = 32 * 1024 * 1024        # 单次上传上限 32 MB
     ALLOWED_IMAGE_EXT = {"png", "jpg", "jpeg", "gif", "webp", "bmp", "tif", "tiff"}
     ALLOWED_DATA_EXT = {"csv", "xlsx", "xls"}
+    # 头像只用浏览器能直接显示的格式（不含 bmp / tif），并单独限制体积
+    ALLOWED_AVATAR_EXT = {"png", "jpg", "jpeg", "gif", "webp"}
+    MAX_AVATAR_LENGTH = 4 * 1024 * 1024          # 4 MB

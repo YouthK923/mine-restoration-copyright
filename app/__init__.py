@@ -86,6 +86,7 @@ def create_app(config_class=Config):
         ("报告与结果输出", "/report/", "file"),
     ]
     ADMIN_LINKS = [
+        ("个人设置", "/profile", "user"),
         ("用户与操作日志", "/users", "users"),
     ]
 
@@ -115,6 +116,8 @@ def create_app(config_class=Config):
         # 面包屑用的当前页名：按路径命中的入口取，未命中时给个通用名
         if path == "/":
             page_title = "工作台"
+        elif path.startswith("/profile"):
+            page_title = "个人设置"
         elif path.startswith(("/users", "/logs")):
             page_title = "用户与操作日志"
         elif path.startswith("/search"):

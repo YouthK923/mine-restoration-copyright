@@ -96,6 +96,7 @@ def build_page_list(pid, rid):
         ("15_得分明细与图表", "/report/%d" % pid, 1700),
         ("16_用户管理", "/users", 900),
         ("16b_操作日志", "/logs", 900),
+        ("16c_个人设置", "/profile", 1100),
     ]
 
 

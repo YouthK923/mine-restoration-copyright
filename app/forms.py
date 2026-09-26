@@ -3,11 +3,25 @@
 
 各模块的 Flask-WTF 表单集中于此。
 """
+import re
+
 from flask_wtf import FlaskForm
 from wtforms import SelectField, SubmitField, StringField, PasswordField, BooleanField
-from wtforms.validators import DataRequired, Length
+from wtforms.validators import (DataRequired, Length, Optional, EqualTo,
+                                ValidationError)
 
 from app.utils.constants import UNIT_TYPES, ASPECT_TYPES
+
+# 邮箱格式：够用的轻量校验。
+# WTForms 自带的 Email() 需要额外安装 email_validator，
+# 为一个字段引入依赖不划算，这里自己用正则判断。
+EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$")
+
+
+def email_format(form, field):
+    v = (field.data or "").strip()
+    if v and not EMAIL_RE.match(v):
+        raise ValidationError("邮箱格式不正确")
 
 
 class AHPSelectForm(FlaskForm):
@@ -35,3 +49,26 @@ class LoginForm(FlaskForm):
     password = PasswordField("密码", validators=[DataRequired()])
     remember = BooleanField("记住我")
     submit = SubmitField("登录")
+
+
+class ProfileForm(FlaskForm):
+    """个人资料：显示名称、职务与联系方式。字段都可留空。"""
+    display_name = StringField("显示名称", validators=[Optional(), Length(max=64)])
+    title = StringField("职务", validators=[Optional(), Length(max=64)])
+    email = StringField("邮箱", validators=[Optional(), email_format,
+                                        Length(max=128)])
+    phone = StringField("手机号", validators=[Optional(), Length(max=32)])
+    submit_info = SubmitField("保存资料")
+
+
+class PasswordForm(FlaskForm):
+    """修改密码：需要先验证当前密码。"""
+    old_password = PasswordField("当前密码", validators=[DataRequired()])
+    new_password = PasswordField("新密码",
+                                 validators=[DataRequired(), Length(min=6, max=64,
+                                                                    message="新密码至少 6 位")])
+    confirm = PasswordField("确认新密码",
+                            validators=[DataRequired(),
+                                        EqualTo("new_password",
+                                                message="两次输入的新密码不一致")])
+    submit_pwd = SubmitField("修改密码")

@@ -20,6 +20,12 @@ REQUIRED_COLUMNS = [
     ("expert_matrices", "unit_type", "VARCHAR(32)"),
     ("expert_matrices", "l1_name", "VARCHAR(64)"),
     ("expert_matrices", "cr", "FLOAT"),
+    # 用户个人资料（个人设置页）
+    ("users", "display_name", "VARCHAR(64)"),
+    ("users", "title", "VARCHAR(64)"),
+    ("users", "email", "VARCHAR(128)"),
+    ("users", "phone", "VARCHAR(32)"),
+    ("users", "avatar", "VARCHAR(256)"),
 ]
 
 

@@ -25,8 +25,26 @@ class User(UserMixin, db.Model):
     active = db.Column(db.Boolean, nullable=False, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    # ---- 个人资料（用户可在「个人设置」中自行维护）----
+    display_name = db.Column(db.String(64), nullable=True)    # 显示名称（姓名）
+    title = db.Column(db.String(64), nullable=True)           # 职务 / 岗位
+    email = db.Column(db.String(128), nullable=True)
+    phone = db.Column(db.String(32), nullable=True)
+    avatar = db.Column(db.String(256), nullable=True)         # 头像，相对 static 的路径
+
+    @property
+    def shown_name(self):
+        """界面上显示的名字：优先用显示名称，没填就用账号名。"""
+        return self.display_name or self.username
+
+    @property
+    def initial(self):
+        """没有头像时用首字母占位。"""
+        return (self.shown_name or "?")[0].upper()
+
     def to_dict(self):
         return {"id": self.id, "username": self.username,
+                "display_name": self.display_name,
                 "role": self.role, "active": self.active}
 
 

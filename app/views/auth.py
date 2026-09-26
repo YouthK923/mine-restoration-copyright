@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 """用户与权限管理 —— 登录、注销、用户维护、操作日志。"""
 from flask import (Blueprint, render_template, redirect, url_for, request,
-                   flash, abort)
+                   flash, abort, current_app)
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from app.forms import LoginForm, EmptyForm
+from app.forms import LoginForm, EmptyForm, ProfileForm, PasswordForm
 from app.models import db, User, OperationLog
+from app.utils import uploads as up
 from app.utils.constants import ROLE_LABELS
 
 bp = Blueprint("auth", __name__)
@@ -59,6 +60,100 @@ def logout():
     logout_user()
     flash("已退出登录", "ok")
     return redirect(url_for("auth.login"))
+
+
+# ---------------------------- 个人设置 ----------------------------
+# 与「用户管理」的区别：那里是管理员维护别人，这里是任何登录用户维护自己。
+
+@bp.route("/profile", methods=["GET", "POST"])
+@login_required
+def profile():
+    # 两个表单放在同一页，用字段前缀区分，避免 submit / csrf_token 重名
+    info_form = ProfileForm(prefix="info", obj=current_user)
+    pwd_form = PasswordForm(prefix="pwd")
+
+    if request.method == "POST":
+        action = request.form.get("action")
+        if action == "info" and info_form.validate_on_submit():
+            current_user.display_name = (info_form.display_name.data or "").strip() or None
+            current_user.title = (info_form.title.data or "").strip() or None
+            current_user.email = (info_form.email.data or "").strip() or None
+            current_user.phone = (info_form.phone.data or "").strip() or None
+            db.session.commit()
+            flash("个人资料已保存", "ok")
+            return redirect(url_for("auth.profile"))
+        if action == "password" and pwd_form.validate_on_submit():
+            if not check_password_hash(current_user.password_hash,
+                                       pwd_form.old_password.data):
+                pwd_form.old_password.errors.append("当前密码不正确")
+            else:
+                current_user.password_hash = generate_password_hash(
+                    pwd_form.new_password.data)
+                db.session.commit()
+                flash("密码已修改", "ok")
+                return redirect(url_for("auth.profile"))
+
+    return render_template("auth/profile.html", info_form=info_form,
+                           pwd_form=pwd_form, avatar_form=EmptyForm(),
+                           role_labels=ROLE_LABELS)
+
+
+def _avatar_length_ok(file_storage):
+    """按字节检查头像大小。超限时 werkzeug 读到内存里的内容也能量出来。"""
+    limit = current_app.config.get("MAX_AVATAR_LENGTH", 4 * 1024 * 1024)
+    stream = file_storage.stream
+    pos = stream.tell()
+    stream.seek(0, 2)
+    size = stream.tell()
+    stream.seek(pos)
+    return size <= limit, size
+
+
+@bp.route("/profile/avatar", methods=["POST"])
+@login_required
+def upload_avatar():
+    form = EmptyForm()
+    if not form.validate_on_submit():
+        flash("表单校验失败，请重试", "error")
+        return redirect(url_for("auth.profile"))
+
+    file = request.files.get("avatar")
+    if file is None or not file.filename:
+        flash("请选择头像图片", "error")
+        return redirect(url_for("auth.profile"))
+
+    ok, size = _avatar_length_ok(file)
+    if not ok:
+        flash("头像不能超过 %.0f MB（当前 %.1f MB）"
+              % (current_app.config["MAX_AVATAR_LENGTH"] / 1024 / 1024,
+                 size / 1024 / 1024), "error")
+        return redirect(url_for("auth.profile"))
+
+    rel, err = up.save_upload(file, "avatars",
+                              current_app.config["ALLOWED_AVATAR_EXT"],
+                              current_app.config["UPLOAD_FOLDER"])
+    if err:
+        flash(err, "error")
+        return redirect(url_for("auth.profile"))
+
+    # 换新头像时删掉旧文件，避免残留
+    up.remove_upload(current_user.avatar, current_app.config["UPLOAD_FOLDER"])
+    current_user.avatar = rel
+    db.session.commit()
+    flash("头像已更新", "ok")
+    return redirect(url_for("auth.profile"))
+
+
+@bp.route("/profile/avatar/delete", methods=["POST"])
+@login_required
+def delete_avatar():
+    form = EmptyForm()
+    if form.validate_on_submit():
+        up.remove_upload(current_user.avatar, current_app.config["UPLOAD_FOLDER"])
+        current_user.avatar = None
+        db.session.commit()
+        flash("头像已移除", "ok")
+    return redirect(url_for("auth.profile"))
 
 
 # ---------------------------- 用户维护 ----------------------------
