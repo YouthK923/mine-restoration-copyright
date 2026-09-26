@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon %}
+{% block title %}搜索 · 历史遗留废弃矿山自然恢复适宜性评价系统{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>搜索结果</h2>
+
+  {% if not q %}
+  <p class="muted">请输入关键词。可检索项目名称与编号、图斑名称与行政区/矿种、
+    标准名称与文号。</p>
+  {% else %}
+  <p class="muted">
+    关键词「<strong>{{ q }}</strong>」共找到
+    <span class="num">{{ total }}</span> 条结果。
+  </p>
+
+  {% if not total %}
+  <p class="muted">没有匹配的内容。换个词试试，或检查是否有错别字。</p>
+  {% endif %}
+  {% endif %}
+</div>
+
+{% if projects %}
+<div class="card">
+  <h2>评价项目（{{ projects|length }}）</h2>
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">项目名称</th>
+        <th scope="col">编号</th>
+        <th scope="col">状态</th>
+        <th scope="col">图斑数</th>
+        <th scope="col">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in projects %}
+      <tr>
+        <td style="text-align:left;">{{ p.name }}</td>
+        <td class="mono">{{ p.code or "—" }}</td>
+        <td><span class="tag tag--muted">{{ p.status }}</span></td>
+        <td class="num">{{ p.patches.count() }}</td>
+        <td class="nowrap">
+          <span class="row-actions">
+            <a class="link-btn" href="/project/{{ p.id }}/patches">矿山图斑</a>
+            <a class="link-btn" href="/project/{{ p.id }}/edit">编辑</a>
+          </span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if patches %}
+<div class="card">
+  <h2>矿山图斑（{{ patches|length }}）</h2>
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">所属项目</th>
+        <th scope="col">图斑名称</th>
+        <th scope="col">行政区</th>
+        <th scope="col">矿种</th>
+        <th scope="col">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in patches %}
+      <tr>
+        <td>{{ m.project.name if m.project else "—" }}</td>
+        <td style="text-align:left;">{{ m.name }}</td>
+        <td>{{ m.admin_region or "—" }}</td>
+        <td>{{ m.mineral_type or "—" }}</td>
+        <td class="nowrap">
+          <span class="row-actions">
+            <a class="link-btn" href="/constraint/{{ m.id }}">限制性判定</a>
+            <a class="link-btn" href="/unit/{{ m.id }}">微地质单元</a>
+            <a class="link-btn" href="/evaluate/{{ m.id }}">执行评价</a>
+          </span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if standards %}
+<div class="card">
+  <h2>标准与政策文件（{{ standards|length }}）</h2>
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">类别</th>
+        <th scope="col">省份</th>
+        <th scope="col">名称</th>
+        <th scope="col">文号</th>
+        <th scope="col">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in standards %}
+      <tr>
+        <td>{{ s.category }}</td>
+        <td>{{ s.province }}</td>
+        <td style="text-align:left;">{{ s.name }}</td>
+        <td class="mono">{{ s.doc_number or "—" }}</td>
+        <td class="nowrap">
+          <span class="row-actions">
+            <a class="link-btn" href="/standard/{{ s.id }}/rules">规则</a>
+          </span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

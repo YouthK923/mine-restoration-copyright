@@ -7,10 +7,9 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.forms import LoginForm, EmptyForm
 from app.models import db, User, OperationLog
+from app.utils.constants import ROLE_LABELS
 
 bp = Blueprint("auth", __name__)
-
-ROLE_LABELS = {"admin": "管理员", "evaluator": "评价员", "viewer": "查看者"}
 
 
 def require_admin():
@@ -22,7 +21,8 @@ def require_admin():
 @bp.route("/")
 def index():
     if current_user.is_authenticated:
-        return render_template("auth/home.html")
+        from app.services import dashboard as dash
+        return render_template("auth/home.html", dash=dash.snapshot())
     return redirect(url_for("auth.login"))
 
 

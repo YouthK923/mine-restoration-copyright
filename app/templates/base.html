@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{% import "_macros.html" as ui %}<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -6,24 +6,27 @@
   <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
   <title>{% block title %}历史遗留废弃矿山自然恢复适宜性评价系统{% endblock %}</title>
   <style>
-    /* ---------- 设计变量：单一强调色 + 中性灰阶 ---------- */
+    /* ---------- 设计变量：绿色主色 + 中性灰阶 ---------- */
     :root {
-      --accent: #1f3a5f;
-      --accent-hover: #2a4d7c;
-      --accent-soft: #eef2f7;
+      --accent: #1f6b45;            /* 主色：深绿，呼应自然恢复主题 */
+      --accent-hover: #185738;
+      --accent-soft: #e9f4ee;
+      --side-1: #17503a;            /* 侧边栏渐变起止色 */
+      --side-2: #113c2b;
       --danger: #b3261e;
       --danger-soft: #fdecea;
       --ok: #1e6b3a;
       --ok-soft: #eaf6ef;
+      --todo: #d98324;              /* 待办角标 */
       --ink: #23262b;
       --ink-soft: #6b7280;
-      --line: #dfe3e8;
+      --line: #e3e7ea;
       --surface: #ffffff;
-      --canvas: #f5f6f8;
-      --radius: 6px;
+      --canvas: #f4f7f5;
+      --radius: 10px;
       --shadow: 0 1px 2px rgba(0, 0, 0, .05);
-      --header-h: 56px;
-      --nav-w: 208px;
+      --header-h: 60px;
+      --nav-w: 226px;
     }
 
     * { box-sizing: border-box; }
@@ -52,99 +55,244 @@
     }
     .skip-link:focus { top: 12px; }
 
-    /* ---------- 顶部标题栏 ---------- */
-    .app-header {
+    /* ---------- 整体骨架：左侧深绿导航 + 右侧内容 ---------- */
+    .app-shell {
       display: flex;
-      align-items: center;
-      gap: 12px;
-      height: var(--header-h);
-      padding: 0 20px;
-      background: var(--accent);
+      align-items: stretch;
+      min-height: 100dvh;
+    }
+
+    /* ---------- 侧边栏 ---------- */
+    .app-side {
+      flex: 0 0 var(--nav-w);
+      width: var(--nav-w);
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(180deg, var(--side-1) 0%, var(--side-2) 100%);
       color: #fff;
     }
-    .app-header__title {
-      font-size: 16px;
+    .app-brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 17px 16px 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, .10);
+    }
+    .app-brand__mark {
+      flex: none;
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, .15);
+    }
+    .app-brand__name {
+      font-size: 14.5px;
       font-weight: 600;
+      line-height: 1.35;
       letter-spacing: .2px;
     }
-    .app-header__version {
-      padding: 1px 8px;
-      font-size: 12px;
-      border: 1px solid rgba(255, 255, 255, .45);
-      border-radius: 10px;
-      font-variant-numeric: tabular-nums;
+    .app-brand__sub {
+      font-size: 11.5px;
+      line-height: 1.35;
+      color: rgba(255, 255, 255, .58);
     }
-    .app-header__spacer { flex: 1; }
-    .app-header__user {
+
+    .app-nav { flex: 1; padding: 6px 12px 14px; overflow-y: auto; }
+    .app-nav__group {
+      margin: 12px 0 5px;
+      padding: 0 10px;
+      font-size: 11.5px;
+      letter-spacing: .05em;
+      color: rgba(255, 255, 255, .48);
+    }
+    .app-nav ul { margin: 0; padding: 0; list-style: none; }
+    .app-nav a {
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 13px;
-    }
-    .app-header__user a {
-      color: #d6e3f4;
-      text-decoration: none;
-      padding: 4px 8px;
-      border-radius: 4px;
-    }
-    .app-header__user a:hover,
-    .app-header__user a:focus-visible {
-      color: #fff;
-      background: rgba(255, 255, 255, .14);
-    }
-
-    /* ---------- 主体：左侧导航 + 内容区 ---------- */
-    .app-body {
-      display: flex;
-      align-items: stretch;
-      min-height: calc(100dvh - var(--header-h));
-    }
-
-    .app-nav {
-      flex: 0 0 var(--nav-w);
-      width: var(--nav-w);
-      padding: 14px 10px;
-      background: var(--surface);
-      border-right: 1px solid var(--line);
-    }
-    .app-nav__group {
-      margin: 0 0 4px;
-      padding: 10px 10px 6px;
-      font-size: 12px;
-      color: var(--ink-soft);
-    }
-    .app-nav ul {
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-    .app-nav a {
-      display: block;
-      padding: 9px 12px;
+      padding: 9px 11px;
       margin-bottom: 2px;
-      border-radius: var(--radius);
-      color: var(--ink);
+      border-radius: 8px;
+      color: rgba(255, 255, 255, .80);
       text-decoration: none;
-      border-left: 3px solid transparent;
+      transition: background-color .16s ease, color .16s ease;
     }
-    .app-nav a:hover { background: var(--accent-soft); }
+    .app-nav a:hover { background: rgba(255, 255, 255, .10); color: #fff; }
     .app-nav a:focus-visible {
-      outline: 2px solid var(--accent);
+      outline: 2px solid rgba(255, 255, 255, .60);
       outline-offset: 1px;
     }
     .app-nav a[aria-current="page"] {
-      background: var(--accent-soft);
-      border-left-color: var(--accent);
-      color: var(--accent);
+      background: rgba(255, 255, 255, .17);
+      color: #fff;
       font-weight: 600;
+    }
+    .app-nav .ico { flex: none; opacity: .92; }
+    .app-nav__badge {
+      margin-left: auto;
+      min-width: 20px;
+      padding: 0 6px;
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 18px;
+      text-align: center;
+      border-radius: 9px;
+      background: var(--todo);
+      color: #fff;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .app-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-top: 1px solid rgba(255, 255, 255, .10);
+    }
+    .app-user__avatar {
+      flex: none;
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .16);
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .app-user__name { font-size: 13px; line-height: 1.3; }
+    .app-user__state {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11.5px;
+      line-height: 1.3;
+      color: rgba(255, 255, 255, .60);
+    }
+    .app-user__dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #6ed49a;
+    }
+    .app-user a {
+      margin-left: auto;
+      padding: 5px;
+      border-radius: 6px;
+      color: rgba(255, 255, 255, .68);
+      text-decoration: none;
+    }
+    .app-user a:hover { color: #fff; background: rgba(255, 255, 255, .12); }
+
+    /* ---------- 右侧内容区 ---------- */
+    .app-content {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---------- 顶栏：面包屑 + 搜索 ---------- */
+    .app-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      height: var(--header-h);
+      padding: 0 22px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+    }
+    .crumb {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      color: var(--ink-soft);
+      white-space: nowrap;
+    }
+    .crumb a { color: var(--ink-soft); text-decoration: none; }
+    .crumb a:hover { color: var(--accent); }
+    .crumb strong { color: var(--ink); font-weight: 600; }
+    .crumb .ico { color: #c3c9d0; }
+    .app-header__spacer { flex: 1; }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 268px;
+      padding: 7px 12px;
+      background: var(--canvas);
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      color: var(--ink-soft);
+      transition: border-color .16s ease, background-color .16s ease;
+    }
+    .search-box:focus-within { border-color: var(--accent); background: #fff; }
+    .search-box input {
+      flex: 1;
+      min-width: 0;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-family: inherit;
+      font-size: 13px;
+      color: var(--ink);
+    }
+    .search-box button {
+      display: grid;
+      place-items: center;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    .icon-btn {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      border: 1px solid transparent;
+      color: var(--ink-soft);
+      text-decoration: none;
+      transition: background-color .16s ease, color .16s ease,
+                  border-color .16s ease;
+    }
+    .icon-btn:hover {
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-color: rgba(31, 107, 69, .18);
     }
 
     .app-main {
       flex: 1;
       min-width: 0;
-      padding: 22px 26px 40px;
+      padding: 22px 26px 26px;
     }
-    .container { max-width: 1040px; }
+    .container { max-width: 1120px; }
+
+    /* ---------- 页脚 ---------- */
+    .app-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 0 26px 18px;
+      font-size: 12px;
+      color: var(--ink-soft);
+    }
+
+    /* ---------- 未登录时的裸页面（登录页） ---------- */
+    .login-shell {
+      display: flex;
+      flex-direction: column;
+      min-height: 100dvh;
+    }
 
     /* ---------- 卡片 ---------- */
     .card {
@@ -247,8 +395,8 @@
       font-size: 14px;
       line-height: 1.4;
       color: #fff;
-      background: rgba(31, 58, 95, .80);
-      border: 1px solid rgba(31, 58, 95, .30);
+      background: rgba(31, 107, 69, .80);
+      border: 1px solid rgba(31, 107, 69, .30);
       border-radius: 8px;
       cursor: pointer;
       text-decoration: none;
@@ -258,15 +406,15 @@
     .btn:hover {
       background: var(--accent);
       border-color: var(--accent);
-      box-shadow: 0 3px 12px rgba(31, 58, 95, .22);
+      box-shadow: 0 3px 12px rgba(31, 107, 69, .22);
     }
     .btn:active { transform: translateY(1px); box-shadow: none; }
     .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
     .btn--ghost {
       color: var(--accent);
-      background: rgba(31, 58, 95, .06);
-      border-color: rgba(31, 58, 95, .22);
+      background: rgba(31, 107, 69, .06);
+      border-color: rgba(31, 107, 69, .22);
     }
     .btn--ghost:hover {
       color: #fff;
@@ -290,11 +438,11 @@
 
     .btn:disabled { opacity: .45; cursor: not-allowed; }
     .btn:disabled:hover {
-      background: rgba(31, 58, 95, .80);
-      border-color: rgba(31, 58, 95, .30);
+      background: rgba(31, 107, 69, .80);
+      border-color: rgba(31, 107, 69, .30);
       box-shadow: none;
     }
-    .btn--ghost:disabled:hover { background: rgba(31, 58, 95, .06); color: var(--accent); }
+    .btn--ghost:disabled:hover { background: rgba(31, 107, 69, .06); color: var(--accent); }
 
     /* ---------- 表格操作列的行内小按钮 ----------
        取代原来「文字 | 文字 | 文字」的写法：
@@ -316,8 +464,8 @@
       font-size: 13px;
       line-height: 1.5;
       color: var(--accent);
-      background: rgba(31, 58, 95, .07);
-      border: 1px solid rgba(31, 58, 95, .20);
+      background: rgba(31, 107, 69, .07);
+      border: 1px solid rgba(31, 107, 69, .20);
       border-radius: 7px;
       cursor: pointer;
       text-decoration: none;
@@ -329,7 +477,7 @@
       color: #fff;
       background: var(--accent);
       border-color: var(--accent);
-      box-shadow: 0 2px 8px rgba(31, 58, 95, .20);
+      box-shadow: 0 2px 8px rgba(31, 107, 69, .20);
     }
     .link-btn:active { transform: translateY(1px); box-shadow: none; }
     .link-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -389,7 +537,7 @@
       max-width: min(560px, 78vw);
       padding: 13px 28px;
       border-radius: 999px;
-      background: rgba(31, 58, 95, .62);          /* 半透明，非实体 */
+      background: rgba(31, 107, 69, .62);          /* 半透明，非实体 */
       color: #fff;
       font-size: 16px;
       font-weight: 600;
@@ -422,7 +570,7 @@
 
     /* 不支持背景模糊时，加深底色保证文字仍然清楚 */
     @supports not (backdrop-filter: blur(1px)) {
-      .toast-center { background: rgba(31, 58, 95, .88); }
+      .toast-center { background: rgba(31, 107, 69, .88); }
     }
 
     /* ---------- 文字工具类 ---------- */
@@ -466,6 +614,19 @@
     }
     .body--login .container { max-width: none; width: 100%; }
 
+    /* 仅供读屏软件的隐藏文本 */
+    .visually-hidden {
+      position: absolute !important;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
     .login-wrap {
       display: flex;
       justify-content: center;
@@ -491,25 +652,263 @@
     }
     .login-card .field__label { font-size: 14px; color: var(--ink); }
 
-    /* ---------- 首页功能块 ---------- */
-    .tile-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
-      gap: 12px;
+    /* ---------- 工作台：页首横幅 ---------- */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      min-height: 176px;
+      padding: 26px 28px;
+      margin-bottom: 16px;
+      border-radius: 12px;
+      /* 左侧压深保证文字可读，右侧透出远山插画；
+         背景按底部对齐，避免远山被居中裁掉 */
+      background:
+        linear-gradient(100deg, rgba(9, 40, 27, .92) 0%,
+                                rgba(11, 48, 33, .68) 50%,
+                                rgba(11, 48, 33, .06) 100%),
+        url("{{ url_for('static', filename='hero.svg') }}")
+        center bottom / cover no-repeat;
+      color: #fff;
     }
-    .tile {
+    .hero__body { max-width: 720px; }
+    .hero__title {
+      margin: 0 0 10px;
+      font-size: 21px;
+      font-weight: 700;
+      line-height: 1.4;
+      letter-spacing: .3px;
+    }
+    .hero__desc {
+      margin: 0;
+      max-width: 640px;
+      font-size: 12.5px;
+      line-height: 1.85;
+      color: rgba(255, 255, 255, .86);
+    }
+    .hero__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .hero-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 15px;
+      font-size: 13px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background-color .16s ease, border-color .16s ease,
+                  color .16s ease;
+    }
+    .hero-btn--solid {
+      color: #14432f;
+      background: rgba(255, 255, 255, .92);
+      border: 1px solid rgba(255, 255, 255, .92);
+    }
+    .hero-btn--solid:hover { background: #fff; }
+    .hero-btn--ghost {
+      color: #fff;
+      background: rgba(255, 255, 255, .14);
+      border: 1px solid rgba(255, 255, 255, .45);
+    }
+    .hero-btn--ghost:hover { background: rgba(255, 255, 255, .26); }
+    .hero-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+    /* ---------- 工作台：数据概览 ---------- */
+    .stat-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+    .stat-card {
       display: block;
-      padding: 16px;
+      padding: 15px 17px;
       background: var(--surface);
       border: 1px solid var(--line);
       border-radius: var(--radius);
+      box-shadow: var(--shadow);
       color: var(--ink);
       text-decoration: none;
+      transition: border-color .16s ease, box-shadow .16s ease;
     }
-    .tile:hover { border-color: var(--accent); background: #fbfcfe; }
-    .tile:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-    .tile__title { font-weight: 600; color: var(--accent); margin-bottom: 5px; }
-    .tile__desc { font-size: 12.5px; color: var(--ink-soft); text-wrap: pretty; }
+    .stat-card:hover {
+      border-color: rgba(31, 107, 69, .45);
+      box-shadow: 0 3px 12px rgba(19, 60, 43, .08);
+    }
+    .stat-card__label {
+      display: block;
+      font-size: 12.5px;
+      color: var(--ink-soft);
+    }
+    .stat-card__value {
+      display: block;
+      margin: 3px 0 2px;
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1.25;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+    }
+    .stat-card__unit {
+      margin-left: 3px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink-soft);
+    }
+    .stat-card__note {
+      display: block;
+      font-size: 12px;
+      color: var(--ink-soft);
+    }
+
+    /* ---------- 工作台：分区标题 ---------- */
+    .section { margin-bottom: 22px; }
+    .section__head {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 6px 14px;
+      margin-bottom: 12px;
+    }
+    .section__title { margin: 0; font-size: 16px; }
+    .section__desc { margin: 0; font-size: 12.5px; color: var(--ink-soft); }
+
+    /* ---------- 工作台：流程步骤卡 ---------- */
+    .step-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(238px, 1fr));
+      gap: 12px;
+    }
+    .step-card {
+      position: relative;
+      display: block;
+      padding: 16px 16px 15px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      color: var(--ink);
+      text-decoration: none;
+      transition: border-color .16s ease, box-shadow .16s ease,
+                  transform .16s ease;
+    }
+    .step-card:hover {
+      border-color: rgba(31, 107, 69, .55);
+      box-shadow: 0 5px 16px rgba(19, 60, 43, .10);
+      transform: translateY(-1px);
+    }
+    .step-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .step-card__no {
+      position: absolute;
+      top: 13px;
+      right: 15px;
+      font-size: 17px;
+      font-weight: 700;
+      color: #d7e3db;
+      font-variant-numeric: tabular-nums;
+    }
+    .step-card__icon {
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      margin-bottom: 10px;
+      border-radius: 9px;
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+    .step-card__title {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .step-card__desc {
+      display: block;
+      font-size: 12.5px;
+      line-height: 1.65;
+      color: var(--ink-soft);
+      text-wrap: pretty;
+    }
+    .step-card__badge {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 1px 9px;
+      font-size: 11.5px;
+      border-radius: 9px;
+      background: #fdf1e2;
+      color: #9a5a12;
+      border: 1px solid #f0d3ab;
+    }
+    /* 前置数据不具备时置灰，并说明缺什么 */
+    .step-card--locked {
+      background: #fafbfa;
+      border-color: #eceff0;
+      box-shadow: none;
+      cursor: default;
+    }
+    .step-card--locked .step-card__no { color: #e6e9e8; }
+    .step-card--locked .step-card__icon {
+      background: #f1f3f2;
+      color: #a9b2ae;
+    }
+    .step-card--locked .step-card__title { color: #9aa3a0; }
+    .step-card--locked .step-card__desc { color: #b3bab7; }
+    .step-card__lock {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 1px 9px;
+      font-size: 11.5px;
+      border-radius: 9px;
+      background: #f1f3f2;
+      color: #8b948f;
+    }
+
+    /* ---------- 工作台：整行入口 ---------- */
+    .row-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 15px 18px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      color: var(--ink);
+      text-decoration: none;
+      transition: border-color .16s ease, box-shadow .16s ease;
+    }
+    .row-card:hover {
+      border-color: rgba(31, 107, 69, .45);
+      box-shadow: 0 3px 12px rgba(19, 60, 43, .08);
+    }
+    .row-card__icon {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      flex: none;
+      border-radius: 10px;
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+    .row-card__main { flex: 1; min-width: 0; }
+    .row-card__title {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .row-card__desc {
+      display: block;
+      font-size: 12.5px;
+      color: var(--ink-soft);
+    }
+    .row-card__arrow { color: #c3c9d0; flex: none; }
 
     /* ---------- 结果摘要 ---------- */
     .stat-row {
@@ -594,24 +993,23 @@
     .patch-panel table { margin: 0; }
 
     /* ---------- 窄屏适配 ---------- */
-    @media (max-width: 860px) {
-      .app-body { flex-direction: column; }
-      .app-nav {
-        flex: none;
-        width: auto;
-        border-right: none;
-        border-bottom: 1px solid var(--line);
-        padding: 8px 10px;
-      }
+    @media (max-width: 960px) {
+      .app-shell { flex-direction: column; }
+      .app-side { width: auto; flex: none; }
+      .app-brand { padding: 12px 14px; }
+      .app-nav { padding: 4px 10px 10px; }
       .app-nav ul { display: flex; flex-wrap: wrap; gap: 4px; }
-      .app-nav a {
-        margin-bottom: 0;
-        border-left: none;
-        border-bottom: 3px solid transparent;
-      }
-      .app-nav a[aria-current="page"] { border-left: none; border-bottom-color: var(--accent); }
-      .app-nav__group { display: none; }
-      .app-main { padding: 16px 14px 32px; }
+      .app-nav a { margin-bottom: 0; }
+      .app-nav__group { margin: 8px 0 4px; }
+      .app-user { padding: 10px 14px; }
+      .app-header { padding: 0 14px; gap: 10px; }
+      .search-box { width: 180px; }
+      .app-main { padding: 16px 14px 20px; }
+      .app-foot { padding: 0 14px 14px; }
+    }
+    @media (max-width: 640px) {
+      .crumb { display: none; }
+      .search-box { width: auto; flex: 1; }
     }
   </style>
 </head>
@@ -632,38 +1030,76 @@
     {% endfor %}
   </div>
 
-  <header class="app-header">
-    <span class="app-header__title">历史遗留废弃矿山自然恢复适宜性评价系统</span>
-    <span class="app-header__version">V1.0</span>
-    <span class="app-header__spacer"></span>
-    {% if current_user.is_authenticated %}
-    <span class="app-header__user">
-      <span>{{ current_user.username }}（{{ current_user.role }}）</span>
-      <a href="/logout">退出</a>
-    </span>
-    {% endif %}
-  </header>
+  {% if current_user.is_authenticated %}
+  <div class="app-shell">
+    <aside class="app-side">
+      <div class="app-brand">
+        <span class="app-brand__mark">{{ ui.icon("mountain", 21) }}</span>
+        <span>
+          <span class="app-brand__name">矿山自然恢复评价</span><br>
+          <span class="app-brand__sub">适宜性评价系统 V1.0</span>
+        </span>
+      </div>
 
-  <div class="app-body">
-    {% if current_user.is_authenticated %}
-    <nav class="app-nav" aria-label="功能导航">
-      <ul>
-        <li>
-          <a href="/"{% if home_active %} aria-current="page"{% endif %}>首页</a>
-        </li>
-      </ul>
-      {% for g in nav_groups %}
-      <p class="app-nav__group">{{ g.title }}</p>
-      <ul>
-        {% for label, href, active in g.links %}
-        <li>
-          <a href="{{ href }}"{% if active %} aria-current="page"{% endif %}>{{ label }}</a>
-        </li>
+      <nav class="app-nav" aria-label="功能导航">
+        <ul>
+          <li>
+            <a href="/"{% if home_active %} aria-current="page"{% endif %}>
+              {{ ui.icon("home") }}<span>工作台</span>
+            </a>
+          </li>
+        </ul>
+        {% for g in nav_groups %}
+        <p class="app-nav__group">{{ g.title }}</p>
+        <ul>
+          {% for item in g.links %}
+          <li>
+            <a href="{{ item.href }}"{% if item.active %} aria-current="page"{% endif %}>
+              {{ ui.icon(item.icon) }}<span>{{ item.label }}</span>
+              {% if item.badge %}<span class="app-nav__badge">{{ item.badge }}</span>{% endif %}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
         {% endfor %}
-      </ul>
-      {% endfor %}
-    </nav>
-    {% endif %}
+      </nav>
+
+      <div class="app-user">
+        <span class="app-user__avatar">{{ current_user.username[0]|upper }}</span>
+        <span>
+          <span class="app-user__name">
+            {{ role_labels.get(current_user.role, current_user.role) }} · {{ current_user.username }}
+          </span><br>
+          <span class="app-user__state">
+            <span class="app-user__dot" aria-hidden="true"></span>在线
+          </span>
+        </span>
+        <a href="/logout" title="退出登录" aria-label="退出登录">{{ ui.icon("logout", 17) }}</a>
+      </div>
+    </aside>
+
+    <div class="app-content">
+      <header class="app-header">
+        <nav class="crumb" aria-label="当前位置">
+          <a href="/">首页</a>
+          {{ ui.icon("chevron", 13) }}
+          <strong>{{ page_title }}</strong>
+        </nav>
+        <span class="app-header__spacer"></span>
+        <form class="search-box" method="get" action="/search" role="search">
+          {{ ui.icon("search", 16) }}
+          <label for="q" class="visually-hidden">搜索项目、图斑、标准</label>
+          <input id="q" type="search" name="q" autocomplete="off"
+                 placeholder="搜索项目、图斑、标准" value="{{ search_q }}">
+          <button type="submit" aria-label="搜索">{{ ui.icon("chevron", 15) }}</button>
+        </form>
+        <a class="icon-btn" href="/logs" title="操作日志" aria-label="操作日志">
+          {{ ui.icon("bell", 18) }}
+        </a>
+      </header>
+  {% else %}
+  <div class="login-shell">
+  {% endif %}
 
     <main id="main" class="app-main">
       <div class="container">
@@ -673,6 +1109,16 @@
         {% block content %}{% endblock %}
       </div>
     </main>
+
+  {% if current_user.is_authenticated %}
+      <footer class="app-foot">
+        <span>历史遗留废弃矿山自然恢复适宜性评价系统 V1.0</span>
+        <span>数据截止 {{ today }}</span>
+      </footer>
+    </div>
   </div>
+  {% else %}
+  </div>
+  {% endif %}
 </body>
 </html>

@@ -40,9 +40,12 @@ print(LINE)
 r = client.post("/login", data={"username": "admin", "password": "admin123"},
                 follow_redirects=True)
 body = r.get_data(as_text=True)
-print("  登录后含「系统功能」:", "系统功能" in body)
+# 工作台：页首横幅 + 评价流程分区 + 数据概览
+print("  登录后含「评价流程」:", "评价流程" in body)
 print("  含用户名 admin:", "admin" in body)
-assert "系统功能" in body
+print("  含页首横幅:", 'class="hero"' in body)
+print("  含数据概览:", 'class="stat-card"' in body)
+assert "评价流程" in body and 'class="hero"' in body
 
 print()
 print(LINE)

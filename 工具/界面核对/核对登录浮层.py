@@ -103,19 +103,25 @@ print()
 print("五、浮层样式：半透明毛玻璃、居中堆叠、不挡操作")
 base = io.open(os.path.join(BASE, "app", "templates", "base.html"),
                encoding="utf-8").read()
+# 浮层规则单独取出来判断底色是否真的半透明
+m_rule = re.search(r"\.toast-center\s*\{(.*?)\}", base, re.S)
+rule = m_rule.group(1) if m_rule else ""
+alpha = re.search(r"background:\s*rgba\([^)]*?,\s*\.?(\d+)\s*\)", rule)
+semi = bool(alpha) and int(alpha.group(1)) < 100
 for key, label in ((".toast-stack", "外层为固定居中的堆叠容器"),
                    ("position: fixed", "容器用 fixed 定位（悬浮于页面之上）"),
                    ("top: 50%", "居中：top 50%"),
                    ("translate(-50%, -50%)", "居中：反向平移"),
                    ("flex-direction: column", "多条提示纵向排开不重叠"),
                    ("backdrop-filter: blur", "半透明毛玻璃效果"),
-                   ("rgba(31, 58, 95, .62)", "底色半透明（非实体色块）"),
                    ("@supports not (backdrop-filter", "不支持模糊时加深底色兜底"),
                    ("@keyframes toast-fade", "定义了淡入淡出动画"),
                    ("forwards", "动画结束后保持透明（不会又冒出来）"),
                    ("pointer-events: none", "浮层不遮挡鼠标操作"),
                    ("prefers-reduced-motion", "尊重系统「减少动态效果」设置")):
     ok(key in base, label)
+ok(semi, "浮层底色为半透明（非实体色块）",
+   alpha.group(0) if alpha else "未找到 rgba 底色")
 
 print()
 print("六、清理测试数据")

@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 420"
+     preserveAspectRatio="xMidYMid slice" role="img"
+     aria-label="绿色矿山的远山与林地">
+  <title>工作台横幅背景</title>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#2f7f5b"/>
+      <stop offset="55%"  stop-color="#256b4a"/>
+      <stop offset="100%" stop-color="#1a5238"/>
+    </linearGradient>
+
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#cfe9d6" stop-opacity=".45"/>
+      <stop offset="100%" stop-color="#cfe9d6" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="hFar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#8fb9a0" stop-opacity=".30"/>
+      <stop offset="100%" stop-color="#7aa98e" stop-opacity=".12"/>
+    </linearGradient>
+
+    <linearGradient id="hMid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#5f9a78" stop-opacity=".42"/>
+      <stop offset="100%" stop-color="#4d8666" stop-opacity=".18"/>
+    </linearGradient>
+
+    <linearGradient id="hNear" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#2f6d4c" stop-opacity=".72"/>
+      <stop offset="100%" stop-color="#215139" stop-opacity=".55"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="420" fill="url(#sky)"/>
+
+  <!-- 高空的柔光 -->
+  <circle cx="1230" cy="96" r="230" fill="url(#glow)"/>
+  <circle cx="1230" cy="96" r="54" fill="#e8f3ea" opacity=".38"/>
+
+  <!-- 远山 -->
+  <path fill="url(#hFar)"
+        d="M0,286 L150,176 L268,258 L420,148 L560,262 L700,186
+           L860,272 L1010,168 L1160,262 L1310,196 L1450,268 L1600,206
+           L1600,420 L0,420 Z"/>
+
+  <!-- 中景山 -->
+  <path fill="url(#hMid)"
+        d="M0,338 L176,232 L330,318 L496,214 L664,326 L836,238
+           L1000,330 L1176,244 L1340,326 L1500,258 L1600,314
+           L1600,420 L0,420 Z"/>
+
+  <!-- 近景林地 -->
+  <path fill="url(#hNear)"
+        d="M0,382 L188,330 L372,378 L560,318 L748,380 L938,322
+           L1128,384 L1320,330 L1502,384 L1600,356
+           L1600,420 L0,420 Z"/>
+
+  <!-- 近景针叶林剪影 -->
+  <g fill="#1b4832" opacity=".62">
+    <path d="M120,384 l14,-40 l14,40 z"/>
+    <path d="M150,384 l18,-52 l18,52 z"/>
+    <path d="M186,384 l13,-36 l13,36 z"/>
+    <path d="M1252,382 l16,-46 l16,46 z"/>
+    <path d="M1286,382 l19,-56 l19,56 z"/>
+    <path d="M1324,382 l13,-38 l13,38 z"/>
+    <path d="M1360,382 l15,-44 l15,44 z"/>
+  </g>
+</svg>

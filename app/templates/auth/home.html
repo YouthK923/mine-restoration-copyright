@@ -1,60 +1,111 @@
 {% extends "base.html" %}
-{% block title %}首页{% endblock %}
+{% from "_macros.html" import icon %}
+{% block title %}工作台 · 历史遗留废弃矿山自然恢复适宜性评价系统{% endblock %}
 {% block content %}
-<div class="card">
-  <h2>系统功能</h2>
-  <p class="muted">
-    本系统以论文《历史遗留废弃矿山自然恢复适宜性评价指标体系建设及典型案例》
-    建立的评价方法为算法内核。下方按论文 4.1 节的评价流程顺序排列，建议依序使用；
-    系统会在每一步检查前置条件，前置步骤未完成时不会放行后续计算。
-  </p>
-</div>
 
-<div class="card">
-  <h2>评价流程</h2>
-  <div class="tile-grid">
-    <a class="tile" href="/project/">
-      <div class="tile__title">项目与矿山档案</div>
-      <div class="tile__desc">建立评价项目、录入矿山图斑、挂接遥感影像、设置参照生态系统</div>
-    </a>
-    <a class="tile" href="/standard/">
-      <div class="tile__title">政策与标准知识库</div>
-      <div class="tile__desc">收录 11 项地方标准与政策文件，结构化判定规则，支持省际口径比对</div>
-    </a>
-    <a class="tile" href="/constraint/">
-      <div class="tile__title">限制性指标判定</div>
-      <div class="tile__desc">政策、区位约束、土壤污染、地质灾害、耕地属性五项一票否决</div>
-    </a>
-    <a class="tile" href="/unit/">
-      <div class="tile__title">微地质单元</div>
-      <div class="tile__desc">划分岩质边坡、碎石边坡、平台三类单元，自动计算面积占比</div>
-    </a>
-    <a class="tile" href="/ahp/">
-      <div class="tile__title">指标体系与权重</div>
-      <div class="tile__desc">指标定义维护、判断矩阵录入、权重计算与一致性检验、多专家汇总</div>
-    </a>
-    <a class="tile" href="/indicator/">
-      <div class="tile__title">指标数据采集</div>
-      <div class="tile__desc">按微地质单元录入土壤、植被、地形指标，支持 CSV / Excel 批量导入</div>
-    </a>
-    <a class="tile" href="/evaluate/">
-      <div class="tile__title">适宜性定量评价</div>
-      <div class="tile__desc">指标标准化、分单元赋分、面积加权合成、适宜性等级判定</div>
-    </a>
-    <a class="tile" href="/report/">
-      <div class="tile__title">报告与结果输出</div>
-      <div class="tile__desc">结果图表、逐层得分明细，导出 PDF 与 Word 评价报告</div>
-    </a>
+{# ---------- 页首横幅 ---------- #}
+<section class="hero">
+  <div class="hero__body">
+    <h1 class="hero__title">历史遗留废弃矿山自然恢复适宜性评价系统</h1>
+    <p class="hero__desc">
+      以论文《历史遗留废弃矿山自然恢复适宜性评价指标体系建设及典型案例》
+      建立的评价方法为算法内核。下方按论文 4.1 节的评价流程顺序排列，
+      系统会在每一步检查前置条件，前置步骤未完成时不会放行后续计算。
+    </p>
+    <div class="hero__actions">
+      <a class="hero-btn hero-btn--ghost" href="/indicator/import">
+        {{ icon("upload", 16) }}批量导入
+      </a>
+      <a class="hero-btn hero-btn--solid" href="/project/add">
+        {{ icon("plus", 16) }}新建评价项目
+      </a>
+    </div>
   </div>
-</div>
+</section>
 
-<div class="card">
-  <h2>系统管理</h2>
-  <div class="tile-grid">
-    <a class="tile" href="/users">
-      <div class="tile__title">用户与操作日志</div>
-      <div class="tile__desc">用户维护与角色权限；全部写操作自动留痕，可查询追溯</div>
-    </a>
+{# ---------- 数据概览 ---------- #}
+<section class="stat-cards">
+  <a class="stat-card" href="/project/">
+    <span class="stat-card__label">评价项目</span>
+    <span class="stat-card__value">{{ dash.stats.projects }}<span class="stat-card__unit">个</span></span>
+    <span class="stat-card__note">
+      {%- if projects_without_patch -%}
+        其中 {{ projects_without_patch|length }} 个项目尚未建立图斑
+      {%- elif dash.progress.patches -%}
+        已建立 {{ dash.progress.patches }} 个矿山图斑
+      {%- else -%}
+        尚未建立矿山图斑
+      {%- endif -%}
+    </span>
+  </a>
+  <a class="stat-card" href="/project/">
+    <span class="stat-card__label">矿山图斑</span>
+    <span class="stat-card__value">{{ dash.stats.patches }}<span class="stat-card__unit">个</span></span>
+    <span class="stat-card__note">
+      {% if dash.progress.ready %}其中 {{ dash.progress.ready }} 个具备评价条件{% else %}暂无具备评价条件的图斑{% endif %}
+    </span>
+  </a>
+  <a class="stat-card" href="/unit/">
+    <span class="stat-card__label">微地质单元</span>
+    <span class="stat-card__value">{{ dash.stats.unit_types }}<span class="stat-card__unit">类</span></span>
+    <span class="stat-card__note">
+      {% if dash.progress.units %}共划分 {{ dash.progress.units }} 个单元{% else %}尚未划分单元{% endif %}
+    </span>
+  </a>
+  <a class="stat-card" href="/standard/">
+    <span class="stat-card__label">标准与政策</span>
+    <span class="stat-card__value">{{ dash.stats.standards }}<span class="stat-card__unit">项</span></span>
+    <span class="stat-card__note">地方标准与政策文件</span>
+  </a>
+</section>
+
+{# ---------- 评价流程 ---------- #}
+<section class="section">
+  <div class="section__head">
+    <h2 class="section__title">评价流程</h2>
+    <p class="section__desc">
+      按论文 4.1 节顺序排列，前置步骤未完成时不会执行后续计算
+    </p>
   </div>
-</div>
+
+  <div class="step-grid">
+    {% for s in dash.steps %}
+    {% if s.available %}
+    <a class="step-card" href="{{ s.href }}">
+      <span class="step-card__no">{{ s.no }}</span>
+      <span class="step-card__icon">{{ icon(s.icon, 18) }}</span>
+      <span class="step-card__title">{{ s.title }}</span>
+      <span class="step-card__desc">{{ s.desc }}</span>
+      {% if s.pending %}
+      <span class="step-card__badge">待处理 {{ s.pending }}</span>
+      {% endif %}
+    </a>
+    {% else %}
+    <div class="step-card step-card--locked" aria-disabled="true">
+      <span class="step-card__no">{{ s.no }}</span>
+      <span class="step-card__icon">{{ icon(s.icon, 18) }}</span>
+      <span class="step-card__title">{{ s.title }}</span>
+      <span class="step-card__desc">{{ s.desc }}</span>
+      <span class="step-card__lock">{{ s.note }}</span>
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+</section>
+
+{# ---------- 系统管理 ---------- #}
+<section class="section">
+  <div class="section__head">
+    <h2 class="section__title">系统管理</h2>
+  </div>
+  <a class="row-card" href="/users">
+    <span class="row-card__icon">{{ icon("users", 19) }}</span>
+    <span class="row-card__main">
+      <span class="row-card__title">用户与操作日志</span>
+      <span class="row-card__desc">用户维护与角色权限；全部写操作自动留痕，可查询追溯</span>
+    </span>
+    <span class="row-card__arrow">{{ icon("chevron", 17) }}</span>
+  </a>
+</section>
+
 {% endblock %}
