@@ -12,6 +12,9 @@ import subprocess
 import sys
 import threading
 import time
+import urllib.error
+import urllib.parse
+import urllib.request
 
 sys.stdout.reconfigure(encoding="utf-8")
 # 本脚本位于子目录，仓库根目录才是 app/ 与 软著材料/ 所在位置
@@ -45,13 +48,17 @@ class ShotConfig(Config):
 
 
 def prepare_data(app):
-    """确保案例与评价结果存在，供截图使用。"""
+    """确保案例与评价结果存在，供截图使用。
+
+    返回 (图斑 id, 所属项目 id, 评价结果 id)。图斑 id 与项目 id 不是一回事：
+    图斑列表页的地址用的是**项目** id，早期脚本误用图斑 id，导致该页截到 404。
+    """
     with app.app_context():
         import seed_demo
         patch = seed_demo.demo_patch()      # 固定取演示案例，不取库中任意图斑
         if patch is None:
             print("  [警告] 数据库无图斑，请先运行 seed_demo.py")
-            return None, None
+            return None, None, None
         if ConstraintCheck.query.filter_by(patch_id=patch.id).first() is None:
             db.session.add(ConstraintCheck(
                 patch_id=patch.id, policy_pass=True, location_pass=True,
@@ -65,17 +72,17 @@ def prepare_data(app):
             # 保证结果页与报告页取到的是同一条记录
             from app.views.evaluate import save_evaluation
             res = save_evaluation(patch.id, load_patch_input(patch.id))
-        return patch.id, res.id
+        return patch.id, patch.project_id, res.id
 
 
-def build_page_list(pid, rid):
+def build_page_list(pid, proj_id, rid):
     return [
         ("01_登录", "/login", 900),
         # 带 #login 访问会直接展开登录框（见 auth/login.html 的脚本）
         ("01b_登录框", "/login#login", 900),
         ("02_系统首页", "/", 900),
         ("03_项目与档案", "/project/", 820),
-        ("04_矿山图斑", "/project/%d/patches" % pid, 820),
+        ("04_矿山图斑", "/project/%d/patches" % proj_id, 820),
         ("04b_遥感影像挂接", "/project/patch/%d/edit" % pid, 1100),
         ("05_微地质单元", "/unit/%d" % pid, 980),
         ("06_限制性判定", "/constraint/%d" % pid, 1100),
@@ -102,6 +109,25 @@ def build_page_list(pid, rid):
     ]
 
 
+def http_status(url):
+    """取页面的 HTTP 状态码。
+
+    截图工具只看「文件有没有生成」，404 错误页同样会生成一张漂亮的截图，
+    以前就是这么把「404 · 请求的页面不存在」当成「矿山图斑管理」收进材料的。
+    所以每页截图前先问一次状态码，不是 200 就在输出里点名。
+    """
+    try:
+        req = urllib.request.Request(
+            urllib.parse.quote(url, safe=":/?&=%#"),
+            headers={"User-Agent": "screenshot-status-check"})
+        with urllib.request.urlopen(req, timeout=10) as r:
+            return r.status
+    except urllib.error.HTTPError as e:
+        return e.code
+    except Exception:
+        return 0
+
+
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     # 先重建演示数据，保证截图内容干净（避免测试残留数据出现在截图中）
@@ -110,10 +136,10 @@ def main():
     print()
 
     app = create_app(ShotConfig)
-    pid, rid = prepare_data(app)
+    pid, proj_id, rid = prepare_data(app)
     if pid is None:
         return
-    print("图斑 ID=%s，评价结果 ID=%s" % (pid, rid))
+    print("图斑 ID=%s（所属项目 ID=%s），评价结果 ID=%s" % (pid, proj_id, rid))
 
     def serve():
         app.run(host="127.0.0.1", port=PORT, debug=False, use_reloader=False)
@@ -122,13 +148,15 @@ def main():
     t.start()
     time.sleep(3)
 
-    pages = build_page_list(pid, rid)
+    pages = build_page_list(pid, proj_id, rid)
     print("开始截图，共 %d 页…" % len(pages))
     ok = 0
+    bad = []
     for name, url, height in pages:
         out = os.path.join(OUT_DIR, "%s.png" % name)
         if os.path.exists(out):
             os.remove(out)
+        status = http_status(HOST + url)
         cmd = [CHROME] + CHROME_ARGS + [
             "--window-size=%d,%d" % (WIN_W, height),
             "--screenshot=%s" % out,
@@ -142,12 +170,19 @@ def main():
             continue
         if os.path.exists(out) and os.path.getsize(out) > 1000:
             ok += 1
-            print("  [OK] %-18s %8.1f KB  %s"
-                  % (name, os.path.getsize(out) / 1024, url))
+            mark = ""
+            if status != 200:
+                bad.append((name, status))
+                mark = "  <-- 状态码 %s，截到的是错误页" % status
+            print("  [OK] %-18s %8.1f KB  %s%s"
+                  % (name, os.path.getsize(out) / 1024, url, mark))
         else:
             print("  [失败] %-18s %s" % (name, url))
 
     print()
+    if bad:
+        print("  [警告] 以下页面不是 200，截图内容不可用：%s"
+              % "、".join("%s(%s)" % (n, s) for n, s in bad))
     print("完成：%d / %d 张截图 -> %s"
           % (ok, len(pages), os.path.relpath(OUT_DIR, BASE)))
 
