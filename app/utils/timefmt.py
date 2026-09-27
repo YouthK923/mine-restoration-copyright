@@ -31,3 +31,12 @@ def to_local(value, fmt=DEFAULT_FORMAT, empty="—"):
 def now_utc():
     """取当前 UTC 时间（带时区），用于只作展示、不落库的时间戳。"""
     return datetime.now(timezone.utc)
+
+
+def utcnow():
+    """取当前 UTC 时间（无时区），用于数据库默认值。
+
+    `datetime.utcnow()` 在 Python 3.12 已标记弃用，导入时会刷告警；
+    这里用带时区的 now() 再摘掉时区，得到的仍是 naive-UTC，行为一致。
+    """
+    return datetime.now(timezone.utc).replace(tzinfo=None)

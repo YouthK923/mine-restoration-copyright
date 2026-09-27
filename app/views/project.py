@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """项目与矿山档案 —— 项目、图斑、参照生态系统、遥感影像挂接。"""
-from datetime import datetime
-
 from flask import (Blueprint, render_template, request, redirect, url_for,
                    flash, current_app)
 from flask_login import login_required, current_user
@@ -10,6 +8,7 @@ from app.forms import EmptyForm
 from app.models import db, Project, MinePatch, ReferenceEcosystem
 from app.services import cleanup
 from app.utils.parsing import FieldError, parse_float
+from app.utils.timefmt import utcnow
 
 bp = Blueprint("project", __name__, url_prefix="/project")
 
@@ -212,7 +211,7 @@ def upload_image(patch_id):
     if patch.image_path:
         up.remove_upload(patch.image_path, current_app.config["UPLOAD_FOLDER"])
     patch.image_path = rel
-    patch.image_uploaded_at = datetime.utcnow()
+    patch.image_uploaded_at = utcnow()
     note = request.form.get("image_note", "").strip()
     if note:
         patch.image_note = note

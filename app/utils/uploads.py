@@ -43,10 +43,19 @@ def save_upload(file_storage, subdir, allowed_ext, upload_root):
 
 
 def remove_upload(rel_path, upload_root):
-    """删除已保存的上传文件（相对 static 的路径）。"""
+    """删除已保存的上传文件（相对 static 的路径）。
+
+    路径必须落在上传根目录之内：rel_path 来自数据库，正常都是 save_upload
+    生成的，但万一被改脏（手工改库、导入异常），`../` 这种值会删掉上传根目录
+    之外的文件。这里用 realpath 做一次围栏校验。
+    """
     if not rel_path:
         return
-    abs_path = os.path.join(upload_root, rel_path.replace("uploads/", "", 1))
+    root = os.path.realpath(upload_root)
+    abs_path = os.path.realpath(
+        os.path.join(root, rel_path.replace("uploads/", "", 1)))
+    if abs_path != root and not abs_path.startswith(root + os.sep):
+        return
     try:
         if os.path.isfile(abs_path):
             os.remove(abs_path)

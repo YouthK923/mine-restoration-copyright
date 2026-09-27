@@ -53,8 +53,8 @@ def create_app(config_class=Config):
     app.register_blueprint(search.bp)
 
     # 全局登录保护：除登录页与静态资源外，均需登录
-    from flask import request, redirect, url_for, send_from_directory
-    from flask_login import current_user, login_user
+    from flask import request, redirect, url_for, send_from_directory, flash
+    from flask_login import current_user, login_user, logout_user
 
     PUBLIC_ENDPOINTS = {"auth.login", "auth.register", "static", "favicon"}
 
@@ -80,6 +80,11 @@ def create_app(config_class=Config):
         if request.endpoint in PUBLIC_ENDPOINTS or request.endpoint is None:
             return None
         if not current_user.is_authenticated:
+            return redirect(url_for("auth.login"))
+        # 账号被停用后立即失效：不然已经登录的会话还能继续用下去
+        if not current_user.active:
+            logout_user()
+            flash("该账号已停用，请联系管理员", "toast-error")
             return redirect(url_for("auth.login"))
         return None
 
@@ -180,6 +185,22 @@ def create_app(config_class=Config):
     def not_found(e):
         return render_template("error.html", code=404,
                                message="请求的页面不存在"), 404
+
+    @app.errorhandler(413)
+    def too_large(e):
+        """上传超过体积上限时给中文页；默认是英文的 Request Entity Too Large。"""
+        limit = app.config.get("MAX_CONTENT_LENGTH") or 0
+        return render_template(
+            "error.html", code=413,
+            message="上传的文件太大（上限 %d MB），请压缩或拆分后重试"
+                    % (limit // 1024 // 1024)), 413
+
+    @app.errorhandler(500)
+    def server_error(e):
+        """未预料的错误也给中文页；生产模式下 Flask 不会带出堆栈。"""
+        return render_template("error.html", code=500,
+                               message="系统处理时出现异常，本次操作未生效，"
+                                       "请返回重试或联系管理员"), 500
 
     @app.errorhandler(CSRFError)
     def csrf_error(e):

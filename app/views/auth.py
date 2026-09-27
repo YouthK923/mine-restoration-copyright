@@ -23,6 +23,8 @@ bp = Blueprint("auth", __name__)
 # 「个人设置」的四个分类；后两个是管理员专属
 PROFILE_TABS = ("info", "security", "users", "logs")
 ADMIN_TABS = ("users", "logs")
+# 口令最短长度：自助注册与管理员建号保持一致，免得出现「a」这种口令
+MIN_PASSWORD_LEN = 6
 
 
 def require_admin():
@@ -272,6 +274,13 @@ def add_user():
         if not username or not password:
             flash("账户名称和密码不能为空", "error")
             return redirect(url_for("auth.add_user"))
+        if len(username) > 64:
+            flash("账户名称不能超过 64 个字符", "error")
+            return redirect(url_for("auth.add_user"))
+        if len(password) < MIN_PASSWORD_LEN:
+            flash("密码至少 %d 位（与自助注册保持一致）" % MIN_PASSWORD_LEN,
+                  "error")
+            return redirect(url_for("auth.add_user"))
         if User.query.filter_by(username=username).first():
             flash("账户名称已存在", "error")
             return redirect(url_for("auth.add_user"))
@@ -325,6 +334,9 @@ def edit_user(user_id):
 
         new_password = request.form.get("password", "").strip()
         if new_password:
+            if len(new_password) < MIN_PASSWORD_LEN:
+                flash("密码至少 %d 位" % MIN_PASSWORD_LEN, "error")
+                return redirect(url_for("auth.edit_user", user_id=user.id))
             user.password_hash = generate_password_hash(new_password)
         db.session.commit()
         flash("账号信息已保存", "ok")

@@ -10,6 +10,7 @@
 import json
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask_login import current_user
 
 from app.forms import EmptyForm
 from app.models import (db, MinePatch, MicroUnit, IndicatorData,
@@ -96,6 +97,40 @@ def pack_units(unit_results, sources=None):
     return out
 
 
+def pack_params(settings, sources=None):
+    """把本次计算用到的参数整理成可持久化的快照。
+
+    参数（指标理想取值、图斑参照生态系统基准、权重方案）都能在界面上改，
+    所以结果记录必须连「当时用的什么参数」一起留下，否则事后无法复现。
+    """
+    from app.utils.constants import (IDEAL_SOIL_RATIO, IDEAL_THICKNESS,
+                                     IDEAL_ORGANIC, IDEAL_COVERAGE,
+                                     IDEAL_SHANNON, HEAVY_METAL_LIMIT)
+    defaults = {
+        "soil_ratio": IDEAL_SOIL_RATIO, "thickness": IDEAL_THICKNESS,
+        "organic_matter": IDEAL_ORGANIC, "coverage": IDEAL_COVERAGE,
+        "shannon": IDEAL_SHANNON,
+    }
+    for metal, limit in HEAVY_METAL_LIMIT.items():
+        defaults["hm_" + metal] = limit
+
+    used = {}
+    for code, fallback in sorted(defaults.items()):
+        value = settings.params.get(code) if settings else None
+        if value is None:
+            used[code] = {"value": fallback, "default": fallback,
+                          "source": "论文给定取值"}
+        elif abs(float(value) - float(fallback)) < 1e-9:
+            # 库里存着这一项，但取值与论文一致 —— 不能标成「界面配置」，
+            # 否则每份报告都会声称用了自定义参数，反而看不出真正的偏离。
+            used[code] = {"value": value, "default": fallback,
+                          "source": "论文给定取值"}
+        else:
+            used[code] = {"value": value, "default": fallback,
+                          "source": "界面配置（论文给定值 %.4g）" % fallback}
+    return {"ideals": used, "weight_sources": dict(sources or {})}
+
+
 def save_evaluation(patch_id, units):
     """执行评价并把结果与逐层明细落库，返回评价记录。
 
@@ -116,6 +151,11 @@ def save_evaluation(patch_id, units):
         measures=res["grade_info"]["measure"],
         unit_scores=json.dumps(pack_units(res["unit_results"], sources),
                                ensure_ascii=False),
+        # 参数快照 + 计算人：参数现在可以在界面上改，不留快照就复现不了这次结果
+        params_json=json.dumps(pack_params(settings, sources),
+                               ensure_ascii=False),
+        created_by=current_user.id if getattr(current_user, "is_authenticated", False)
+        else None,
     )
     db.session.add(saved)
     db.session.flush()      # 先取得 result.id，再写明细
@@ -132,6 +172,55 @@ def save_evaluation(patch_id, units):
                 contribution=d["contribution"]))
     db.session.commit()
     return saved
+
+
+def weak_points(unit_scores, top=3):
+    """从已保存的结果里挑出「提升空间最大」的指标。
+
+    提升空间 = 权重 ×（1 − 标准化值）：标准化值越低、权重越大，抬它越划算。
+    只读已保存的记录，不重新计算，保证与报告口径一致。
+    """
+    rows = []
+    for u in unit_scores or []:
+        for d in u.get("details") or []:
+            std = d.get("std_value")
+            weight = d.get("weight")
+            if std is None or weight is None:
+                continue          # 不适用项（未参与计算）不进短板
+            rows.append({
+                "unit_type": u.get("unit_type"),
+                "l2": d.get("l2"),
+                "raw": d.get("raw"),
+                "std_value": std,
+                "gain": weight * (1.0 - std),
+            })
+    rows.sort(key=lambda x: x["gain"], reverse=True)
+    return [x for x in rows if x["gain"] > 1e-9][:top]
+
+
+def user_label(user_id):
+    """把计算人 id 换成「昵称（账户名称）」。"""
+    from app.models import User
+    if not user_id:
+        return None
+    u = db.session.get(User, user_id)
+    if u is None:
+        return "已删除的账号"
+    return u.shown_name
+
+
+def param_source_summary(params):
+    """一句话说清参数从哪来：有没有偏离论文给定值。
+
+    多数情况下全部等于论文取值，报告应直接说明「未偏离」；
+    只有真被改过时才点名，便于审阅者一眼看到差异。
+    """
+    ideals = (params or {}).get("ideals") or {}
+    custom = sorted(k for k, v in ideals.items()
+                    if v.get("source", "").startswith("界面配置"))
+    if not custom:
+        return "全部采用论文给定取值，未被改动"
+    return "以下 %d 项被改为界面配置值：%s" % (len(custom), "、".join(custom))
 
 
 def block_reasons(progress):
@@ -180,7 +269,12 @@ def result(result_id):
     r = db.get_or_404(EvaluationResult, result_id)
     patch = db.session.get(MinePatch, r.patch_id)
     unit_scores = json.loads(r.unit_scores) if r.unit_scores else []
+    params = json.loads(r.params_json) if r.params_json else {}
     return render_template("evaluate/result.html", r=r, patch=patch,
                            unit_scores=unit_scores,
                            undetected=wf.undetected_metals(patch.id)
-                           if patch else [])
+                           if patch else [],
+                           weak=weak_points(unit_scores),
+                           params=params.get("ideals") or {},
+                           param_sources=param_source_summary(params),
+                           operator=user_label(r.created_by))

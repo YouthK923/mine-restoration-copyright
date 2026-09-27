@@ -5,6 +5,7 @@
 标题 → 图斑信息 → 评价结论 → 各微地质单元得分 → 完整得分明细 → 生成时间。
 """
 import io
+import json
 
 from docx import Document
 from docx.shared import Pt, Cm
@@ -56,13 +57,16 @@ def _table(doc, headers, rows, widths=None):
     return t
 
 
-def build_report(patch, mine_result):
+def build_report(patch, mine_result, record=None, weak=None, operator=None):
     """生成评价报告 Word 文档，返回 BytesIO。
 
     参数
     ----
     patch : MinePatch，图斑对象
     mine_result : evaluation_service.score_mine 的返回 dict
+    record : EvaluationResult，用于标注计算人与参数快照来源
+    weak : [(单元, 指标, 实测值, 标准化值, 提升空间)]，短板提示
+    operator : str，计算人显示名
     """
     doc = Document()
     # 页边距
@@ -77,6 +81,21 @@ def build_report(patch, mine_result):
           size=10.5, align=WD_ALIGN_PARAGRAPH.CENTER)
     _para(doc, "生成时间：%s" % to_local(now_utc(), "%Y-%m-%d %H:%M:%S"),
           size=10.5, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=12)
+
+    # 计算人与参数来源：报告要能说明「谁算的、用的什么参数」
+    if record is not None:
+        from app.views.evaluate import param_source_summary
+        try:
+            params = json.loads(record.params_json) if record.params_json else {}
+        except ValueError:
+            params = {}
+        meta = [
+            ("计算人", operator or "—"),
+            ("计算时间", to_local(record.created_at, "%Y-%m-%d %H:%M:%S")),
+            ("评价记录编号", record.id),
+            ("计算参数", param_source_summary(params)),
+        ]
+        _table(doc, ["项目", "内容"], meta)
 
     # 图斑信息
     _heading(doc, "一、图斑基本信息", 1)
@@ -135,6 +154,20 @@ def build_report(patch, mine_result):
         parts = ["%s：%s" % (t, "、".join(m)) for t, m in undetected]
         _para(doc, "以下重金属项未检测，按论文注记以「未受污染」计入污染指标"
                    "（并非实测达标）：%s。" % "；".join(parts), size=10.5)
+
+    # 短板提示：告诉使用方先改哪几项最有效
+    if weak:
+        _heading(doc, "六、短板提示", 1)
+        _para(doc, "按「权重 ×（1 − 标准化值）」排序，提升下列指标对总分的拉动最大。",
+              size=10.5, space_after=4)
+        _table(doc, ["微地质单元", "指标", "实测值", "标准化值", "提升空间"],
+               [(u, l2, "—" if raw is None else raw, "%.4f" % std,
+                 "%.4f" % gain) for u, l2, raw, std, gain in weak])
+
+    # 签字栏：报告是评价结论的书面载体，留出复核与签发的位置（与 PDF 版一致）
+    _para(doc, "", size=10.5, space_after=18)
+    _para(doc, "评价人（签字）：____________________　　"
+               "日期：____________", size=10.5)
 
     buf = io.BytesIO()
     doc.save(buf)

@@ -5,10 +5,11 @@
 约定：两人只读此文件；确需改表时，由乙提需求、甲统一修改。
 """
 import json
-from datetime import datetime
 
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
+
+from app.utils.timefmt import utcnow   # 替代已弃用的 datetime.utcnow()
 
 db = SQLAlchemy()
 
@@ -23,7 +24,7 @@ class User(UserMixin, db.Model):
     # 职务只有两种：管理员 admin（可管理账号与他人的职务）/ 操作员 operator
     role = db.Column(db.String(20), nullable=False, default="operator")
     active = db.Column(db.Boolean, nullable=False, default=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utcnow)
 
     # ---- 个人资料（用户可在「个人设置」里自行维护）----
     display_name = db.Column(db.String(64), nullable=True)    # 昵称
@@ -62,7 +63,7 @@ class OperationLog(db.Model):
     target_type = db.Column(db.String(64), nullable=True)   # 对象类型
     target_id = db.Column(db.Integer, nullable=True)        # 对象主键
     detail = db.Column(db.Text, nullable=True)              # 操作详情
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    created_at = db.Column(db.DateTime, default=utcnow, index=True)
 
 
 class Project(db.Model):
@@ -75,7 +76,7 @@ class Project(db.Model):
     description = db.Column(db.Text, nullable=True)
     status = db.Column(db.String(20), default="进行中")       # 进行中 / 已完成 / 已归档
     created_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utcnow)
 
     patches = db.relationship("MinePatch", backref="project", lazy="dynamic",
                               cascade="all, delete-orphan")
@@ -100,7 +101,7 @@ class MinePatch(db.Model):
     image_path = db.Column(db.String(256), nullable=True)     # 相对 static 的路径
     image_note = db.Column(db.String(256), nullable=True)     # 影像说明（如来源、时相）
     image_uploaded_at = db.Column(db.DateTime, nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utcnow)
 
     units = db.relationship("MicroUnit", backref="patch", lazy="dynamic",
                             cascade="all, delete-orphan")
@@ -163,7 +164,7 @@ class ConstraintCheck(db.Model):
     farmland_pass = db.Column(db.Boolean, nullable=True)       # 耕地属性
     passed = db.Column(db.Boolean, nullable=True)              # 总体是否通过
     reason = db.Column(db.Text, nullable=True)                 # 不通过原因
-    checked_at = db.Column(db.DateTime, default=datetime.utcnow)
+    checked_at = db.Column(db.DateTime, default=utcnow)
 
 
 class MicroUnit(db.Model):
@@ -210,7 +211,7 @@ class WeightScheme(db.Model):
     name = db.Column(db.String(64), nullable=True)                # 方案名称
     level = db.Column(db.Integer, nullable=False, default=1)      # 1=一级指标 2=二级指标
     is_default = db.Column(db.Boolean, default=False)             # 是否默认（论文表 3）
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utcnow)
 
 
 class WeightItem(db.Model):
@@ -236,7 +237,7 @@ class ExpertMatrix(db.Model):
     level = db.Column(db.Integer, nullable=False, default=1)      # 矩阵对应指标层级
     matrix_json = db.Column(db.Text, nullable=False)              # 判断矩阵（JSON 二维数组）
     cr = db.Column(db.Float, nullable=True)                       # 该专家矩阵的一致性比例
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utcnow)
 
 
 class IndicatorData(db.Model):
@@ -281,7 +282,11 @@ class EvaluationResult(db.Model):
     grade = db.Column(db.String(32), nullable=True)               # 适宜性等级
     measures = db.Column(db.Text, nullable=True)                  # 推荐措施
     unit_scores = db.Column(db.Text, nullable=True)               # 各单元得分 JSON
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    # 计算参数快照：本次用的权重来源、参照生态系统基准、各指标理想取值。
+    # 参数现在可以在界面上改，不留快照就无法复现这一次的结果。
+    params_json = db.Column(db.Text, nullable=True)
+    created_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    created_at = db.Column(db.DateTime, default=utcnow)
 
 
 class ScoreDetail(db.Model):

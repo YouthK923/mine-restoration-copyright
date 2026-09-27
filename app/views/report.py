@@ -50,6 +50,33 @@ def _deny(progress, patch_id, endpoint="report.detail"):
     return redirect(url_for("report.index"))
 
 
+def _weak_points(result, top=3):
+    """提升空间最大的指标：权重 ×（1 − 标准化值）。
+
+    与结果页用同一套口径，便于向使用方解释「先改哪几项」。
+    """
+    rows = []
+    for u in result.get("unit_results") or []:
+        for d in u.get("details") or []:
+            std, w = d.get("std_value"), d.get("weight")
+            if std is None or w is None:
+                continue
+            rows.append((u["unit_type"], d["l2"], d.get("raw"), std,
+                         w * (1.0 - std)))
+    rows.sort(key=lambda x: x[4], reverse=True)
+    return [r for r in rows if r[4] > 1e-9][:top]
+
+
+def _operator(record):
+    """报告里的计算人：昵称（账户名称）。"""
+    from app.models import User
+    uid = getattr(record, "created_by", None)
+    if not uid:
+        return None
+    u = db.session.get(User, uid)
+    return u.shown_name if u else "已删除的账号"
+
+
 def _charts(result):
     """生成两张图表：单元得分对比 + 一级指标平均得分分布。"""
     units = [(u["unit_type"], u["unit_score"],
@@ -93,7 +120,9 @@ def word(patch_id):
     patch, reference, result, record, prog = _prepare(patch_id)
     if result is None:
         return _deny(prog, patch_id)
-    buf = rs.build_report(patch, result)
+    buf = rs.build_report(patch, result, record=record,
+                          weak=_weak_points(result),
+                          operator=_operator(record))
     filename = "自然恢复适宜性评价报告_%s.docx" % patch.name
     return send_file(buf, as_attachment=True, download_name=filename,
                      mimetype="application/vnd.openxmlformats-officedocument."

@@ -26,6 +26,9 @@ REQUIRED_COLUMNS = [
     ("users", "phone", "VARCHAR(32)"),
     ("users", "gender", "VARCHAR(8)"),
     ("users", "avatar", "VARCHAR(256)"),
+    # 评价结果的可追溯信息：计算参数快照与计算人
+    ("evaluation_results", "params_json", "TEXT"),
+    ("evaluation_results", "created_by", "INTEGER"),
 ]
 
 # 职务体系由「管理员 / 评价员 / 查看者」三种收敛为「管理员 / 操作员」两种，

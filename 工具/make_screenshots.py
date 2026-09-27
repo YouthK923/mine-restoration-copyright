@@ -50,15 +50,16 @@ class ShotConfig(Config):
 def prepare_data(app):
     """确保案例与评价结果存在，供截图使用。
 
-    返回 (图斑 id, 所属项目 id, 评价结果 id)。图斑 id 与项目 id 不是一回事：
-    图斑列表页的地址用的是**项目** id，早期脚本误用图斑 id，导致该页截到 404。
+    返回 (图斑 id, 所属项目 id, 评价结果 id, 单元 id)。
+    这几个 id 各有各的用途，别混：图斑列表页用**项目** id，
+    指标录入页用**微地质单元** id，早期脚本写死过 2，结果截到 404。
     """
     with app.app_context():
         import seed_demo
         patch = seed_demo.demo_patch()      # 固定取演示案例，不取库中任意图斑
         if patch is None:
             print("  [警告] 数据库无图斑，请先运行 seed_demo.py")
-            return None, None, None
+            return None, None, None, None
         if ConstraintCheck.query.filter_by(patch_id=patch.id).first() is None:
             db.session.add(ConstraintCheck(
                 patch_id=patch.id, policy_pass=True, location_pass=True,
@@ -72,10 +73,14 @@ def prepare_data(app):
             # 保证结果页与报告页取到的是同一条记录
             from app.views.evaluate import save_evaluation
             res = save_evaluation(patch.id, load_patch_input(patch.id))
-        return patch.id, patch.project_id, res.id
+        from app.models import MicroUnit
+        unit = MicroUnit.query.filter_by(patch_id=patch.id).first()
+        if unit is None:
+            print("  [警告] 演示图斑下没有微地质单元，指标录入页无法截图")
+        return patch.id, patch.project_id, res.id, (unit.id if unit else None)
 
 
-def build_page_list(pid, proj_id, rid):
+def build_page_list(pid, proj_id, rid, unit_id=None):
     return [
         ("01_登录", "/login", 900),
         # 带 #login 访问会直接展开登录框（见 auth/login.html 的脚本）
@@ -97,7 +102,7 @@ def build_page_list(pid, proj_id, rid):
          "/ahp/matrix?unit_type=碎石边坡&level=1&calc=1", 1100),
         ("11_指标数据列表", "/indicator/", 900),
         ("11b_批量导入", "/indicator/import", 1100),
-        ("12_指标数据录入", "/indicator/2", 1400),
+        ("12_指标数据录入", "/indicator/%s" % (unit_id or 1), 1400),
         ("13_适宜性评价", "/evaluate/", 760),
         ("14_评价结果", "/evaluate/result/%d" % rid, 900),
         ("15_得分明细与图表", "/report/%d" % pid, 1700),
@@ -136,10 +141,11 @@ def main():
     print()
 
     app = create_app(ShotConfig)
-    pid, proj_id, rid = prepare_data(app)
+    pid, proj_id, rid, unit_id = prepare_data(app)
     if pid is None:
         return
-    print("图斑 ID=%s（所属项目 ID=%s），评价结果 ID=%s" % (pid, proj_id, rid))
+    print("图斑 ID=%s（项目 ID=%s，单元 ID=%s），评价结果 ID=%s"
+          % (pid, proj_id, unit_id, rid))
 
     def serve():
         app.run(host="127.0.0.1", port=PORT, debug=False, use_reloader=False)
@@ -148,7 +154,7 @@ def main():
     t.start()
     time.sleep(3)
 
-    pages = build_page_list(pid, proj_id, rid)
+    pages = build_page_list(pid, proj_id, rid, unit_id)
     print("开始截图，共 %d 页…" % len(pages))
     ok = 0
     bad = []

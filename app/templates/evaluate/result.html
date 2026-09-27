@@ -45,6 +45,60 @@
   </table>
   {% endif %}
 
+  {% if weak %}
+  <h3>短板提示</h3>
+  <p class="muted" style="margin-top:-4px;">
+    按「权重 ×（1 − 标准化值）」排序，提升这些指标对总分的拉动最大：
+  </p>
+  <table style="max-width:760px;">
+    <thead>
+      <tr>
+        <th scope="col">微地质单元</th>
+        <th scope="col">指标</th>
+        <th scope="col">实测值</th>
+        <th scope="col">标准化值</th>
+        <th scope="col">提升空间</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for w in weak %}
+      <tr>
+        <td>{{ w.unit_type }}</td>
+        <td>{{ w.l2 }}</td>
+        <td class="mono">{{ w.raw if w.raw is not none else "—" }}</td>
+        <td class="mono">{{ "%.4f"|format(w.std_value) }}</td>
+        <td class="mono">{{ "%.4f"|format(w.gain) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  <p class="muted" style="margin-top:14px;">
+    计算人：{{ operator or "—" }} ·
+    计算时间：{{ r.created_at | localdt("%Y-%m-%d %H:%M:%S") }} ·
+    参数来源：{{ param_sources }}
+  </p>
+  {% if params %}
+  <details style="margin-top:8px;">
+    <summary class="muted">本次计算使用的参数快照</summary>
+    <table style="max-width:520px;">
+      <thead>
+        <tr><th scope="col">参数</th><th scope="col">取值</th><th scope="col">来源</th></tr>
+      </thead>
+      <tbody>
+        {% for code, item in params.items() %}
+        <tr>
+          <td class="mono">{{ code }}</td>
+          <td class="mono">{{ item.value }}</td>
+          <td class="muted">{{ item.source }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </details>
+  {% endif %}
+
   <p class="actions" style="margin-top:18px;">
     <a class="btn btn--ghost" href="/report/{{ r.patch_id }}">查看得分明细</a>
     <a class="btn btn--ghost" href="/evaluate/">返回评价列表</a>
