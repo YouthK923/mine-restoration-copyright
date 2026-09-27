@@ -274,7 +274,9 @@
   }
 
   .lp-foot {
-    margin: 0;
+    /* margin 简写会把 .lp-intro > * 里的左右 auto 一起清掉，块就贴到左边
+       （文字自己居中，看着却整体偏左）—— 与标题那两处是同一个坑 */
+    margin: 0 auto;
     padding-top: 26px;
     border-top: 1px solid #e6e6e8;
     text-align: center;

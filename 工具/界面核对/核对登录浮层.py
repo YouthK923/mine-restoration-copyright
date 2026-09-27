@@ -172,6 +172,11 @@ ok("text-align: center" in title, "「一套把评价流程固定下来的工具
 ok("margin: 0 auto" in title, "标题块自身也居中（不是只把文字居中）")
 sub = rule_of(lp, ".lp-sub-title")
 ok("text-align: center" in sub, "「九个功能模块」居中")
+# 底部那行字：块自己要居中（margin 简写会清掉左右 auto，只写 text-align 不够）
+foot = rule_of(lp, ".lp-foot")
+ok("margin: 0 auto" in foot, "底部说明行的块居中（不只是文字居中）",
+   foot.split(";")[0].strip() if ";" in foot else "")
+ok("text-align: center" in foot, "底部说明行的文字居中")
 mods = rule_of(lp, ".lp-mods")
 ok("repeat(3" in mods, "模块卡排成三列", mods.split(";")[1].strip()
    if ";" in mods else "")
