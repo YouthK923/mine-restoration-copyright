@@ -110,6 +110,16 @@ blank = c2.post("/login", data={"username": "", "password": ""},
 ok("请输入账户名称" in blank and "请输入密码" in blank,
    "账户名称与密码都为空时两条都提示")
 
+# 错误态的生命周期：登录失败留下的红框不能「关掉再打开」还在，
+# 也不能粘着不走 —— 一输入就该撤掉。三条断言盯住脚本里的实现。
+lp_src = io.open(os.path.join(BASE, "app", "templates", "auth", "login.html"),
+                 encoding="utf-8").read()
+ok("function clearFieldErrors" in lp_src, "有清除字段错误的函数")
+ok("openPanel(false)" in lp_src and "openPanel(true)" in lp_src,
+   "用户点开时清空错误、失败自动展开时保留错误")
+ok("addEventListener('input'" in lp_src and "clearFieldErrors(field)" in lp_src,
+   "一旦输入就撤掉该项的红色状态")
+
 c2.post("/login", data={"username": "admin", "password": "admin123"},
         follow_redirects=True)
 made = c2.post("/project/add", data={"name": "浮层核对", "code": "TOASTCHK"},

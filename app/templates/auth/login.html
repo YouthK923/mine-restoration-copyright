@@ -613,7 +613,23 @@
   var auth = document.getElementById('lp-auth');
   var lastFocus = null;
 
-  function openPanel() {
+  /* 清掉上一次提交留下的字段错误（红框 + 输入框下方的提示）。
+     登录失败时页面是直接渲染的，错误留在 DOM 里；如果只是把面板关掉再打开，
+     那些红框还在，看起来就像「刚点开就报错」。 */
+  function clearFieldErrors(scope) {
+    var root = scope || auth;
+    Array.prototype.forEach.call(
+      root.querySelectorAll('.lp-field__error'),
+      function (el) { el.remove(); });
+    Array.prototype.forEach.call(
+      root.querySelectorAll('[aria-invalid="true"]'),
+      function (el) { el.removeAttribute('aria-invalid'); });
+  }
+
+  function openPanel(keepErrors) {
+    // keepErrors：由「登录失败自动展开」触发时保留错误提示；
+    // 用户自己点「登录」重新打开时则清掉，给一个干净的开始。
+    if (!keepErrors) clearFieldErrors();
     lastFocus = document.activeElement;
     auth.classList.add('is-open');
     auth.setAttribute('aria-hidden', 'false');
@@ -639,7 +655,8 @@
   }
 
   if (btn && auth) {
-    btn.addEventListener('click', openPanel);
+    // 注意别把事件对象当成参数传进去（那样会被当成 keepErrors=true）
+    btn.addEventListener('click', function () { openPanel(false); });
     Array.prototype.forEach.call(
       auth.querySelectorAll('[data-lp-close]'),
       function (el) { el.addEventListener('click', closePanel); }
@@ -649,11 +666,22 @@
     });
     // 登录失败回到本页、或直接带 #login 访问时，直接展开登录框。
     // 失败可能落在两处：字段校验错误在表单里，凭据错误在浮层里。
+    // 这条路径保留错误提示（keepErrors），用户才知道刚才哪儿没填。
     if (location.hash === '#login'
         || document.querySelector('.lp-field__error')
         || document.querySelector('.toast-center')) {
-      openPanel();
+      openPanel(true);
     }
+
+    // 一开始输入就把这一项的红色状态撤掉：错误已经不被犯了，红框留着只会让人困惑
+    Array.prototype.forEach.call(
+      auth.querySelectorAll('input'),
+      function (input) {
+        input.addEventListener('input', function () {
+          var field = input.closest('.lp-field');
+          if (field) clearFieldErrors(field);
+        });
+      });
   }
 
   /* ---------- 内容进场 + 徽标散开：同一套滚动计算 ----------
