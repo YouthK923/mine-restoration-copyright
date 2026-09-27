@@ -657,34 +657,59 @@
   /* ---------- 内容进场 + 徽标散开：同一套滚动计算 ----------
      原先用 IntersectionObserver，实测在滚动到位置后回调并未生效，
      内容始终停在 opacity:0。改为直接按元素与视口的相对位置判断，
-     与徽标用同一次滚动回调，行为可预期、也便于排查。 */
+     与徽标用同一次滚动回调，行为可预期、也便于排查。
+
+     判断「进没进视野」用的是**布局位置**，不是 getBoundingClientRect()：
+     进场动画本身就是位移（左右两列横向 56vw、中列自下方 24vh 升起），
+     用视觉位置判断时，中列的盒子一直比自己的位置低一截，
+     于是它总要再往下滚一段才触发，看起来比左右两列慢半拍。
+     transform 不影响 offsetTop，所以这里沿 offsetParent 把布局位置累加出来，
+     只在加载时算一次；滚动过程中不再测量，也就没有读写交替带来的重排。 */
   var items = document.querySelectorAll('.lp-reveal');
   var badge = document.getElementById('lp-badge');
   var ticking = false;
+  var slots = [];
+
+  function layoutTop(el) {
+    var top = 0;
+    var node = el;
+    while (node) {
+      top += node.offsetTop || 0;
+      node = node.offsetParent;
+    }
+    return top;
+  }
+
+  if (!reduce) {
+    for (var k = 0; k < items.length; k++) {
+      slots.push({
+        el: items[k],
+        top: layoutTop(items[k]),
+        height: items[k].offsetHeight
+      });
+    }
+  }
 
   function applyScroll() {
     ticking = false;
     var vh = window.innerHeight || 800;
+    var y = window.scrollY || window.pageYOffset || 0;
 
     /* 徽标：滚动前约三分之一屏内完成散开淡出 */
     if (badge) {
       var range = vh * 0.34;
-      var p = range > 0 ? window.scrollY / range : 0;
+      var p = range > 0 ? y / range : 0;
       badge.style.setProperty('--p', Math.min(1, Math.max(0, p)).toFixed(3));
     }
 
-    /* 内容：先批量测量，再改类名，避免读写交替触发反复重排 */
-    if (reduce || !items.length) return;
-    var box = [];
-    for (var i = 0; i < items.length; i++) {
-      box.push(items[i].getBoundingClientRect());
-    }
-    for (var j = 0; j < items.length; j++) {
-      var r = box[j];
+    if (reduce || !slots.length) return;
+    for (var j = 0; j < slots.length; j++) {
+      var s = slots[j];
+      var viewTop = s.top - y;
       // 上沿进入视口下部、下沿尚未越出视口上部 → 视为在视野内
-      var shown = r.top < vh * 0.88 && r.bottom > vh * 0.06;
-      if (shown) items[j].classList.add('is-in');
-      else items[j].classList.remove('is-in');
+      var shown = viewTop < vh * 0.88 && viewTop + s.height > vh * 0.06;
+      if (shown) s.el.classList.add('is-in');
+      else s.el.classList.remove('is-in');
     }
   }
 
