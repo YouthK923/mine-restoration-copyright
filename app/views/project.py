@@ -8,6 +8,7 @@ from flask_login import login_required, current_user
 
 from app.forms import EmptyForm
 from app.models import db, Project, MinePatch, ReferenceEcosystem
+from app.services import cleanup
 
 bp = Blueprint("project", __name__, url_prefix="/project")
 
@@ -61,8 +62,10 @@ def edit(pid):
 @login_required
 def delete(pid):
     p = db.get_or_404(Project, pid)
-    db.session.delete(p)
-    db.session.commit()
+    # 项目下的图斑由 ORM 级联删除，但图斑下面的指标数据、限制性判定、
+    # 评价结果、得分明细、参照生态系统不会跟着走，必须先逐个图斑清理，
+    # 否则每删一个项目都在库里留下一批孤儿数据（见 app/services/cleanup.py）。
+    cleanup.delete_project(p)
     flash("项目已删除", "ok")
     return redirect(url_for("project.index"))
 
@@ -80,28 +83,14 @@ def patches(pid):
 @bp.route("/patch/<int:patch_id>/delete", methods=["POST"])
 @login_required
 def patch_delete(patch_id):
-    """删除矿山图斑，及其微地质单元与指标数据。"""
-    from app.models import MicroUnit, IndicatorData, EvaluationResult, \
-        ScoreDetail, ConstraintCheck, ReferenceEcosystem
+    """删除矿山图斑，及其微地质单元、指标数据与评价记录。"""
     patch = db.get_or_404(MinePatch, patch_id)
     pid = patch.project_id
-    unit_ids = [u.id for u in MicroUnit.query.filter_by(patch_id=patch.id).all()]
-    if unit_ids:
-        IndicatorData.query.filter(IndicatorData.unit_id.in_(unit_ids)).delete(
-            synchronize_session=False)
-    for r in EvaluationResult.query.filter_by(patch_id=patch.id).all():
-        ScoreDetail.query.filter_by(result_id=r.id).delete(
-            synchronize_session=False)
-    EvaluationResult.query.filter_by(patch_id=patch.id).delete(
-        synchronize_session=False)
-    ConstraintCheck.query.filter_by(patch_id=patch.id).delete(
-        synchronize_session=False)
-    MicroUnit.query.filter_by(patch_id=patch.id).delete(synchronize_session=False)
-    ReferenceEcosystem.query.filter_by(patch_id=patch.id).delete(
-        synchronize_session=False)
-    db.session.delete(patch)
-    db.session.commit()
-    flash("图斑「%s」及其数据已删除" % patch.name, "ok")
+    # 清理逻辑统一放在 app/services/cleanup.py：项目删除走的是同一个函数，
+    # 免得两条删除路径各写一份、漏掉某张子表（曾经就漏过）。
+    deleted, _counts = cleanup.delete_patch(patch.id)
+    flash("图斑「%s」及其数据已删除" % (deleted.name if deleted else patch.name),
+          "ok")
     return redirect(url_for("project.patches", pid=pid))
 
 
@@ -161,8 +150,11 @@ def patch_edit(patch_id):
         if ref is None:
             ref = ReferenceEcosystem(patch_id=patch.id)
             db.session.add(ref)
-        ref.coverage_benchmark = fv("coverage_benchmark", float) or 75.0
-        ref.shannon_benchmark = fv("shannon_benchmark", float) or 0.7
+        # 基准值：用户填 0 是合法输入（不能写成 `or 75.0`，那样 0 会被悄悄换成默认值）
+        cov = fv("coverage_benchmark", float)
+        sha = fv("shannon_benchmark", float)
+        ref.coverage_benchmark = 75.0 if cov is None else cov
+        ref.shannon_benchmark = 0.7 if sha is None else sha
         ref.dominant_species = fv("dominant_species")
         patch.image_note = fv("image_note")
         db.session.commit()

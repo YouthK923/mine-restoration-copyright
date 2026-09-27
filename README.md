@@ -26,6 +26,7 @@ app/                    应用代码（详见下方「系统代码结构」）
     make_screenshots.py         自动抓取界面截图（Chrome 无头模式）
     check_materials.py          申请材料形式要求自检（21 项）
     verify_all.py               项目最终验收汇总
+    清理孤儿数据.py             清掉挂在已删除图斑/单元下的残留数据（默认只统计）
     生成图标.py                 生成 app/static/favicon.ico（网页图标 + 快捷方式图标）
     生成登录徽标.py             生成 app/templates/_login_badge.svg（登录页系统徽标）
     创建桌面快捷方式.py         在桌面/开始菜单创建快捷方式
@@ -36,11 +37,12 @@ app/                    应用代码（详见下方「系统代码结构」）
     数值核对/                   案例数值的独立复算与正确性验证脚本
     界面核对/                   界面行为、文档用词的自检脚本
 
-测试/                   ★ 自检脚本（14 套，均从仓库根运行）
+测试/                   ★ 自检脚本（15 套，均从仓库根运行）
     test_ahp.py test_evaluate.py test_web_ahp.py test_web_modules.py
     test_web_evaluate.py test_web_report.py test_ui_fixes.py
     test_new_features.py test_workflow.py test_weights.py
-    test_profile.py test_register.py test_login.py
+    test_profile.py test_register.py test_login.py test_timefmt.py
+    test_delete_cascade.py
 
 验证数据/               ★ 系统正确性验证数据（8 个带手算期望值的算例）
     使用说明.md                 ★ 使用文档：两种核对方式、逐步操作、常见问题

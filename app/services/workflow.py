@@ -83,7 +83,10 @@ def patch_progress(patch_id):
         data_step = {"done": True, "ready": True, "missing": [],
                      "detail": "全部 %d 个微地质单元的指标数据已录入" % len(units)}
 
-    ratio_ok = ratio_sum > 0.999 if units else False
+    # 占比合计必须落在 100% 附近才算通过。只挡「偏小」是不够的：
+    # 库里若出现合计 1.5 的记录（手工改库、导入异常），F = Σ(Sᵢ×F′ᵢ)
+    # 会被放大到 1.5 倍，所以上下都要挡。
+    ratio_ok = 0.999 <= ratio_sum <= 1.001 if units else False
     if units and not ratio_ok:
         units_step["detail"] += "（占比合计不等于 100%，请检查面积录入）"
 

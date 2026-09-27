@@ -257,7 +257,18 @@ class IndicatorData(db.Model):
     aspect = db.Column(db.String(16), nullable=True)              # 坡向：阳坡/阴阳坡/阴坡
 
     def heavy_metals_dict(self):
-        return json.loads(self.heavy_metals) if self.heavy_metals else {}
+        """把重金属 JSON 解析成字典。
+
+        字段是手工可改的文本，被脏写或导入半个 JSON 时不能让整页 500：
+        解析失败按「未检测」处理（空字典），并把原文留在库里供排查。
+        """
+        if not self.heavy_metals:
+            return {}
+        try:
+            data = json.loads(self.heavy_metals)
+        except (ValueError, TypeError):
+            return {}
+        return data if isinstance(data, dict) else {}
 
 
 class EvaluationResult(db.Model):
