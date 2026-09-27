@@ -6,6 +6,7 @@ from flask_login import login_required
 from app.forms import EmptyForm
 from app.models import db, MinePatch, MicroUnit, IndicatorData
 from app.utils.constants import UNIT_TYPES
+from app.utils.parsing import FieldError, parse_float
 
 bp = Blueprint("unit", __name__, url_prefix="/unit")
 
@@ -66,8 +67,13 @@ def add(patch_id):
             return redirect(url_for("unit.index", patch_id=patch_id))
 
         area = request.form.get("area", "").strip()
+        try:
+            area_value = parse_float(area, "面积（公顷）", minimum=0)
+        except FieldError as e:
+            flash(str(e), "error")
+            return redirect(url_for("unit.index", patch_id=patch_id))
         u = MicroUnit(patch_id=patch.id, unit_type=unit_type,
-                      area=float(area) if area else None,
+                      area=area_value,
                       description=request.form.get("description", "").strip() or None)
         db.session.add(u)
         db.session.flush()
@@ -97,7 +103,11 @@ def edit(unit_id):
 
         u.unit_type = new_type
         area = request.form.get("area", "").strip()
-        u.area = float(area) if area else None
+        try:
+            u.area = parse_float(area, "面积（公顷）", minimum=0)
+        except FieldError as e:
+            flash(str(e), "error")
+            return redirect(url_for("unit.edit", unit_id=u.id))
         u.description = request.form.get("description", "").strip() or None
         recalc_ratio(u.patch_id)
         db.session.commit()

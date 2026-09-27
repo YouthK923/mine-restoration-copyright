@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """指标体系与 AHP 权重 —— 路由与页面逻辑。"""
 import json
+import math
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 
@@ -105,7 +106,13 @@ def index():
 @bp.route("/matrix", methods=["GET", "POST"])
 def matrix():
     unit_type = request.values.get("unit_type")
-    level = int(request.values.get("level", 1))
+    # level 是手改地址栏就能改的参数，写成 abc 不该把页面打成 500
+    try:
+        level = int(request.values.get("level", 1))
+    except (TypeError, ValueError):
+        level = 1
+    if level not in (1, 2):
+        level = 1
     l1 = normalize_l1(unit_type, level, request.values.get("l1"))
 
     if unit_type not in DEFAULT_WEIGHTS:
@@ -139,6 +146,10 @@ def matrix():
         try:
             upper = [float(request.form.get("m_%d_%d" % (i, j), "1"))
                      for i in range(n) for j in range(i + 1, n)]
+            # 0 / 负数 / inf / nan 能过 float()，但会让 n 次方根算出 inf 或 nan，
+            # 保存时直接撞上 NOT NULL 约束（weight 为 nan）→ 500
+            if any((not math.isfinite(x)) or x <= 0 for x in upper):
+                raise ValueError("矩阵元素必须是正数")
             result = compute(upper)
         except (ValueError, ZeroDivisionError):
             flash("矩阵输入有误：请填入正数（对角线自动为 1，下三角自动取倒数）", "error")
@@ -247,7 +258,12 @@ def expert_scope():
     unit_type = request.values.get("unit_type") or UNIT_TYPES[0]
     if unit_type not in DEFAULT_WEIGHTS:
         unit_type = UNIT_TYPES[0]
-    level = int(request.values.get("level", 1))
+    try:
+        level = int(request.values.get("level", 1))
+    except (TypeError, ValueError):
+        level = 1
+    if level not in (1, 2):
+        level = 1
     l1 = normalize_l1(unit_type, level, request.values.get("l1"))
     return unit_type, level, l1
 
@@ -299,6 +315,12 @@ def experts():
                 flash("矩阵输入有误，请填入正数", "error")
                 return redirect(url_for("ahp.experts", unit_type=unit_type,
                                         level=level, l1=l1))
+            # 0 / 负数 / inf / nan 都能过 float()，但会让 n 次方根算出 inf 或 nan，
+            # 于是库里存下 [[1,0],[Infinity,1]] 这种矩阵、CR 还显示 0.0000。
+            if any((not math.isfinite(x)) or x <= 0 for x in upper):
+                flash("判断矩阵只能填正数（大于 0 的有限数字）", "error")
+                return redirect(url_for("ahp.experts", unit_type=unit_type,
+                                        level=level, l1=l1))
             A = ahp.matrix_from_upper(upper)
             r = ahp.weights_and_consistency(A)
             scheme = default_scheme(unit_type, level, l1)
@@ -325,6 +347,9 @@ def experts():
                 _, cnt = ws.save_weights(unit_type, pairs)
                 flash("已保存并为「%s」生效 %d 项汇总权重（CR=%.4f）"
                       % (unit_type, cnt, weights["cr"]), "ok")
+        else:
+            # action 缺失或值不认识时以前是静默跳回，用户只觉得「点了没反应」
+            flash("未识别的操作，请从页面上的按钮重新提交", "error")
         return redirect(url_for("ahp.experts", unit_type=unit_type,
                                 level=level, l1=l1))
 

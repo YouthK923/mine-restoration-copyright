@@ -4,6 +4,7 @@ from datetime import date
 
 from flask import Flask
 from flask_login import LoginManager
+from flask_wtf.csrf import CSRFProtect, CSRFError
 
 from app.config import Config
 from app.models import db, User
@@ -12,6 +13,8 @@ from app.utils.constants import ROLE_LABELS
 login_manager = LoginManager()
 login_manager.login_view = "auth.login"
 login_manager.login_message = "请先登录"
+
+csrf = CSRFProtect()
 
 
 @login_manager.user_loader
@@ -25,6 +28,11 @@ def create_app(config_class=Config):
 
     db.init_app(app)
     login_manager.init_app(app)
+
+    # CSRF 防护：WTF_CSRF_ENABLED 只对 FlaskForm 生效，页面上那些手写 POST 表单
+    # （账号增删改、项目/图斑删除等）以前是没校验的；同时模板里的 csrf_token()
+    # 也需要它才会存在——少了这一行，保存过一次 AHP 权重后 /ahp/ 直接 500。
+    csrf.init_app(app)
 
     # 模板里展示时间统一走 localdt：库里存 UTC，展示成本地时间
     from app.utils.timefmt import to_local
@@ -172,5 +180,19 @@ def create_app(config_class=Config):
     def not_found(e):
         return render_template("error.html", code=404,
                                message="请求的页面不存在"), 404
+
+    @app.errorhandler(CSRFError)
+    def csrf_error(e):
+        """令牌过期或来源不符时给一句人话，并把人送回上一页。
+
+        原来校验一失败就是默认英文 400 页，或者（对手写表单）干脆什么都不发生，
+        用户只会觉得「点了没反应」。回跳目标只取本站地址，避免开放重定向。
+        """
+        from flask import flash, redirect, url_for
+        flash("页面停留时间过久或提交来源校验未通过，请重新提交一次", "error")
+        referrer = request.referrer or ""
+        if referrer.startswith(request.host_url):
+            return redirect(referrer)
+        return redirect(url_for("auth.index"))
 
     return app

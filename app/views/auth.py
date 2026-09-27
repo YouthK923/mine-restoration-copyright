@@ -168,13 +168,19 @@ def _users_context():
 
 def _logs_context():
     """管理员分类「操作日志」所需的数据。"""
-    page = request.args.get("page", 1, type=int)
     per_page = 50
     q = OperationLog.query.order_by(OperationLog.id.desc())
     total = q.count()
+    pages = max(1, (total + per_page - 1) // per_page)
+    # 页码先夹到 [1, pages] 再算 offset：手工把 page 写成天文数字时，
+    # (page-1)*per_page 会超出 SQLite 能绑定的整数范围，直接 500。
+    try:
+        page = int(request.args.get("page", 1))
+    except (TypeError, ValueError):
+        page = 1
+    page = max(1, min(page, pages))
     records = q.offset((page - 1) * per_page).limit(per_page).all()
     users_map = {u.id: u.username for u in User.query.all()}
-    pages = max(1, (total + per_page - 1) // per_page)
     return {"records": records, "page": page, "pages": pages,
             "total": total, "users_map": users_map}
 

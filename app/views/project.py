@@ -9,6 +9,7 @@ from flask_login import login_required, current_user
 from app.forms import EmptyForm
 from app.models import db, Project, MinePatch, ReferenceEcosystem
 from app.services import cleanup
+from app.utils.parsing import FieldError, parse_float
 
 bp = Blueprint("project", __name__, url_prefix="/project")
 
@@ -104,14 +105,23 @@ def patch_add(pid):
             v = request.form.get(name, "").strip()
             return cast(v) if v != "" else None
 
+        try:
+            area_ha = parse_float(request.form.get("area_ha"), "图斑面积（公顷）",
+                                  minimum=0)
+            stop_years = parse_float(request.form.get("stop_years"), "停产年限",
+                                     minimum=0)
+        except FieldError as e:
+            flash(str(e), "error")
+            return redirect(url_for("project.patch_add", pid=p.id))
+
         patch = MinePatch(
             project_id=p.id,
             name=request.form.get("name", "").strip(),
             admin_region=fv("admin_region"),
-            area_ha=fv("area_ha", float),
+            area_ha=area_ha,
             mineral_type=fv("mineral_type"),
             mining_method=fv("mining_method"),
-            stop_years=fv("stop_years", float),
+            stop_years=stop_years,
             responsible_entity_missing=bool(request.form.get("responsible_entity_missing")),
         )
         if not patch.name:
@@ -138,12 +148,26 @@ def patch_edit(patch_id):
             v = request.form.get(name, "").strip()
             return cast(v) if v != "" else None
 
+        # 数值字段统一走 parse_float：填了非数字给中文提示，而不是 500
+        try:
+            area_ha = parse_float(request.form.get("area_ha"), "图斑面积（公顷）",
+                                  minimum=0)
+            stop_years = parse_float(request.form.get("stop_years"), "停产年限",
+                                     minimum=0)
+            cov = parse_float(request.form.get("coverage_benchmark"),
+                              "植被覆盖度基准（%）", minimum=0, maximum=100)
+            sha = parse_float(request.form.get("shannon_benchmark"),
+                              "Shannon 基准", minimum=0)
+        except FieldError as e:
+            flash(str(e), "error")
+            return redirect(url_for("project.patch_edit", patch_id=patch.id))
+
         patch.name = request.form.get("name", "").strip()
         patch.admin_region = fv("admin_region")
-        patch.area_ha = fv("area_ha", float)
+        patch.area_ha = area_ha
         patch.mineral_type = fv("mineral_type")
         patch.mining_method = fv("mining_method")
-        patch.stop_years = fv("stop_years", float)
+        patch.stop_years = stop_years
         patch.responsible_entity_missing = bool(request.form.get("responsible_entity_missing"))
         # 参照生态系统
         ref = ReferenceEcosystem.query.filter_by(patch_id=patch.id).first()
@@ -151,8 +175,6 @@ def patch_edit(patch_id):
             ref = ReferenceEcosystem(patch_id=patch.id)
             db.session.add(ref)
         # 基准值：用户填 0 是合法输入（不能写成 `or 75.0`，那样 0 会被悄悄换成默认值）
-        cov = fv("coverage_benchmark", float)
-        sha = fv("shannon_benchmark", float)
         ref.coverage_benchmark = 75.0 if cov is None else cov
         ref.shannon_benchmark = 0.7 if sha is None else sha
         ref.dominant_species = fv("dominant_species")

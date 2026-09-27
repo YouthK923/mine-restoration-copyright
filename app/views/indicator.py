@@ -13,6 +13,7 @@ from flask import (Blueprint, render_template, request, redirect, url_for,
 from app.forms import EmptyForm
 from app.models import db, MinePatch, MicroUnit, IndicatorData
 from app.utils.constants import HEAVY_METALS, ASPECT_TYPES, UNIT_ENABLED_INDICATORS
+from app.utils.parsing import FieldError, parse_float
 from app.services import import_service as imp
 
 bp = Blueprint("indicator", __name__, url_prefix="/indicator")
@@ -61,28 +62,38 @@ def edit(unit_id):
     groups = unit_field_config(unit.unit_type)
 
     if request.method == "POST" and form.validate_on_submit():
-        def f(name, cast=float):
-            v = request.form.get(name, "").strip()
-            return cast(v) if v != "" else None
-
-        heavy = {}
-        for m in HEAVY_METALS:
-            v = f("hm_" + m)
-            if v is not None:
-                heavy[m] = v
+        # 各字段的合理范围（覆盖度是百分数、pH 0–14、坡度 0–90，其余非负）。
+        # 以前这里直接 float(v)，用户填个「约 3.5」看到的就是英文 500 页。
+        LIMITS = {
+            "soil_ratio": ("土石比", 0, None),
+            "thickness": ("土层厚度（cm）", 0, None),
+            "ph": ("pH", 0, 14),
+            "organic_matter": ("有机质（g/kg）", 0, None),
+            "coverage": ("植被覆盖度（%）", 0, 100),
+            "shannon": ("Shannon 指数", 0, None),
+            "slope": ("坡度（°）", 0, 90),
+        }
+        try:
+            values = {}
+            for name, (label, lo, hi) in LIMITS.items():
+                values[name] = parse_float(request.form.get(name), label,
+                                           minimum=lo, maximum=hi)
+            heavy = {}
+            for m in HEAVY_METALS:
+                v = parse_float(request.form.get("hm_" + m),
+                                "重金属 %s（mg/kg）" % m, minimum=0)
+                if v is not None:
+                    heavy[m] = v
+        except FieldError as e:
+            flash(str(e), "error")
+            return redirect(url_for("indicator.edit", unit_id=unit.id))
 
         if ind is None:
             ind = IndicatorData(unit_id=unit.id)
             db.session.add(ind)
-
-        ind.soil_ratio = f("soil_ratio")
-        ind.thickness = f("thickness")
-        ind.ph = f("ph")
-        ind.organic_matter = f("organic_matter")
+        for name, value in values.items():
+            setattr(ind, name, value)
         ind.heavy_metals = json.dumps(heavy, ensure_ascii=False) if heavy else None
-        ind.coverage = f("coverage")
-        ind.shannon = f("shannon")
-        ind.slope = f("slope")
         ind.aspect = request.form.get("aspect", "").strip() or None
 
         db.session.commit()
