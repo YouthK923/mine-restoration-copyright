@@ -26,6 +26,16 @@
     不会因事后修改指标数据而变化。
   </p>
 
+  {% if undetected %}
+  <p class="muted" style="margin-top:8px;">
+    数据完整度说明：以下重金属项<strong>未检测</strong>，按论文注记以「未受污染」计入污染指标，
+    并非实测达标 ——
+    {% for unit_type, metals in undetected %}
+      {{ unit_type }}：{{ metals|join("、") }}{% if not loop.last %}；{% endif %}
+    {% endfor %}。
+  </p>
+  {% endif %}
+
   <p class="actions" style="margin-top:16px;">
     <a class="btn" href="/report/{{ patch.id }}/pdf">导出 PDF 报告</a>
     <a class="btn btn--ghost" href="/report/{{ patch.id }}/word">导出 Word 报告</a>

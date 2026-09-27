@@ -16,6 +16,7 @@ from app.models import (db, MinePatch, MicroUnit, IndicatorData,
                         EvaluationResult, ScoreDetail)
 from app.services import evaluation_service as ev
 from app.services import workflow as wf
+from app.services import unit_config
 
 bp = Blueprint("evaluate", __name__, url_prefix="/evaluate")
 
@@ -104,7 +105,10 @@ def save_evaluation(patch_id, units):
     记录下来的那次评价，不再重新推算。
     """
     weights, sources = load_weights(units)
-    res = ev.score_mine(units, weights)
+    # 标准化参数取自该图斑的参照生态系统与指标定义（界面上可改），
+    # 没配过的项自动回落到代码常量，历史结果与验证算例不受影响。
+    settings = unit_config.for_patch(patch_id)
+    res = ev.score_mine(units, weights, settings)
     saved = EvaluationResult(
         patch_id=patch_id,
         final_score=round(res["final_score"], 4),
@@ -177,4 +181,6 @@ def result(result_id):
     patch = db.session.get(MinePatch, r.patch_id)
     unit_scores = json.loads(r.unit_scores) if r.unit_scores else []
     return render_template("evaluate/result.html", r=r, patch=patch,
-                           unit_scores=unit_scores)
+                           unit_scores=unit_scores,
+                           undetected=wf.undetected_metals(patch.id)
+                           if patch else [])

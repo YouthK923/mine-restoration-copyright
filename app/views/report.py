@@ -84,7 +84,8 @@ def detail(patch_id):
     chart_units, chart_weight = _charts(result)
     return render_template("report/detail.html", patch=patch, result=result,
                            record=record, reference=reference,
-                           chart_units=chart_units, chart_weight=chart_weight)
+                           chart_units=chart_units, chart_weight=chart_weight,
+                           undetected=wf.undetected_metals(patch.id))
 
 
 @bp.route("/<int:patch_id>/word")

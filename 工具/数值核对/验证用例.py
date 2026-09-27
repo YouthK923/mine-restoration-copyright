@@ -49,7 +49,8 @@ if BASE not in sys.path:
 
 from app import create_app
 from app.models import (db, Project, MinePatch, MicroUnit, IndicatorData,
-                        ConstraintCheck, EvaluationResult, ScoreDetail)
+                        ConstraintCheck, EvaluationResult, ScoreDetail,
+                        ReferenceEcosystem)
 from app.services import import_service as imp
 
 CSV_DIR = os.path.join(BASE, "验证数据")
@@ -324,6 +325,11 @@ def clean(app):
                 synchronize_session=False)
             ConstraintCheck.query.filter(
                 ConstraintCheck.patch_id.in_(pids)).delete(
+                synchronize_session=False)
+            # 参照生态系统也要清：漏掉它，每跑一次算例就在库里留一批
+            # 指向已删图斑的孤儿行（与「删除项目」曾经漏清的是同一类问题）
+            ReferenceEcosystem.query.filter(
+                ReferenceEcosystem.patch_id.in_(pids)).delete(
                 synchronize_session=False)
             MicroUnit.query.filter(MicroUnit.patch_id.in_(pids)).delete(
                 synchronize_session=False)

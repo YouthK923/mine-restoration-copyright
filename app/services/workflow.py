@@ -16,6 +16,7 @@
 """
 from app.models import (db, MicroUnit, IndicatorData, ConstraintCheck,
                         EvaluationResult)
+from app.services import unit_config
 
 # 指标数据非空字段（用于判断某单元是否已录入数据）
 DATA_FIELDS = ("soil_ratio", "thickness", "ph", "organic_matter",
@@ -28,6 +29,15 @@ def _has_data(ind):
     if any(getattr(ind, f, None) is not None for f in DATA_FIELDS):
         return True
     return bool(ind.heavy_metals_dict())
+
+
+def _data_of(ind):
+    """把 IndicatorData 行转成标准化接口要的 dict。"""
+    if ind is None:
+        return {}
+    data = {f: getattr(ind, f, None) for f in DATA_FIELDS}
+    data["heavy_metals"] = ind.heavy_metals_dict()
+    return data
 
 
 def patch_progress(patch_id):
@@ -67,11 +77,22 @@ def patch_progress(patch_id):
                            "detail": "限制性条件判定未通过（%s）" % (cc.reason or "")}
 
     # ---- 步骤三：指标数据 ----
-    missing = []
+    # 判断标准是「该单元类型启用的必填项是否齐全」，而不是「有没有填过任意一个字段」。
+    # 早先只要 8 个字段里有一个非空就算齐，于是碎石边坡只填一个坡度也能跑出
+    # F=0.69「基本适宜」；而 score_unit 又会把缺的项剔掉、把权重摊给其余指标，
+    # 结论方向还偏乐观。污染指标按论文注记允许「未检测」，不算缺。
+    settings = unit_config.for_patch(patch_id)
+    missing = []            # 完全没录数据的单元类型
+    incomplete = []         # 录了但不齐的单元类型 → [(单元类型, [缺的字段])]
     for u in units:
         ind = IndicatorData.query.filter_by(unit_id=u.id).first()
+        data = _data_of(ind)
+        gaps = settings.missing_fields(u.unit_type, data)
         if not _has_data(ind):
             missing.append(u.unit_type)
+        elif gaps:
+            incomplete.append((u.unit_type, gaps))
+
     if not units:
         data_step = {"done": False, "ready": False, "missing": [],
                      "detail": "尚无可录入数据的微地质单元"}
@@ -79,6 +100,12 @@ def patch_progress(patch_id):
         data_step = {"done": False, "ready": False, "missing": missing,
                      "detail": "以下微地质单元尚未录入指标数据：%s"
                                % "、".join(missing)}
+    elif incomplete:
+        data_step = {"done": False, "ready": False,
+                     "missing": [t for t, _ in incomplete],
+                     "detail": "以下微地质单元的必填指标未填齐：%s"
+                               % "；".join("%s缺 %s" % (t, "、".join(g))
+                                           for t, g in incomplete)}
     else:
         data_step = {"done": True, "ready": True, "missing": [],
                      "detail": "全部 %d 个微地质单元的指标数据已录入" % len(units)}
@@ -132,6 +159,27 @@ def patch_progress(patch_id):
         "blocking": blocking,
         "ready": not blocking,
     }
+
+
+def undetected_metals(patch_id):
+    """列出该图斑各单元「未检测」的重金属，供结果页与报告如实标注。
+
+    论文注记允许未检测的重金属按未受污染计入，但报告里必须写明是哪些 ——
+    否则读报告的人会以为这些项是实测达标。
+    只列启用了土壤指标的单元：岩质边坡本来就不评价土壤，列 8 项未检测是噪音。
+    """
+    settings = unit_config.for_patch(patch_id)
+    out = []
+    for u in MicroUnit.query.filter_by(patch_id=patch_id).all():
+        if settings.group_enabled(u.unit_type, "土壤指标", "soil") is False:
+            continue
+        ind = IndicatorData.query.filter_by(unit_id=u.id).first()
+        if ind is None:
+            continue
+        metals = settings.undetected_metals(_data_of(ind))
+        if metals:
+            out.append((u.unit_type, metals))
+    return out
 
 
 def latest_result(patch_id):

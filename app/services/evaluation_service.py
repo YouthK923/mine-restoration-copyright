@@ -10,8 +10,13 @@ from app.utils.constants import DEFAULT_WEIGHTS, grade_of
 from app.services import standardization as std
 
 
-def score_unit(unit_type, data, weights=None):
+def score_unit(unit_type, data, weights=None, settings=None):
     """计算单个微地质单元的评价因子 F′。
+
+    参数
+    ----
+    weights  : 该单元类型的权重；不传用论文默认权重
+    settings : 图斑级标准化参数（基准值与理想取值）；不传全部按代码常量
 
     返回
     ----
@@ -22,7 +27,7 @@ def score_unit(unit_type, data, weights=None):
     if weights is None:
         weights = DEFAULT_WEIGHTS[unit_type]
 
-    std_result = std.standardize_unit(unit_type, data, weights)
+    std_result = std.standardize_unit(unit_type, data, weights, settings)
     l1_weights = weights["l1"]
     l1_scores = {}
     details = []
@@ -60,7 +65,7 @@ def score_unit(unit_type, data, weights=None):
     return {"l1_scores": l1_scores, "unit_score": unit_score, "details": details}
 
 
-def score_mine(units, weights_map=None):
+def score_mine(units, weights_map=None, settings=None):
     """计算整个矿山的评价因子 F 与适宜性等级。
 
     参数
@@ -71,6 +76,8 @@ def score_mine(units, weights_map=None):
     weights_map : dict，{单元类型: 权重结构}。未提供的单元类型
         使用论文表 3 的默认权重。权重可来自 AHP 计算并经
         weight_service 保存生效，从而真正参与评价。
+    settings : 图斑级标准化参数（参照生态系统基准、指标理想取值），
+        由 app.services.unit_config.for_patch() 生成；不传按代码常量。
 
     返回
     ----
@@ -81,7 +88,7 @@ def score_mine(units, weights_map=None):
     unit_results = []
     for u in units:
         r = score_unit(u["unit_type"], u["data"],
-                       weights_map.get(u["unit_type"]))
+                       weights_map.get(u["unit_type"]), settings)
         weighted = u["ratio"] * r["unit_score"]
         total += weighted
         unit_results.append({

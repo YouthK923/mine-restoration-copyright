@@ -12,6 +12,7 @@ from docx.oxml.ns import qn
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 from app.utils.timefmt import to_local, now_utc
+from app.services import workflow as wf
 
 
 def _set_run(run, text=None, size=12, bold=False):
@@ -126,6 +127,14 @@ def build_report(patch, mine_result):
         for k, v in u["l1_scores"].items():
             l1_row.append("%s=%.4f" % (k, v))
         _para(doc, "一级指标得分：" + "，".join(l1_row), size=10.5, space_after=10)
+
+    # 数据完整度：未检测项必须写明，否则读报告的人会以为这些项是实测达标
+    undetected = wf.undetected_metals(patch.id)
+    if undetected:
+        _heading(doc, "五、数据完整度说明", 1)
+        parts = ["%s：%s" % (t, "、".join(m)) for t, m in undetected]
+        _para(doc, "以下重金属项未检测，按论文注记以「未受污染」计入污染指标"
+                   "（并非实测达标）：%s。" % "；".join(parts), size=10.5)
 
     buf = io.BytesIO()
     doc.save(buf)
