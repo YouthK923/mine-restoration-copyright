@@ -1006,7 +1006,9 @@
       .app-nav__group { margin: 8px 0 4px; }
       .app-user { padding: 10px 14px; }
       .app-header { padding: 0 14px; gap: 10px; }
-      .search-box { width: 180px; }
+      /* 搜索框保持与宽屏一致的宽度：原来这里缩到 180px，
+         窗口一窄搜索框就变窄，同一台机器不同窗口大小看着像两个尺寸 */
+      .search-box { width: 268px; }
       .app-main { padding: 16px 14px 20px; }
       .app-foot { padding: 0 14px 14px; }
     }

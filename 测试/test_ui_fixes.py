@@ -145,6 +145,13 @@ print("  %s 内容区预留滚动条槽位（顶栏宽度不再随页面变化�
       % ("[符合]" if has_gutter else "[不符合]"))
 assert has_gutter, "缺少 scrollbar-gutter: stable，顶栏宽度会因滚动条而不一致"
 
+# 搜索框宽度不随窗口大小变：原来 960px 断点把它缩到 180px，同一台机器换窗口
+# 大小看着就像两个尺寸。统一保持 268px（640px 以下才改为铺满，属手机版式）。
+no_shrink = "width: 180px" not in base_src
+print("  %s 搜索框宽度在窄屏断点下不再缩小"
+      % ("[符合]" if no_shrink else "[不符合]"))
+assert no_shrink, "搜索框在 960px 断点被缩成 180px，宽度会随窗口变化"
+
 print()
 print(LINE)
 print("界面修复自检全部通过 √")
