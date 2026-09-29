@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """界面修复自检：「记住我」与各模块删除功能。"""
+import io
 import os
 import re
 import sys
@@ -130,6 +131,19 @@ gone = "待删除测试项目" not in html
 print("  %s 删除项目后列表中不再出现" % ("[符合]" if gone else "[不符合]"))
 assert gone
 print("  %s 有删除成功提示" % ("[符合]" if "已删除" in html else "[不符合]"))
+
+print()
+print(LINE)
+print("六、顶栏宽度在各页面保持一致")
+print(LINE)
+# 滚动条出现在 .app-content 内部：内容高的页面会因此把顶栏挤窄约 10px，
+# 于是「顶栏在不同页面不一样宽」。scrollbar-gutter: stable 预留槽位后各页一致。
+base_src = io.open(os.path.join(ROOT, "app", "templates", "base.html"),
+                   encoding="utf-8").read()
+has_gutter = "scrollbar-gutter: stable" in base_src
+print("  %s 内容区预留滚动条槽位（顶栏宽度不再随页面变化）"
+      % ("[符合]" if has_gutter else "[不符合]"))
+assert has_gutter, "缺少 scrollbar-gutter: stable，顶栏宽度会因滚动条而不一致"
 
 print()
 print(LINE)

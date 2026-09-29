@@ -225,6 +225,11 @@
       flex-direction: column;
       overflow-y: auto;
       overflow-x: hidden;
+      /* 滚动条槽位始终占位。滚动条是出现在这个滚动容器内部的，
+         内容高的页面（工作台、标准库、操作日志）会因此把顶栏挤窄约 10px，
+         内容刚好放得下的页面（限制性判定、项目档案…）则不会 ——
+         结果就是「顶栏在不同页面不一样宽」。预留槽位后各页一致。 */
+      scrollbar-gutter: stable;
       /* 细滚动条：默认半透明，悬停时加深，不抢视线 */
       scrollbar-width: thin;
       scrollbar-color: rgba(31, 107, 69, .28) transparent;
