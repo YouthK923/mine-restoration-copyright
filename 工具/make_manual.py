@@ -144,7 +144,7 @@ CONTENT = [
           "（或用键盘 Tab 聚焦）才会展开该模块的职责说明。"),
     ("p", "系统设置了管理员、操作员两种职务，职务不同则可用功能不同：管理员可管理系统、"
           "维护基础数据并查看操作日志，操作员可使用全部业务功能。"
-          "自助注册的账号一律为操作员，职务只能由管理员在「个人设置 · 账号」中调整。"
+          "自助注册的账号一律为操作员，职务只能由管理员在个人设置的「账号」分类中调整。"
           "未登录状态下访问其他功能页面，系统会自动跳转至登录界面。"),
     ("img", "01_登录.png", "登录界面（首屏）"),
     ("img", "01b_登录框.png", "点击「登录」后渐变浮现的登录框"),
@@ -391,6 +391,30 @@ CONTENT = [
 # 排版引擎
 # ---------------------------------------------------------------------------
 
+CN_DIGITS = "一二三四五六七八九十"
+
+
+def cn_ordinal(n):
+    """阿拉伯数字转中文序号：1→一、10→十、11→十一、23→二十三。"""
+    if n <= 0:
+        return str(n)
+    if n <= 10:
+        return CN_DIGITS[n - 1]
+    if n < 20:
+        return "十" + CN_DIGITS[n - 11]
+    tens, ones = divmod(n, 10)
+    return CN_DIGITS[tens - 1] + "十" + (CN_DIGITS[ones - 1] if ones else "")
+
+
+def plain(text):
+    """去掉 Markdown 的行内标记。
+
+    说明书是 PDF，不做富文本渲染，`**加粗**` 与反引号必须在这里清掉 ——
+    否则页面上会原样印出星号（4.2 节那三条就曾经这样漏出去过）。
+    """
+    return text.replace("**", "").replace("`", "")
+
+
 def wrap_text(text, size, max_w, font=FONT):
     """按渲染宽度折行，兼容中英文混排。"""
     lines, cur = [], ""
@@ -445,6 +469,7 @@ class Manual:
 
     # ---- 内容块 ----
     def heading(self, text, level):
+        text = plain(text)
         size = {1: 14, 2: 12}[level]
         before = {1: 20, 2: 16}[level]
         after = {1: 20, 2: 16}[level]
@@ -460,6 +485,7 @@ class Manual:
         self.y = base + after
 
     def para(self, text):
+        text = plain(text)
         size = 10.5
         lh = 17
         for ln in wrap_text(text, size, BODY_W):
@@ -469,15 +495,22 @@ class Manual:
             self.y += lh
         self.y += 6
 
-    def bullet(self, text):
+    def bullet(self, text, index=1):
+        """带中文序号的小条目（一、二、三……）。
+
+        原先用「·」做项目符号：正式材料里这种点既不像编号、也和正文的间隔号
+        混在一起，改成中文序号更清楚，也与章节的「一、二、三」体例一致。
+        """
+        text = plain(text)
         size = 10.5
         lh = 17
-        indent = 14
+        marker = cn_ordinal(index) + "、"
+        indent = 34          # 容得下「十一、」这样的三字标号
         first = True
         for ln in wrap_text(text, size, BODY_W - indent):
             self.ensure(lh)
             if first:
-                self.page.insert_text((MARGIN_L, self.y), "·",
+                self.page.insert_text((MARGIN_L, self.y), marker,
                                       fontname=FONT, fontsize=size)
                 first = False
             self.page.insert_text((MARGIN_L + indent, self.y), ln,
@@ -572,7 +605,13 @@ class Manual:
         self.cover_page()
         self.toc()
         self.new_page()
+        li_no = 0            # 连续的小条目算一组，组内从「一、」重新数
         for kind, *rest in blocks:
+            if kind == "li":
+                li_no += 1
+                self.bullet(rest[0], li_no)
+                continue
+            li_no = 0
             if kind == "h1":
                 self.heading(rest[0], 1)
             elif kind == "h2":
