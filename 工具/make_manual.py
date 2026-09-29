@@ -415,6 +415,21 @@ def plain(text):
     return text.replace("**", "").replace("`", "")
 
 
+def toc_entries(blocks=None):
+    """由正文的标题块推导目录条目，返回 [(标题, 层级)]。
+
+    目录原先是在 toc() 里手写的一份清单，与正文各写一份，改标题时容易漏改其中一处；
+    改为从 CONTENT 推导后，正文加一节目录自动跟着变。Word 版说明书也用这份目录。
+    """
+    out = []
+    for kind, *rest in (CONTENT if blocks is None else blocks):
+        if kind == "h1":
+            out.append((plain(rest[0]), 0))
+        elif kind == "h2":
+            out.append((plain(rest[0]), 1))
+    return out
+
+
 def wrap_text(text, size, max_w, font=FONT):
     """按渲染宽度折行，兼容中英文混排。"""
     lines, cur = [], ""
@@ -578,21 +593,7 @@ class Manual:
     def toc(self):
         self.new_page(numbered=True)      # 目录作为第 1 页
         self.heading("目　录", 1)
-        entries = [
-            ("一、引言", 0), ("1.1 编写目的", 1), ("1.2 背景", 1),
-            ("二、系统介绍", 0), ("2.1 系统概述", 1), ("2.2 界面框架", 1),
-            ("2.3 系统功能特点与技术特征", 1),
-            ("三、系统流程说明", 0),
-            ("3.1 登录", 1), ("3.2 系统首页（工作台）", 1), ("3.3 项目与矿山档案", 1),
-            ("3.4 微地质单元划分", 1), ("3.5 限制性指标判定", 1),
-            ("3.6 政策与标准知识库", 1), ("3.7 AHP 指标权重计算", 1),
-            ("3.8 指标数据采集", 1), ("3.9 适宜性定量评价", 1),
-            ("3.10 报告与结果输出", 1), ("3.11 账号与权限管理", 1),
-            ("3.12 个人设置", 1), ("3.13 退出系统", 1),
-            ("四、计算方法与口径说明", 0),
-            ("4.1 指标标准化", 1), ("4.2 数据完整性与缺失处理", 1),
-            ("4.3 面积加权与等级判定", 1), ("4.4 评价结果与论文案例数值的口径", 1),
-        ]
+        entries = toc_entries()
         for text, lvl in entries:
             size = 11 if lvl == 0 else 10.5
             self.ensure(20)

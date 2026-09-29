@@ -22,9 +22,10 @@ app/                    应用代码（详见下方「系统代码结构」）
 
 工具/                   ★ 材料生成与校验脚本
     make_source_doc.py          生成源程序鉴别材料 PDF
-    make_manual.py              生成软件说明书 PDF
+    make_manual.py              生成软件说明书 PDF（正文内容的唯一来源）
+    make_manual_docx.py         按同一份正文生成说明书 Word 版
     make_screenshots.py         自动抓取界面截图（Chrome 无头模式）
-    check_materials.py          申请材料形式要求自检（21 项）
+    check_materials.py          申请材料形式要求自检（22 项）
     verify_all.py               项目最终验收汇总
     清理孤儿数据.py             清掉挂在已删除图斑/单元下的残留数据（默认只统计）
     生成图标.py                 生成 app/static/favicon.ico（网页图标 + 快捷方式图标）
@@ -32,17 +33,17 @@ app/                    应用代码（详见下方「系统代码结构」）
     创建桌面快捷方式.py         在桌面/开始菜单创建快捷方式
     提取论文与模板文本.py        从论文/模板 PDF 提取全文到 参考资料/论文与模板解析文本/
     生成Word中文模板.py         生成 pandoc 中文排版模板
-    生成文档Word.py             把 文档/ 下的 Markdown 批量转成 docx
+    生成文档Word.py             把 文档/ 与 软著材料/ 下的 Markdown 批量转成 docx
     修正Word标题配色.py         修正 docx 标题样式为「黑体 + 纯黑」
     数值核对/                   案例数值的独立复算与正确性验证脚本
     界面核对/                   界面行为、文档用词的自检脚本
 
-测试/                   ★ 自检脚本（16 套，均从仓库根运行）
+测试/                   ★ 自检脚本（17 套，均从仓库根运行）
     test_ahp.py test_evaluate.py test_web_ahp.py test_web_modules.py
     test_web_evaluate.py test_web_report.py test_ui_fixes.py
     test_new_features.py test_workflow.py test_weights.py
     test_profile.py test_register.py test_login.py test_timefmt.py
-    test_delete_cascade.py test_unit_config.py
+    test_delete_cascade.py test_unit_config.py test_robustness.py
 
 验证数据/               ★ 系统正确性验证数据（8 个带手算期望值的算例）
     使用说明.md                 ★ 使用文档：两种核对方式、逐步操作、常见问题
@@ -53,8 +54,8 @@ app/                    应用代码（详见下方「系统代码结构」）
 
 软著材料/               ★ 登记提交材料（由工具生成）
     源程序_....pdf / 源程序_提交版（前30页+后30页）_....pdf
-    说明书_....pdf
-    登记信息表底稿.md
+    说明书_....pdf / 说明书_....docx   （提交用 PDF，Word 版供改字，两版同源）
+    登记信息表底稿.md / .docx
     截图/                       界面截图
 
 参考资料/               ★ 只读参考件（不纳入版本控制）
@@ -150,7 +151,7 @@ python run.py --dev          # 开发模式：开启热重载与调试器
 python 测试/test_workflow.py    # 评价流程门禁、数据保护、重复单元拦截
 python 测试/test_weights.py     # AHP 权重生效链路
 python 测试/test_timefmt.py     # 时间显示：库里存 UTC、页面显示本地时间
-python 工具/check_materials.py  # 申请材料形式要求自检（21 项）
+python 工具/check_materials.py  # 申请材料形式要求自检（22 项）
 python 工具/verify_all.py       # 项目最终验收汇总
 ```
 
@@ -179,13 +180,17 @@ python 工具/数值核对/验证用例.py --clean  # 删除算例
 ```bash
 python 工具/make_screenshots.py    # 1) 自动截图（Chrome 无头模式，需先 seed_demo.py）
 python 工具/make_manual.py         # 2) 生成说明书 PDF
-python 工具/make_source_doc.py     # 3) 生成源程序 PDF
+python 工具/make_manual_docx.py    # 3) 生成说明书 Word 版（同一份正文）
+python 工具/make_source_doc.py     # 4) 生成源程序 PDF
+python 工具/生成文档Word.py         # 5) 文档与底稿的 Markdown 转 Word
 ```
 
 - **源程序**：A4 纵向、页眉为软件名称与版本号、页码右上角、每页固定 50 行、
   去除空行保证每页均为有效代码行、末页为程序结束页。超过 60 页时同时生成
   「前 30 页 + 后 30 页」的提交版。
 - **说明书**：A4 纵向、页眉同为软件名称与版本号、页码自目录起编号，图文并茂。
+  **提交用 PDF**；`make_manual_docx.py` 另出一份 Word 版（正文、目录、截图与 PDF
+  同源，页数也一致），供项目成员直接改字、写批注，**不作为提交形式**。
 - `make_screenshots.py` 以截图模式启动应用（配置项 `SCREENSHOT_MODE`，自动以管理员登录）。
   > 该模式仅为生成配图的开发用途，正常运行时配置为关闭状态。
 

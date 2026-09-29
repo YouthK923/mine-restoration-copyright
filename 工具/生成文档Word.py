@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-"""把 文档/ 下的 Markdown 转成带中文模板的 Word。
+"""把 文档/ 与 软著材料/ 下的 Markdown 转成带中文模板的 Word。
 
 用法：python 工具/生成文档Word.py
 前置：D:\\Pandoc\\pandoc.exe；中文模板由 工具/生成Word中文模板.py 产出。
+说明：说明书另有专门的 Word 版，由 工具/make_manual_docx.py 生成（与 PDF 版同源）。
 """
 import os
 import subprocess
@@ -12,10 +13,15 @@ sys.stdout.reconfigure(encoding="utf-8")
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PANDOC = r"D:\Pandoc\pandoc.exe"
-DOC_DIR = os.path.join(ROOT, "文档")
 
 # 需要出 Word 的文稿；联网核实报告只作存档，不转 Word
-SOURCES = ["软著功能计划.md", "制作步骤与分工.md", "演示脚本.md", "开发日志.md"]
+SOURCES = [
+    os.path.join("文档", "软著功能计划.md"),
+    os.path.join("文档", "制作步骤与分工.md"),
+    os.path.join("文档", "演示脚本.md"),
+    os.path.join("文档", "开发日志.md"),
+    os.path.join("软著材料", "登记信息表底稿.md"),
+]
 
 
 def build_reference():
@@ -38,7 +44,7 @@ def main():
     print("中文模板：%s" % ref)
 
     for name in SOURCES:
-        src = os.path.join(DOC_DIR, name)
+        src = os.path.join(ROOT, name)
         if not os.path.exists(src):
             print("  [跳过] %s（不存在）" % name)
             continue

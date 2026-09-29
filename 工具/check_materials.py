@@ -9,6 +9,7 @@ import re
 import sys
 
 import fitz
+from docx import Document
 
 sys.stdout.reconfigure(encoding="utf-8")
 # 本脚本位于子目录，仓库根目录才是 app/ 与 软著材料/ 所在位置
@@ -24,6 +25,7 @@ VERSION = "V1.0"
 SRC = os.path.join(MAT, "源程序_历史遗留废弃矿山自然恢复适宜性评价系统V1.0.pdf")
 SRC60 = os.path.join(MAT, "源程序_提交版（前30页+后30页）_历史遗留废弃矿山自然恢复适宜性评价系统V1.0.pdf")
 MAN = os.path.join(MAT, "说明书_历史遗留废弃矿山自然恢复适宜性评价系统V1.0.pdf")
+MAN_DOCX = os.path.join(MAT, "说明书_历史遗留废弃矿山自然恢复适宜性评价系统V1.0.docx")
 FORM = os.path.join(MAT, "登记信息表底稿.md")
 
 results = []
@@ -125,6 +127,29 @@ else:
     size_mb = os.path.getsize(MAN) / 1024 / 1024
     check(size_mb < 10, "文件体积适合上传", "%.2f MB" % size_mb)
     doc.close()
+
+# 说明书的 Word 版：正式提交用 PDF，Word 版是给项目成员改字用的，
+# 两版同源（都取自 工具/make_manual.py），这里只校验它没被改跑偏。
+if not os.path.exists(MAN_DOCX):
+    check(False, "说明书 Word 版存在且与 PDF 一致", "未找到 Word 版")
+elif not os.path.exists(MAN):
+    check(False, "说明书 Word 版存在且与 PDF 一致", "缺少 PDF 版，无法比对")
+else:
+    d = Document(MAN_DOCX)
+    flat_docx = re.sub(r"\s+", "", "".join(p.text for p in d.paragraphs))
+    ref = fitz.open(MAN)
+    flat_pdf = re.sub(r"\s+", "",
+                      "".join(ref[i].get_text() for i in range(ref.page_count)))
+    ref.close()
+    grams = hits = 0
+    for i in range(0, max(0, len(flat_docx) - 12 + 1), 4):
+        grams += 1
+        if flat_docx[i:i + 12] in flat_pdf:
+            hits += 1
+    ratio = hits / grams if grams else 0
+    leak = flat_docx.count("**") + flat_docx.count("`")
+    check(ratio >= 0.95 and leak == 0, "说明书 Word 版存在且与 PDF 一致",
+          "文字吻合 %.1f%%，Markdown 残留 %d 处" % (ratio * 100, leak))
 
 # ---------------------------------------------------------------------------
 print()
