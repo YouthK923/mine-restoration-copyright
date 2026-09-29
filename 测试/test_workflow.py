@@ -44,6 +44,23 @@ def ok(flag, label, extra=""):
         _fails.append(label)
 
 
+def purge_fixtures():
+    """开跑前先清掉上一次可能残留的自检项目。
+
+    自检项目按 code 前缀命名（WF-）；如果上一次跑到一半被打断（报错、被中断），
+    清理函数没执行到，残留的项目就会出现在工作台与项目列表里 ——
+    生成软著截图时这些测试数据会被拍进去。
+    """
+    with app.app_context():
+        leftovers = Project.query.filter(Project.code.like("WF-%")).all()
+        for p in leftovers:
+            for m in p.patches.all():
+                db.session.delete(m)
+            db.session.delete(p)
+        db.session.commit()
+        return len(leftovers)
+
+
 def new_patch(tag):
     with app.app_context():
         p = Project(name="门禁-" + tag, code="WF-" + tag)
@@ -121,6 +138,7 @@ def get_report(pid):
 print(LINE)
 print("一、前置条件缺失时，评价必须被拦住")
 print(LINE)
+print("  （开跑前清掉 %d 个上一次残留的自检项目）" % purge_fixtures())
 
 print()
 print("场景 1：连微地质单元都没划分")

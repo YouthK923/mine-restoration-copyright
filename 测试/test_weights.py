@@ -76,6 +76,32 @@ def build_case():
         return patch.id
 
 
+def purge_fixtures():
+    """开跑前清掉上一次可能残留的自检项目（code 前缀 WEIGHT-）。
+
+    上一次跑到一半被打断时清理函数执行不到，残留项目会出现在工作台与
+    项目列表里，生成软著截图时会被拍进去。
+    """
+    with app.app_context():
+        from app.models import Project, ReferenceEcosystem
+        leftovers = Project.query.filter(Project.code.like("WEIGHT-%")).all()
+        for p in leftovers:
+            for m in p.patches.all():
+                uids = [u.id for u in MicroUnit.query.filter_by(patch_id=m.id)]
+                if uids:
+                    IndicatorData.query.filter(
+                        IndicatorData.unit_id.in_(uids)).delete(
+                        synchronize_session=False)
+                EvaluationResult.query.filter_by(patch_id=m.id).delete()
+                ConstraintCheck.query.filter_by(patch_id=m.id).delete()
+                ReferenceEcosystem.query.filter_by(patch_id=m.id).delete()
+                MicroUnit.query.filter_by(patch_id=m.id).delete()
+                db.session.delete(m)
+            db.session.delete(p)
+        db.session.commit()
+        return len(leftovers)
+
+
 def cleanup(pid):
     with app.app_context():
         from app.models import ScoreDetail
@@ -109,6 +135,7 @@ def run_eval(pid):
 print(LINE)
 print("一、默认应使用论文表 3 的权重")
 print(LINE)
+print("  （开跑前清掉 %d 个上一次残留的自检项目）" % purge_fixtures())
 with app.app_context():
     ws.reset_weights(UNIT_TYPE)
     w, label, scheme = ws.effective_weights(UNIT_TYPE)
