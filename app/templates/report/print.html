@@ -4,31 +4,45 @@
 <meta charset="UTF-8">
 <title>自然恢复适宜性评价报告 · {{ patch.name }}</title>
 <style>
-  @page { size: A4; margin: 18mm 16mm; }
+  @page { size: A4; margin: 25mm 25mm; }
   * { box-sizing: border-box; }
   body {
-    margin: 0; color: #23262b; background: #fff;
-    font-family: "Microsoft YaHei", "SimSun", sans-serif;
-    font-size: 10.5pt; line-height: 1.65;
+    margin: 0; color: #000; background: #fff;
+    font-family: "SimSun", "宋体", serif;
+    font-size: 12pt; line-height: 1.0;
   }
-  h1 { font-size: 17pt; text-align: center; margin: 0 0 6px; }
-  h2 { font-size: 13pt; color: #1f3a5f; margin: 20px 0 8px;
-       border-bottom: 1px solid #dfe3e8; padding-bottom: 4px; }
-  h3 { font-size: 11.5pt; color: #1f3a5f; margin: 16px 0 6px; }
-  .sub { text-align: center; color: #6b7280; font-size: 9.5pt; margin-bottom: 18px; }
+  h1 {
+    font-family: "SimHei", "黑体", sans-serif;
+    font-size: 16pt; text-align: center;
+    font-weight: bold; color: #000;
+    margin: 0 0 6px;
+  }
+  h2 {
+    font-family: "SimHei", "黑体", sans-serif;
+    font-size: 14pt; text-align: center;
+    font-weight: bold; color: #000;
+    margin: 16px 0 8px;
+    border-bottom: none; padding-bottom: 0;
+  }
+  h3 {
+    font-family: "SimSun", "宋体", serif;
+    font-size: 12pt; color: #000; font-weight: bold;
+    margin: 12px 0 6px;
+  }
+  .sub { text-align: center; color: #000; font-size: 12pt; margin-bottom: 14px; }
   table { width: 100%; border-collapse: collapse; margin: 8px 0 14px;
-          font-variant-numeric: tabular-nums; }
-  th, td { border: 1px solid #c9ccd1; padding: 4px 8px; text-align: center; }
-  th { background: #eef2f7; font-weight: 600; }
+          font-size: 12pt; font-variant-numeric: tabular-nums; }
+  th, td { border: 1px solid #000; padding: 3px 6px; text-align: center; }
+  th { background: #fff; font-weight: bold; }
   .left { text-align: left; }
-  .mono { font-family: Consolas, "Courier New", monospace; }
+  .mono { font-family: "SimSun", "宋体", serif; }
   .kv { width: auto; }
   .kv th { width: 30%; text-align: left; }
   .kv td { text-align: left; }
-  ul { margin: 6px 0 12px; padding-left: 20px; }
-  .note { color: #6b7280; font-size: 9.5pt; }
+  ul { margin: 6px 0 12px; padding-left: 20px; font-size: 12pt; }
+  .note { color: #000; font-size: 12pt; }
   .chart { margin: 10px 0 16px; }
-  .sig { margin-top: 28px; font-size: 10pt; }
+  .sig { margin-top: 28px; font-size: 12pt; }
   .avoid-break { break-inside: avoid; }
   svg { max-width: 100%; }
 </style>
@@ -37,8 +51,8 @@
   <h1>历史遗留废弃矿山自然恢复适宜性评价报告</h1>
   <p class="sub">
     {{ patch.name }}
-    {% if patch.admin_region %} · {{ patch.admin_region }}{% endif %}
-    <br>历史遗留废弃矿山自然恢复适宜性评价系统 V1.0 ·
+    {% if patch.admin_region %}　{{ patch.admin_region }}{% endif %}
+    <br>历史遗留废弃矿山自然恢复适宜性评价系统 V1.0　
     生成时间 {{ generated_at | localdt }}
   </p>
 
@@ -125,8 +139,7 @@
     <li>指标权重取自论文表 3，按岩质边坡、碎石边坡、平台三类微地质单元分别确定。</li>
   </ul>
 
-  <p class="sig">
-    评价人（签字）：____________________　　日期：____________
-  </p>
+  <p class="sig">评价人（签字）：____________________</p>
+  <p class="sig">日期：____________________</p>
 </body>
 </html>
