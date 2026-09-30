@@ -8,14 +8,14 @@
 """
 from html import escape
 
-ACCENT = "#1f3a5f"
-ACCENT_SOFT = "#7f93ad"
+ACCENT = "#559FCF"
+ACCENT_SOFT = "#64BBE0"
 INK = "#23262b"
 MUTED = "#6b7280"
 LINE = "#dfe3e8"
 
-# 灰度梯度：黑白打印时相邻扇区/条柱仍可区分
-GRAYS = ["#1f3a5f", "#456188", "#6d86a8", "#96a9c4", "#bcc9da", "#dbe3ec"]
+# 科研顶刊配色
+GRAYS = ["#6FAE47", "#FCE5D6", "#FFF2CC", "#DAE3F2", "#E9C9C9", "#559FCF"]
 
 
 def _fmt(v, digits=4):
