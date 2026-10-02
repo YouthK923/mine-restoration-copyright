@@ -128,7 +128,7 @@ def patch_add(pid):
         else:
             db.session.add(patch)
             db.session.flush()
-            # 参照生态系统默认取论文值
+            # 参照生态系统默认取系统内置值
             db.session.add(ReferenceEcosystem(
                 patch_id=patch.id, coverage_benchmark=75.0, shannon_benchmark=0.7))
             db.session.commit()

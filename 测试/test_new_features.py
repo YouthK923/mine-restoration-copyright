@@ -167,7 +167,7 @@ with app.app_context():
 c.post("/ahp/indicators/reset")
 with app.app_context():
     ok("自检修改" not in (Indicator.query.filter_by(code="coverage").first().description or ""),
-       "可按论文取值重置")
+       "可按系统默认值重置")
 
 base = {"m_0_1": "1.4194", "m_0_2": "1.76", "m_1_2": "1.24"}
 for name in ("张工", "李工", "王工"):

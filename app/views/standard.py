@@ -5,6 +5,7 @@ from flask_login import login_required
 
 from app.forms import EmptyForm
 from app.models import db, Standard, StandardRule
+from app.services import standard_check
 
 bp = Blueprint("standard", __name__, url_prefix="/standard")
 
@@ -119,3 +120,27 @@ def compare():
     for r in rules:
         groups.setdefault(r.item, []).append(r)
     return render_template("standard/compare.html", groups=groups)
+
+
+@bp.route("/check")
+@login_required
+def check_index():
+    """结论对照入口：选择一个图斑，看评价结论是否符合当地文件要求。"""
+    from app.models import MinePatch
+    patches = MinePatch.query.order_by(MinePatch.id.desc()).all()
+    rows = []
+    for p in patches:
+        found = standard_check.province_of(p.admin_region)
+        rows.append({"patch": p, "province": found})
+    return render_template("standard/check_index.html", rows=rows)
+
+
+@bp.route("/check/<int:patch_id>")
+@login_required
+def check(patch_id):
+    """某个图斑的评价结论与当地标准 / 政策文件的逐条对照。"""
+    result = standard_check.compare(patch_id)
+    if result is None:
+        flash("未找到该矿山图斑", "error")
+        return redirect(url_for("standard.check_index"))
+    return render_template("standard/check.html", check=result)

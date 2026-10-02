@@ -1,0 +1,46 @@
+{# 结论对照内容块：标准知识库对照页与评价结果页共用同一份渲染 #}
+{% if check %}
+<h3>与地方标准 / 政策文件的对照</h3>
+{% if not check.covered %}
+<p class="muted">{{ check.message }}。标准知识库只作文件储备与比对，不参与评价计算；
+  如需对照，请先在「标准知识库」中收录该省份的标准或政策文件。</p>
+{% else %}
+<p class="muted">
+  图斑所在行政区：{{ check.region or "未填写" }}（对照 {{ check.province }} 的标准与政策文件）。
+  对照只是把文件里的判定项逐条映射到系统已有数据：共 {{ check.totals["符合"] + check.totals["不符合"] + check.totals["待人工判断"] }} 条，
+  符合 <strong>{{ check.totals["符合"] }}</strong> 条、不符合 <strong>{{ check.totals["不符合"] }}</strong> 条、
+  待人工判断 <strong>{{ check.totals["待人工判断"] }}</strong> 条。
+  文件里的定性要求（如「地形地貌与周边协调」）系统没有对应数据，一律标为待人工判断，不代为结论。
+</p>
+{% for s in check.standards %}
+<h4 style="margin:14px 0 6px;">{{ s.name }}{% if s.doc_number %} <span class="muted mono">{{ s.doc_number }}</span>{% endif %}</h4>
+<table>
+  <caption class="muted">{{ s.category }}｜符合 {{ s.counts["符合"] }} 条、不符合 {{ s.counts["不符合"] }} 条、待人工判断 {{ s.counts["待人工判断"] }} 条</caption>
+  <thead>
+    <tr>
+      <th scope="col">文件判定项</th>
+      <th scope="col">条件</th>
+      <th scope="col">类型</th>
+      <th scope="col">对照结果</th>
+      <th scope="col">依据（系统内的对应数据）</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in s.rules %}
+    <tr>
+      <td style="text-align:left;">{{ r.item }}</td>
+      <td class="mono nowrap">{{ r.operator }} {{ r.threshold or "" }}</td>
+      <td>{{ r.condition_type or "—" }}</td>
+      <td><span class="tag {{ r.tag }}">{{ r.verdict }}</span></td>
+      <td style="text-align:left;">{{ r.evidence }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endfor %}
+<p class="muted">
+  对照结论仅供评价与报送时参考：符合全部必要条件的，说明评价结论与文件要求一致；
+  出现「不符合」或「待人工判断」的，需由评价人员结合现场情况核定后再报送。
+</p>
+{% endif %}
+{% endif %}

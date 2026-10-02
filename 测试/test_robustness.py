@@ -154,8 +154,8 @@ with app.app_context():
     snap = json.loads(rec.params_json or "{}")
     ok("ideals" in snap and "weight_sources" in snap,
        "快照含理想取值与权重来源", "键：%s" % list(snap))
-    ok(param_source_summary(snap).startswith("全部采用论文给定取值"),
-       "默认情况下如实说明「未偏离论文取值」", param_source_summary(snap))
+    ok(param_source_summary(snap).startswith("全部采用系统默认取值"),
+       "默认情况下如实说明「未偏离系统默认取值」", param_source_summary(snap))
     ok(rec.created_by == admin_id, "计算人已记录", str(user_label(rec.created_by)))
     units = json.loads(rec.unit_scores)
     weak = weak_points(units)

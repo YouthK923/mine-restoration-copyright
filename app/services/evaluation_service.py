@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """适宜性评价引擎。
 
-按论文式(9) 实现：
+按加权合成公式实现：
 - 单元级：F' = Σ（二级指标权重 × 该二级指标下三级指标标准化值）
 - 矿山级：F = Σ（Sᵢ × F'ᵢ），Sᵢ 为各微地质单元面积占比
-- 等级判定按论文表 4。
+- 等级判定按适宜性等级划分表。
 """
 from app.utils.constants import DEFAULT_WEIGHTS, grade_of
 from app.services import standardization as std
@@ -15,7 +15,7 @@ def score_unit(unit_type, data, weights=None, settings=None):
 
     参数
     ----
-    weights  : 该单元类型的权重；不传用论文默认权重
+    weights  : 该单元类型的权重；不传用系统默认权重
     settings : 图斑级标准化参数（基准值与理想取值）；不传全部按代码常量
 
     返回
@@ -54,7 +54,7 @@ def score_unit(unit_type, data, weights=None, settings=None):
         l1_scores[l1_name] = acc / wsum if wsum > 0 else 0.0
 
     # 一级指标权重按实际参与计算的指标归一化。
-    # 论文表 3 的权重本身已归一（和为 1），此处为恒等变换；
+    # 内置权重本身已归一（和为 1），此处为恒等变换；
     # 若某层指标缺失或自定义权重不完整，可避免单元得分被整体压低。
     lw_sum = sum(l1_weights[k] for k in l1_scores if k in l1_weights)
     if lw_sum > 0:
@@ -74,7 +74,7 @@ def score_mine(units, weights_map=None, settings=None):
         {unit_type, ratio, data}
         ratio 为该单元面积占比（0~1），data 为实测数据 dict。
     weights_map : dict，{单元类型: 权重结构}。未提供的单元类型
-        使用论文表 3 的默认权重。权重可来自 AHP 计算并经
+        使用系统默认权重。权重可来自 AHP 计算并经
         weight_service 保存生效，从而真正参与评价。
     settings : 图斑级标准化参数（参照生态系统基准、指标理想取值），
         由 app.services.unit_config.for_patch() 生成；不传按代码常量。

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}结论对照 · {{ check.patch.name }}{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>结论对照 · {{ check.patch.name }}</h2>
+  {% include "standard/_check_block.html" %}
+  <p class="actions" style="margin-top:16px;">
+    <a class="btn btn--ghost" href="/standard/check">返回图斑列表</a>
+    <a class="btn btn--ghost" href="/standard/">返回标准列表</a>
+  </p>
+</div>
+{% endblock %}

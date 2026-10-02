@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """指标定义维护。
 
-把论文表 2/表 3 的指标体系写入 indicators 表，使指标名称、单位、
+把内置指标体系写入 indicators 表，使指标名称、单位、
 理想值与取值依据可在界面上查看维护，而不再只存在于代码常量中。
 
 代码常量（app.utils.constants）仍是计算时的**权威取值来源**；
@@ -19,17 +19,17 @@ ALL_UNITS = ",".join(UNIT_TYPES)
 # (code, name, level, parent, unit, ideal_value, ideal_type, enabled_units, desc, is_constraint)
 TREE = [
     # ---- 一级指标 ----
-    ("soil", "土壤指标", 1, None, None, None, None, "碎石边坡,平台", "论文表 2 评价指标之一级指标", False),
-    ("veg", "植被指标", 1, None, None, None, None, ALL_UNITS, "论文表 2 评价指标之一级指标", False),
-    ("terrain", "地形指标", 1, None, None, None, None, "岩质边坡,碎石边坡", "论文表 2 评价指标之一级指标", False),
+    ("soil", "土壤指标", 1, None, None, None, None, "碎石边坡,平台", "评价指标体系的一级指标", False),
+    ("veg", "植被指标", 1, None, None, None, None, ALL_UNITS, "评价指标体系的一级指标", False),
+    ("terrain", "地形指标", 1, None, None, None, None, "岩质边坡,碎石边坡", "评价指标体系的一级指标", False),
 
     # ---- 二级指标：土壤 ----
     ("soil_ratio", "土石比", 2, "soil", "—", str(IDEAL_SOIL_RATIO), "benefit", "碎石边坡,平台",
-     "论文 4.2.2 节：理想值 0.8，根据矿山修复实际情况确定", False),
+     "取值规定：理想值 0.8，根据矿山修复实际情况确定", False),
     ("thickness", "土层厚度", 2, "soil", "cm", str(IDEAL_THICKNESS), "benefit", "碎石边坡,平台",
-     "论文 4.2.2 节：理想值 20 cm", False),
+     "取值规定：理想值 20 cm", False),
     ("ph", "pH", 2, "soil", "—", "%g~%g" % IDEAL_PH_RANGE, "mid", "碎石边坡,平台",
-     "论文 4.2.2 节：pH 用适中指标的标准化方法，理想区间 %g~%g" % IDEAL_PH_RANGE, False),
+     "取值规定：pH 用适中指标的标准化方法，理想区间 %g~%g" % IDEAL_PH_RANGE, False),
     ("organic_matter", "有机质", 2, "soil", "g/kg", str(IDEAL_ORGANIC), "benefit", "碎石边坡,平台",
      "《全国第二次土壤普查养分等级划分标准》二等（较丰富）最低值 30 g/kg", False),
     ("pollution", "污染指标", 2, "soil", "mg/kg", "见三级指标", "cost", "碎石边坡,平台",
@@ -37,15 +37,15 @@ TREE = [
 
     # ---- 二级指标：植被 ----
     ("coverage", "植被覆盖度", 2, "veg", "%", str(IDEAL_COVERAGE), "benefit", ALL_UNITS,
-     "论文 4.2.2 节：参照生态系统取值 75%", False),
+     "取值规定：参照生态系统取值 75%", False),
     ("shannon", "生物多样性", 2, "veg", "—", str(IDEAL_SHANNON), "benefit", ALL_UNITS,
      "Shannon-Wiener 多样性指数，参照生态系统取值 0.7", False),
 
     # ---- 二级指标：地形 ----
     ("slope", "坡度", 2, "terrain", "°", "%g° 分界" % SLOPE_BREAK, "cost", "岩质边坡,碎石边坡",
-     "论文 4.2.2 节引《新一轮退耕还林还草总体方案》发改西部〔2014〕1772 号：25° 为陡坡重要分界", False),
+     "取值规定引《新一轮退耕还林还草总体方案》发改西部〔2014〕1772 号：25° 为陡坡重要分界", False),
     ("aspect", "坡向", 2, "terrain", "—", "阳坡0.2/阴阳坡0.6/阴坡1.0", "discrete", "岩质边坡,碎石边坡",
-     "论文 4.2.2 节：阴坡及半阴坡水分条件更优，故赋值高于阳坡", False),
+     "取值规定：阴坡及半阴坡水分条件更优，故赋值高于阳坡", False),
 ]
 
 # 污染指标下的三级指标（8 种重金属）

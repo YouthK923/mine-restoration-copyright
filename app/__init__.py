@@ -88,7 +88,7 @@ def create_app(config_class=Config):
             return redirect(url_for("auth.login"))
         return None
 
-    # 侧边栏导航：按论文评价流程的顺序编排，分为「评价流程」与「系统管理」两组。
+    # 侧边栏导航：按评价流程的顺序编排，分为「评价流程」与「系统管理」两组。
     # 不使用模块编号，避免出现与实际流程不一致的代号。
     # 每项带图标名（内联 SVG，见 templates/_macros.html 的 ICONS）
     # 与可选的待办角标（该步骤还没做完的图斑数）。

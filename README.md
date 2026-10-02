@@ -38,12 +38,13 @@ app/                    应用代码（详见下方「系统代码结构」）
     数值核对/                   案例数值的独立复算与正确性验证脚本
     界面核对/                   界面行为、文档用词的自检脚本
 
-测试/                   ★ 自检脚本（17 套，均从仓库根运行）
+测试/                   ★ 自检脚本（18 套，均从仓库根运行）
     test_ahp.py test_evaluate.py test_web_ahp.py test_web_modules.py
     test_web_evaluate.py test_web_report.py test_ui_fixes.py
     test_new_features.py test_workflow.py test_weights.py
     test_profile.py test_register.py test_login.py test_timefmt.py
     test_delete_cascade.py test_unit_config.py test_robustness.py
+    test_standard_check.py
 
 验证数据/               ★ 系统正确性验证数据（8 个带手算期望值的算例）
     使用说明.md                 ★ 使用文档：两种核对方式、逐步操作、常见问题

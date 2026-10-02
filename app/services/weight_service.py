@@ -3,16 +3,16 @@
 
 系统有两套权重来源：
 
-1. 论文表 3 给出的默认权重（app.utils.constants.DEFAULT_WEIGHTS），
+1. 系统内置的默认权重（app.utils.constants.DEFAULT_WEIGHTS），
    是**权威取值来源**，案例复算与报告结论以此为准；
 2. 通过层次分析法在本系统中实际算出的权重，保存在
    weight_schemes / weight_items 两张表中，可标记为「生效」。
 
 本模块负责把这两者合成为计算引擎直接可用的嵌套权重结构：
-以论文表 3 为底，用生效方案中已保存的条目覆盖。
-没有任何生效方案时，即完全使用论文表 3 的权重。
+以系统内置权重为底，用生效方案中已保存的条目覆盖。
+没有任何生效方案时，即完全使用系统内置权重。
 
-这样既保证默认行为与论文一致，又使 AHP 计算结果真正参与评价，
+这样既保证默认行为与内置取值一致，又使 AHP 计算结果真正参与评价，
 而不是算完即弃。
 """
 import copy
@@ -52,7 +52,7 @@ def effective_weights(unit_type):
     scheme = WeightScheme.query.filter_by(unit_type=unit_type,
                                           name=ACTIVE_NAME).first()
     if scheme is None:
-        return copy.deepcopy(base), "论文表 3 默认权重", None
+        return copy.deepcopy(base), "系统默认权重", None
 
     merged = copy.deepcopy(base)
     l1_map, l2_map = _code_maps()
@@ -71,8 +71,8 @@ def effective_weights(unit_type):
                 applied += 1
 
     if applied == 0:
-        return copy.deepcopy(base), "论文表 3 默认权重", None
-    return merged, "自定义方案（%d 项覆盖论文表 3）" % applied, scheme
+        return copy.deepcopy(base), "系统默认权重", None
+    return merged, "自定义方案（%d 项覆盖系统内置权重）" % applied, scheme
 
 
 def save_weights(unit_type, code_weight_pairs, note=None):
@@ -109,7 +109,7 @@ def save_weights(unit_type, code_weight_pairs, note=None):
 
 
 def reset_weights(unit_type):
-    """删除该单元类型的自定义方案，恢复为论文表 3 的默认权重。"""
+    """删除该单元类型的自定义方案，恢复为系统默认权重。"""
     schemes = WeightScheme.query.filter_by(unit_type=unit_type,
                                            name=ACTIVE_NAME).all()
     n = 0

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""内置玉田县案例：把论文第 5 节案例数据写入数据库。
+"""内置玉田县示例案例：把示例数据写入数据库。
 
-用于功能验证与操作演示。数据逐字取自论文表 5 与第 5 节。
+用于功能验证与操作演示。数据逐字取自内置示例数据。
 运行：python seed_demo.py            幂等，只补写缺失的演示数据，
                                      不会删除用户自建的项目与图斑
       python seed_demo.py --reset    连同标准库与指标定义一并重建
@@ -20,7 +20,7 @@ app = create_app()
 # 内置演示案例的项目编号，用于区分「演示数据」与「用户自建数据」
 DEMO_CODE = "DEMO-001"
 
-# 论文表 1：11 项地方标准与政策文件
+# 内置标准库：11 项地方标准与政策文件
 STANDARDS = [
     dict(category="地方标准", province="辽宁", name="矿山废弃地植被自然恢复技术规程",
          doc_number="DB21/T 3702—2023", publish_date="2023-03-30",
@@ -248,7 +248,7 @@ def seed(reset=False):
         clean_case(reset=reset)
 
         project = Project(name=CASE["name"], code=DEMO_CODE,
-                          description="论文第 5 节典型案例", created_by=admin.id)
+                          description="内置示例案例", created_by=admin.id)
         db.session.add(project)
         db.session.flush()
 
@@ -286,7 +286,7 @@ def seed(reset=False):
             )
             db.session.add(ind)
 
-        # 限制性条件判定记录：演示案例按论文第 5 节描述属「无地质灾害隐患点」、
+        # 限制性条件判定记录：示例案例属「无地质灾害隐患点」、
         # 具备自然恢复条件，故五项全部通过。缺此记录会使后续评价被流程门禁拦住。
         db.session.add(ConstraintCheck(
             patch_id=patch.id,
@@ -328,7 +328,7 @@ def _report():
 
 
 def seed_standards():
-    """写入论文表 1 的 11 项标准与政策文件及其结构化规则。"""
+    """写入内置标准库的 11 项标准与政策文件及其结构化规则。"""
     StandardRule.query.delete()
     Standard.query.delete()
     db.session.commit()

@@ -32,7 +32,7 @@ NUMERIC_IDEALS = {
 # 重金属编码 → 金属名
 METAL_CODES = {"hm_" + m: m for m in HEAVY_METALS}
 
-# 必填的实测字段（污染指标按论文注记允许「未检测」，故不在必填之列）
+# 必填的实测字段（污染指标按方法约定允许「未检测」，故不在必填之列）
 REQUIRED_CODES = ["soil_ratio", "thickness", "ph", "organic_matter",
                   "coverage", "shannon", "slope", "aspect"]
 
@@ -105,7 +105,7 @@ class UnitSettings:
         return missing
 
     def undetected_metals(self, data):
-        """按论文注记，未检测的重金属按「未受污染」计入；这里列出是哪些。"""
+        """按方法约定，未检测的重金属按「未受污染」计入；这里列出是哪些。"""
         measured = data.get("heavy_metals") or {}
         return [m for m in HEAVY_METALS if measured.get(m) is None]
 

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}结论对照{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>评价结论与地方标准 / 政策文件的对照</h2>
+  <p class="muted">
+    标准知识库不参与评价计算，只在评价完成后回答一个问题：
+    本次评价结论是否符合图斑所在省份的文件要求。选择一个图斑查看逐条对照。
+  </p>
+
+  {% if not rows %}
+  <p class="muted">暂无矿山图斑。请先在「项目与矿山档案」中建立图斑并录入数据。</p>
+  {% else %}
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">矿山图斑</th>
+        <th scope="col">所在行政区</th>
+        <th scope="col">已收录该省份文件</th>
+        <th scope="col">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td style="text-align:left;">{{ row.patch.name }}</td>
+        <td style="text-align:left;">{{ row.patch.admin_region or "—" }}</td>
+        <td>
+          {% if row.province %}<span class="tag tag--ok">{{ row.province }}</span>
+          {% else %}<span class="tag tag--muted">未收录</span>{% endif %}
+        </td>
+        <td><a class="link-btn" href="/standard/check/{{ row.patch.id }}">查看对照</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  <p class="actions" style="margin-top:16px;">
+    <a class="btn btn--ghost" href="/standard/">返回标准列表</a>
+  </p>
+</div>
+{% endblock %}

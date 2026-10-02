@@ -59,7 +59,7 @@ def add(patch_id):
         if unit_type not in UNIT_TYPES:
             flash("微地质单元类型不正确", "error")
             return redirect(url_for("unit.index", patch_id=patch_id))
-        # 论文 4.1 节将图斑分为平台、碎石边坡、岩质边坡三类，每类至多一个。
+        # 评价流程规定将图斑分为平台、碎石边坡、岩质边坡三类，每类至多一个。
         # 允许重复会让面积占比与按单元类型组织的指标数据对不上号。
         if MicroUnit.query.filter_by(patch_id=patch.id,
                                      unit_type=unit_type).first():

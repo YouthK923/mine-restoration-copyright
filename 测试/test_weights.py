@@ -133,14 +133,15 @@ def run_eval(pid):
 
 
 print(LINE)
-print("一、默认应使用论文表 3 的权重")
+print("一、默认应使用系统内置权重")
 print(LINE)
 print("  （开跑前清掉 %d 个上一次残留的自检项目）" % purge_fixtures())
 with app.app_context():
     ws.reset_weights(UNIT_TYPE)
     w, label, scheme = ws.effective_weights(UNIT_TYPE)
-ok(scheme is None and "论文表" in label, "未配置时权重来源为论文表 3", label)
-ok(abs(w["l1"]["土壤指标"] - 0.44) < 1e-9, "一级权重取自论文表 3",
+ok(scheme is None and "系统默认权重" in label,
+   "未配置时权重来源为系统默认权重", label)
+ok(abs(w["l1"]["土壤指标"] - 0.44) < 1e-9, "一级权重取自系统内置权重",
    "土壤指标 %.2f" % w["l1"]["土壤指标"])
 
 pid = build_case()
@@ -165,7 +166,7 @@ ok(abs(w2["l1"]["土壤指标"] - 0.70) < 1e-9, "新权重已生效",
    "土壤指标 %.2f" % w2["l1"]["土壤指标"])
 ok(abs(w2["l1"]["植被指标"] - 0.20) < 1e-9, "同批保存的其他项也已生效")
 ok(abs(w2["l2"]["土壤指标"]["土石比"] - 0.25) < 1e-9,
-   "未覆盖的二级权重仍保留论文取值",
+   "未覆盖的二级权重仍保留系统内置取值",
    "土石比 %.2f" % w2["l2"]["土壤指标"]["土石比"])
 
 new_score = run_eval(pid)
@@ -189,12 +190,13 @@ ok(any(u.get("weight_source") for u in stored),
 
 print()
 print(LINE)
-print("四、恢复默认后应回到论文取值")
+print("四、恢复默认后应回到系统默认权重")
 print(LINE)
 with app.app_context():
     ws.reset_weights(UNIT_TYPE)
     w3, label3, scheme3 = ws.effective_weights(UNIT_TYPE)
-ok(scheme3 is None and "论文表" in label3, "已恢复为论文表 3 权重", label3)
+ok(scheme3 is None and "系统默认权重" in label3,
+   "已恢复为系统默认权重", label3)
 back_score = run_eval(pid)
 print("  恢复后评价值 F = %.4f（默认时 %.4f）" % (back_score, base_score))
 ok(abs(back_score - base_score) < 1e-9, "评价结果与默认时一致")

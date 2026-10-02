@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """报告生成：生成 Word 评价报告。
 
-格式（论文规范）：
+格式（规范体例）：
 - 题目：三号(16pt) 黑体 居中
 - 一级标题：四号(14pt) 黑体 居中
 - 正文/表格：小四号(12pt) 宋体
@@ -80,8 +80,13 @@ def _table(doc, headers, rows, widths=None):
     return t
 
 
-def build_report(patch, mine_result, record=None, weak=None, operator=None):
-    """生成评价报告 Word 文档，返回 BytesIO。"""
+def build_report(patch, mine_result, record=None, weak=None, operator=None,
+                 check=None):
+    """生成评价报告 Word 文档，返回 BytesIO。
+
+    check : 标准结论对照（app.services.standard_check.compare 的结果）。
+            标准不参与计算，只在报告里回答「结论是否符合当地文件要求」。
+    """
     doc = Document()
     for section in doc.sections:
         section.top_margin = Cm(2.5)
@@ -141,8 +146,29 @@ def build_report(patch, mine_result, record=None, weak=None, operator=None):
                      "%.4f" % u["unit_score"], "%.4f" % u["weighted"]))
     _table(doc, ["微地质单元", "面积占比", "单元评价因子 F′", "加权贡献"], rows)
 
+    # 与当地标准 / 政策文件的对照（不参与计算，只回答结论是否符合文件要求）
+    if check and check.get("covered"):
+        _heading(doc, "四、与地方标准 / 政策文件的对照", 1)
+        _para(doc, "图斑所在行政区：%s（对照 %s 的标准与政策文件）。"
+                   "对照只把文件里的判定项逐条映射到系统已有数据，"
+                   "系统内没有对应数据的定性要求一律标为待人工判断。"
+                   % (check.get("region") or "未填写", check.get("province") or ""),
+              size=12, space_after=6)
+        for s in check.get("standards", []):
+            _para(doc, "%s%s" % (s["name"],
+                                 ("（%s）" % s["doc_number"]) if s.get("doc_number") else ""),
+                  size=12, bold=True, space_after=4)
+            _table(doc, ["文件判定项", "条件", "类型", "对照结果", "依据"],
+                   [(r["item"], "%s %s" % (r["operator"], r["threshold"] or ""),
+                     r["condition_type"] or "—", r["verdict"], r["evidence"])
+                    for r in s["rules"]])
+        t = check.get("totals", {})
+        _para(doc, "合计：符合 %d 条、不符合 %d 条、待人工判断 %d 条。"
+                   % (t.get("符合", 0), t.get("不符合", 0), t.get("待人工判断", 0)),
+              size=12)
+
     # 完整得分明细
-    _heading(doc, "四、得分明细", 1)
+    _heading(doc, "五、得分明细", 1)
     for u in mine_result["unit_results"]:
         _para(doc, "%s（占比 %.2f%%）" % (u["unit_type"], u["ratio"] * 100),
               size=12, bold=True, space_after=4)
@@ -163,14 +189,14 @@ def build_report(patch, mine_result, record=None, weak=None, operator=None):
     # 数据完整度
     undetected = wf.undetected_metals(patch.id)
     if undetected:
-        _heading(doc, "五、数据完整度说明", 1)
+        _heading(doc, "六、数据完整度说明", 1)
         parts = ["%s：%s" % (t, "、".join(m)) for t, m in undetected]
-        _para(doc, "以下重金属项未检测，按论文注记以「未受污染」计入污染指标"
+        _para(doc, "以下重金属项未检测，按方法约定以「未受污染」计入污染指标"
                    "（并非实测达标）：%s。" % "；".join(parts), size=12)
 
     # 短板提示
     if weak:
-        _heading(doc, "六、短板提示", 1)
+        _heading(doc, "七、短板提示", 1)
         _para(doc, "按「权重 ×（1 − 标准化值）」排序，提升下列指标对总分的拉动最大。",
               size=12, space_after=4)
         _table(doc, ["微地质单元", "指标", "实测值", "标准化值", "提升空间"],

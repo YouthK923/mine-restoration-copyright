@@ -10,7 +10,7 @@ from app.models import (db, Project, MinePatch, MicroUnit, IndicatorData,
                         ConstraintCheck, EvaluationResult, Standard)
 from app.services import workflow as wf
 
-# 评价流程的八个步骤（顺序即论文 4.1 节的作业顺序）
+# 评价流程的八个步骤（顺序即评价流程的作业顺序）
 #   key        步骤标识
 #   no         步骤编号（01~08）
 #   title      名称

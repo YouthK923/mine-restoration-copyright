@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """指标标准化（的一部分）。
 
-按论文 4.2.2 节式(8) 实现：
+按标准化公式实现：
     x' = (x - x_min) / (x_max - x_min)
 按指标性质分为四类：越大越优 / 越小越优 / 适中 / 离散赋值。
 所有理想极值取自 app.utils.constants，可配置。
@@ -42,7 +42,7 @@ def std_mid_ph(value, lo, hi, tol_lo=PH_TOL_LOW, tol_hi=PH_TOL_HIGH):
 def std_slope(value, break_point=SLOPE_BREAK, upper=90.0):
     """坡度标准化。
 
-    论文 4.2.2 节：以 25° 为陡坡重要分界。25° 及以下记满分 1，
+    取值规定：以 25° 为陡坡重要分界。25° 及以下记满分 1，
     超过 25° 线性折减，90° 记 0。
     """
     if value is None:
@@ -53,7 +53,7 @@ def std_slope(value, break_point=SLOPE_BREAK, upper=90.0):
 
 
 def aspect_score(aspect):
-    """坡向离散赋值：阳坡 0.2 / 阴阳坡 0.6 / 阴坡 1.0（论文 4.2.2 节）。"""
+    """坡向离散赋值：阳坡 0.2 / 阴阳坡 0.6 / 阴坡 1.0（取值规定）。"""
     if aspect is None:
         return None
     return ASPECT_SCORES.get(aspect)
@@ -62,7 +62,7 @@ def aspect_score(aspect):
 def pollution_score(heavy_metals, limits=None):
     """污染指标：8 种重金属等权（各 0.125）合成。
 
-    论文注：未检测 Cr、Zn 的，从矿山类型看未受污染，按无污染(=1)处理。
+    方法约定：未检测 Cr、Zn 的，从矿山类型看未受污染，按无污染(=1)处理。
     heavy_metals : dict，键为金属名，值为含量 mg/kg；缺失键视为未检测。
     limits : 可选，金属 → 极值；不传则用代码常量（界面改过就传库里的值）。
     """

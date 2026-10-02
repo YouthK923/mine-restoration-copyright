@@ -40,9 +40,9 @@
 {% endmacro %}
 
 
-{# 评价流程步骤条：按论文 4.1 节顺序显示各前置步骤的完成情况
+{# 评价流程步骤条：按评价流程顺序显示各前置步骤的完成情况
    顺序为：限制性条件判定 → 划分微地质单元 → 录入指标数据 → 执行评价。
-   论文原文：「先进行政策、位置约束地质灾害判断……对于满足限制性条件的
+   流程约定：「先进行政策、位置约束地质灾害判断……对于满足限制性条件的
    废弃矿山，按照地形地貌划分……三种地质微单元类型」，故判定在前。 #}
 {% macro workflow_steps(progress) %}
 <div class="steps">
@@ -83,7 +83,7 @@
 {% macro workflow_blocking(progress) %}
 {% if progress.blocking %}
 <table class="prereq-table">
-  <caption>本步骤的前置条件尚未满足，按论文 4.1 节的流程顺序先补上：</caption>
+  <caption>本步骤的前置条件尚未满足，按评价流程的顺序先补上：</caption>
   <thead>
     <tr>
       <th scope="col">前置步骤</th>

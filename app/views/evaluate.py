@@ -4,7 +4,7 @@
 从数据库加载某图斑的微地质单元与指标数据，调用评价引擎计算，
 展示各单元得分、最终评价因子 F、适宜性等级与推荐措施。
 
-入口处按论文 4.1 节的流程顺序检查前置条件（见 app/services/workflow.py），
+入口处按评价流程的顺序检查前置条件（见 app/services/workflow.py），
 前置步骤未完成时不予计算，避免在条件不具备时产出评价结论。
 """
 import json
@@ -18,6 +18,7 @@ from app.models import (db, MinePatch, MicroUnit, IndicatorData,
 from app.services import evaluation_service as ev
 from app.services import workflow as wf
 from app.services import unit_config
+from app.services import standard_check
 
 bp = Blueprint("evaluate", __name__, url_prefix="/evaluate")
 
@@ -55,7 +56,7 @@ def _round(v, n=6):
 def load_weights(units):
     """解析各单元类型当前生效的权重与来源说明。
 
-    权重可来自 AHP 计算并保存的生效方案；未配置时用论文表 3 的默认值。
+    权重可来自 AHP 计算并保存的生效方案；未配置时用系统默认值。
     来源一并记录，便于报告标注与事后复核。
     """
     from app.services import weight_service as ws
@@ -119,15 +120,15 @@ def pack_params(settings, sources=None):
         value = settings.params.get(code) if settings else None
         if value is None:
             used[code] = {"value": fallback, "default": fallback,
-                          "source": "论文给定取值"}
+                          "source": "系统默认取值"}
         elif abs(float(value) - float(fallback)) < 1e-9:
-            # 库里存着这一项，但取值与论文一致 —— 不能标成「界面配置」，
+            # 库里存着这一项，但取值与系统默认值一致 —— 不能标成「界面配置」，
             # 否则每份报告都会声称用了自定义参数，反而看不出真正的偏离。
             used[code] = {"value": value, "default": fallback,
-                          "source": "论文给定取值"}
+                          "source": "系统默认取值"}
         else:
             used[code] = {"value": value, "default": fallback,
-                          "source": "界面配置（论文给定值 %.4g）" % fallback}
+                          "source": "界面配置（系统默认值 %.4g）" % fallback}
     return {"ideals": used, "weight_sources": dict(sources or {})}
 
 
@@ -135,7 +136,7 @@ def save_evaluation(patch_id, units):
     """执行评价并把结果与逐层明细落库，返回评价记录。
 
     权重取各单元类型当前生效的方案（AHP 计算结果），未配置时用
-    论文表 3 的默认权重；来源一并记录。结果 JSON 保留各单元得分、
+    系统默认权重；来源一并记录。结果 JSON 保留各单元得分、
     一级指标得分与逐条二级指标明细，结果页与报告据此复现
     记录下来的那次评价，不再重新推算。
     """
@@ -210,16 +211,16 @@ def user_label(user_id):
 
 
 def param_source_summary(params):
-    """一句话说清参数从哪来：有没有偏离论文给定值。
+    """一句话说清参数从哪来：有没有偏离系统默认值。
 
-    多数情况下全部等于论文取值，报告应直接说明「未偏离」；
+    多数情况下全部等于系统默认值，报告应直接说明「未偏离」；
     只有真被改过时才点名，便于审阅者一眼看到差异。
     """
     ideals = (params or {}).get("ideals") or {}
     custom = sorted(k for k, v in ideals.items()
                     if v.get("source", "").startswith("界面配置"))
     if not custom:
-        return "全部采用论文给定取值，未被改动"
+        return "全部采用系统默认取值，未被改动"
     return "以下 %d 项被改为界面配置值：%s" % (len(custom), "、".join(custom))
 
 
@@ -277,4 +278,5 @@ def result(result_id):
                            weak=weak_points(unit_scores),
                            params=params.get("ideals") or {},
                            param_sources=param_source_summary(params),
+                           check=standard_check.compare(patch.id) if patch else None,
                            operator=user_label(r.created_by))

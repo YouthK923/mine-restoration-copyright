@@ -123,7 +123,7 @@ def matrix():
     n = len(names)
     form = EmptyForm()
 
-    # 预填默认值：系统默认 权重对应的完全一致矩阵 a_ij = w_i / w_j
+    # 预填默认值：系统默认权重对应的完全一致矩阵 a_ij = w_i / w_j
     default = [[round(vec[i] / vec[j], 4) for j in range(n)] for i in range(n)]
 
     def compute(upper):

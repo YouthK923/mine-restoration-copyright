@@ -38,7 +38,7 @@
         <td class="num">{{ "%.2f%%"|format(u.ratio * 100) }}</td>
         <td class="mono">{{ u.unit_score }}</td>
         <td class="mono">{{ "%.4f"|format(u.ratio * u.unit_score) }}</td>
-        <td class="muted">{{ u.weight_source or "论文表 3 默认权重" }}</td>
+        <td class="muted">{{ u.weight_source or "系统默认权重" }}</td>
       </tr>
       {% endfor %}
     </tbody>
@@ -72,6 +72,10 @@
       {% endfor %}
     </tbody>
   </table>
+  {% endif %}
+
+  {% if check and check.covered %}
+  {% include "standard/_check_block.html" %}
   {% endif %}
 
   <p class="muted" style="margin-top:14px;">

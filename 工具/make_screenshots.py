@@ -94,6 +94,7 @@ def build_page_list(pid, proj_id, rid, unit_id=None):
         ("07_标准知识库", "/standard/", 1100),
         ("07b_标准规则", "/standard/1/rules", 1000),
         ("08_省际口径比对", "/standard/compare", 1300),
+        ("08b_结论对照", "/standard/check", 1000),
         ("09_AHP权重选择", "/ahp/", 780),
         ("09b_指标定义维护", "/ahp/indicators", 1500),
         ("09c_多专家矩阵", "/ahp/experts", 1200),

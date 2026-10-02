@@ -79,7 +79,35 @@
     <tr><th>推荐措施</th><td>{{ result.grade_info.measure }}</td></tr>
   </table>
 
-  <h2>三、各微地质单元得分</h2>
+  {% if check and check.covered %}
+  <h2>三、与地方标准 / 政策文件的对照</h2>
+  <p class="note">
+    图斑所在行政区：{{ check.region or "未填写" }}（对照 {{ check.province }} 的标准与政策文件）。
+    对照只把文件里的判定项逐条映射到系统已有数据，系统内没有对应数据的定性要求一律标为待人工判断。
+    合计：符合 {{ check.totals["符合"] }} 条、不符合 {{ check.totals["不符合"] }} 条、待人工判断 {{ check.totals["待人工判断"] }} 条。
+  </p>
+  {% for s in check.standards %}
+  <h3>{{ s.name }}{% if s.doc_number %}（{{ s.doc_number }}）{% endif %}</h3>
+  <table>
+    <thead>
+      <tr><th>文件判定项</th><th>条件</th><th>类型</th><th>对照结果</th><th>依据</th></tr>
+    </thead>
+    <tbody>
+      {% for r in s.rules %}
+      <tr>
+        <td class="left">{{ r.item }}</td>
+        <td class="mono">{{ r.operator }} {{ r.threshold or "" }}</td>
+        <td>{{ r.condition_type or "—" }}</td>
+        <td>{{ r.verdict }}</td>
+        <td class="left">{{ r.evidence }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endfor %}
+  {% endif %}
+
+  <h2>四、各微地质单元得分</h2>
   <table>
     <thead>
       <tr><th>微地质单元</th><th>面积占比</th><th>单元评价因子 F′</th><th>加权贡献</th></tr>
@@ -97,10 +125,10 @@
   </table>
   <div class="chart">{{ chart_units|safe }}</div>
 
-  <h2>四、一级指标权重分布</h2>
+  <h2>五、一级指标权重分布</h2>
   <div class="chart">{{ chart_weight|safe }}</div>
 
-  <h2>五、得分明细</h2>
+  <h2>六、得分明细</h2>
   {% for u in result.unit_results %}
   <h3>{{ u.unit_type }}（占比 {{ "%.2f%%"|format(u.ratio * 100) }}，单元得分 {{ "%.4f"|format(u.unit_score) }}）</h3>
   <table>
@@ -129,14 +157,14 @@
   </p>
   {% endfor %}
 
-  <h2>六、评价依据说明</h2>
+  <h2>七、评价依据说明</h2>
   <ul class="note">
-    <li>指标标准化按论文式(8) 执行，按指标性质分为越大越优、越小越优、
+    <li>指标标准化按标准化公式执行，按指标性质分为越大越优、越小越优、
         适中型与离散赋值四类。</li>
-    <li>单元评价因子按论文式(9) 由二级指标权重加权求得；
+    <li>单元评价因子按加权合成公式由二级指标权重加权求得；
         整矿评价因子由各微地质单元按面积占比加权合成。</li>
-    <li>适宜性等级按论文表 4 划分：F&lt;0.3 不适宜、0.3≤F≤0.7 基本适宜、F≥0.7 适宜。</li>
-    <li>指标权重取自论文表 3，按岩质边坡、碎石边坡、平台三类微地质单元分别确定。</li>
+    <li>适宜性等级按等级划分表判定：F&lt;0.3 不适宜、0.3≤F≤0.7 基本适宜、F≥0.7 适宜。</li>
+    <li>指标权重取自系统内置权重，按岩质边坡、碎石边坡、平台三类微地质单元分别确定。</li>
   </ul>
 
   <p class="sig">评价人（签字）：____________________</p>

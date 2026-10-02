@@ -28,12 +28,16 @@
 
   {% if undetected %}
   <p class="muted" style="margin-top:8px;">
-    数据完整度说明：以下重金属项<strong>未检测</strong>，按论文注记以「未受污染」计入污染指标，
+    数据完整度说明：以下重金属项<strong>未检测</strong>，按方法约定以「未受污染」计入污染指标，
     并非实测达标 ——
     {% for unit_type, metals in undetected %}
       {{ unit_type }}：{{ metals|join("、") }}{% if not loop.last %}；{% endif %}
     {% endfor %}。
   </p>
+  {% endif %}
+
+  {% if check and check.covered %}
+  {% include "standard/_check_block.html" %}
   {% endif %}
 
   <p class="actions" style="margin-top:16px;">

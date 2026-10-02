@@ -8,6 +8,7 @@ from flask import Blueprint, render_template, send_file, flash, redirect, url_fo
 
 from app.models import db, MinePatch, ReferenceEcosystem
 from app.services import report_service as rs
+from app.services import standard_check
 from app.services import workflow as wf
 from app.utils import charts
 from app.utils import browser
@@ -112,6 +113,7 @@ def detail(patch_id):
     return render_template("report/detail.html", patch=patch, result=result,
                            record=record, reference=reference,
                            chart_units=chart_units, chart_weight=chart_weight,
+                           check=standard_check.compare(patch.id),
                            undetected=wf.undetected_metals(patch.id))
 
 
@@ -122,7 +124,8 @@ def word(patch_id):
         return _deny(prog, patch_id)
     buf = rs.build_report(patch, result, record=record,
                           weak=_weak_points(result),
-                          operator=_operator(record))
+                          operator=_operator(record),
+                          check=standard_check.compare(patch.id))
     filename = "自然恢复适宜性评价报告_%s.docx" % patch.name
     return send_file(buf, as_attachment=True, download_name=filename,
                      mimetype="application/vnd.openxmlformats-officedocument."
@@ -140,6 +143,7 @@ def pdf(patch_id):
     html = render_template(
         "report/print.html", patch=patch, reference=reference, result=result,
         chart_units=chart_units, chart_weight=chart_weight,
+        check=standard_check.compare(patch.id),
         generated_at=now_utc())
     data, err = browser.html_to_pdf(html)
     if err:
