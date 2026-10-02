@@ -58,7 +58,7 @@
             <a class="link-btn" href="/ahp/matrix?unit_type={{ r.unit_type }}&level=1&calc=1">查看一致性</a>
             {% if r.custom %}
             <form method="post" action="/ahp/weights/reset"
-                  onsubmit="return confirm('确定把「{{ r.unit_type }}」恢复为论文表 3 的默认权重吗？');">
+                  onsubmit="return confirm('确定把「{{ r.unit_type }}」恢复为系统默认权重吗？');">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <input type="hidden" name="unit_type" value="{{ r.unit_type }}">
               <button type="submit" class="link-btn link-btn--danger">恢复默认</button>

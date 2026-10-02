@@ -7,9 +7,9 @@
     <a class="btn btn--sm btn--ghost" href="/ahp/">返回权重计算</a>
     <a class="btn btn--sm btn--ghost" href="/ahp/experts">多专家矩阵</a>
     <form method="post" action="/ahp/indicators/reset" style="display:inline;"
-          onsubmit="return confirm('将按论文取值重置全部指标定义，自定义修改会丢失。确定继续？');">
+          onsubmit="return confirm('将按系统默认值重置全部指标定义，自定义修改会丢失。确定继续？');">
       {{ form.hidden_tag() }}
-      <button type="submit" class="btn btn--sm btn--danger">按论文取值重置</button>
+      <button type="submit" class="btn btn--sm btn--danger">按系统默认值重置</button>
     </form>
   </p>
 
