@@ -34,6 +34,7 @@
     <thead>
       <tr>
         <th scope="col">专家</th>
+        <th scope="col">专业</th>
         <th scope="col">矩阵规模</th>
         <th scope="col">该矩阵 CR</th>
         <th scope="col">一致性</th>
@@ -45,6 +46,7 @@
       {% for r in rows %}
       <tr>
         <td>{{ r.expert_name }}</td>
+        <td>{{ r.specialty or "—" }}</td>
         <td class="num">{{ n }} × {{ n }}</td>
         <td class="mono">{{ "%.4f"|format(r.cr) if r.cr is not none else "—" }}</td>
         <td>
@@ -81,10 +83,17 @@
     <input type="hidden" name="level" value="{{ level }}">
     {% if l1 %}<input type="hidden" name="l1" value="{{ l1 }}">{% endif %}
 
-    <div class="field">
-      <label class="field__label" for="expert-name">专家姓名</label>
-      <input id="expert-name" type="text" name="expert_name"
-             style="width:220px;" placeholder="如：张工">
+    <div style="display:flex; gap:16px;">
+      <div class="field">
+        <label class="field__label" for="expert-name">专家姓名</label>
+        <input id="expert-name" type="text" name="expert_name"
+               style="width:180px;" placeholder="如：张工">
+      </div>
+      <div class="field">
+        <label class="field__label" for="expert-specialty">专家专业（选填）</label>
+        <input id="expert-specialty" type="text" name="specialty"
+               style="width:220px;" placeholder="如：地质/生态/土壤">
+      </div>
     </div>
 
     <table style="width:auto;">
