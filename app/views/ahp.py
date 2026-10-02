@@ -123,7 +123,7 @@ def matrix():
     n = len(names)
     form = EmptyForm()
 
-    # 预填默认值：论文表 3 权重对应的完全一致矩阵 a_ij = w_i / w_j
+    # 预填默认值：系统默认 权重对应的完全一致矩阵 a_ij = w_i / w_j
     default = [[round(vec[i] / vec[j], 4) for j in range(n)] for i in range(n)]
 
     def compute(upper):
@@ -170,7 +170,7 @@ def matrix():
                 return redirect(url_for("ahp.matrix", unit_type=unit_type,
                                         level=level, l1=l1))
     elif request.values.get("calc") == "1":
-        # 按默认（论文表 3）矩阵直接试算，便于一键查看权重与一致性
+        # 按默认（系统默认）矩阵直接试算，便于一键查看权重与一致性
         result = compute([default[i][j] for i in range(n) for j in range(i + 1, n)])
 
     _, source_label, custom_scheme = ws.effective_weights(unit_type)
@@ -184,7 +184,7 @@ def matrix():
 
 @bp.route("/weights/reset", methods=["POST"])
 def weights_reset():
-    """删除自定义权重方案，恢复为该单元类型的论文表 3 默认权重。"""
+    """删除自定义权重方案，恢复为该单元类型的系统默认权重。"""
     unit_type = request.form.get("unit_type")
     form = EmptyForm()
     if form.validate_on_submit():
@@ -193,9 +193,9 @@ def weights_reset():
         else:
             n = ws.reset_weights(unit_type)
             if n:
-                flash("已恢复「%s」为论文表 3 默认权重" % unit_type, "ok")
+                flash("已恢复「%s」为系统默认权重" % unit_type, "ok")
             else:
-                flash("「%s」本就是论文表 3 默认权重，无需恢复" % unit_type, "ok")
+                flash("「%s」本就是系统默认权重，无需恢复" % unit_type, "ok")
     return redirect(url_for("ahp.index"))
 
 
@@ -243,11 +243,11 @@ def indicator_edit(code):
 
 @bp.route("/indicators/reset", methods=["POST"])
 def indicators_reset():
-    """按论文取值重置指标定义。"""
+    """按系统默认值重置指标定义。"""
     form = EmptyForm()
     if form.validate_on_submit():
         n = ind_svc.seed_indicators()
-        flash("已按论文取值重置 %d 项指标定义" % n, "ok")
+        flash("已按系统默认值重置 %d 项指标定义" % n, "ok")
     return redirect(url_for("ahp.indicators"))
 
 
@@ -308,6 +308,7 @@ def experts():
         action = request.form.get("action")
         if action == "add":
             expert_name = request.form.get("expert_name", "").strip() or "未具名专家"
+            specialty = request.form.get("specialty", "").strip()
             try:
                 upper = [float(request.form.get("m_%d_%d" % (i, j), "1"))
                          for i in range(n) for j in range(i + 1, n)]
@@ -327,11 +328,11 @@ def experts():
             db.session.add(ExpertMatrix(
                 scheme_id=scheme.id,
                 unit_type=unit_type, l1_name=(l1 if level == 2 else None),
-                expert_name=expert_name, level=level,
+                expert_name=expert_name, specialty=specialty or None, level=level,
                 matrix_json=json.dumps([list(map(float, row)) for row in A]),
                 cr=round(r["cr"], 6)))
             db.session.commit()
-            flash("已录入专家「%s」的判断矩阵（CR=%.4f）" % (expert_name, r["cr"]), "ok")
+            flash("已录入专家「%s」%s的判断矩阵（CR=%.4f）" % (expert_name, ("（%s）" % specialty) if specialty else "", r["cr"]), "ok")
         elif action == "save_agg":
             # 把汇总权重落库并生效，使多专家结果真正参与评价计算
             weights = _aggregate(unit_type, level, l1)
