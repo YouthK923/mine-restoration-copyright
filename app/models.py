@@ -210,7 +210,7 @@ class WeightScheme(db.Model):
     unit_type = db.Column(db.String(32), nullable=False)          # 所属单元类型
     name = db.Column(db.String(64), nullable=True)                # 方案名称
     level = db.Column(db.Integer, nullable=False, default=1)      # 1=一级指标 2=二级指标
-    is_default = db.Column(db.Boolean, default=False)             # 是否默认（论文表 3）
+    is_default = db.Column(db.Boolean, default=False)             # 是否默认（系统默认）
     created_at = db.Column(db.DateTime, default=utcnow)
 
 
@@ -234,6 +234,7 @@ class ExpertMatrix(db.Model):
     unit_type = db.Column(db.String(32), nullable=True)           # 微地质单元类型
     l1_name = db.Column(db.String(64), nullable=True)             # 所属一级指标（二级矩阵用）
     expert_name = db.Column(db.String(64), nullable=True)         # 专家姓名
+    specialty = db.Column(db.String(64), nullable=True)             # 专家专业
     level = db.Column(db.Integer, nullable=False, default=1)      # 矩阵对应指标层级
     matrix_json = db.Column(db.Text, nullable=False)              # 判断矩阵（JSON 二维数组）
     cr = db.Column(db.Float, nullable=True)                       # 该专家矩阵的一致性比例
