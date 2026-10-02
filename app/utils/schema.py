@@ -19,6 +19,7 @@ REQUIRED_COLUMNS = [
     # 多专家矩阵
     ("expert_matrices", "unit_type", "VARCHAR(32)"),
     ("expert_matrices", "l1_name", "VARCHAR(64)"),
+    ("expert_matrices", "specialty", "VARCHAR(64)"),
     ("expert_matrices", "cr", "FLOAT"),
     # 用户个人资料（账户页）
     ("users", "display_name", "VARCHAR(64)"),
