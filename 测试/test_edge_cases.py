@@ -153,7 +153,7 @@ def build_fixture(ratio_ok=True, constraint_ok=True, data_ok=True):
                 u.ratio = r
         ck = ConstraintCheck(patch_id=patch.id, policy_pass=constraint_ok,
                              location_pass=constraint_ok, pollution_pass=constraint_ok,
-                             geo_pass=constraint_ok, farmland_pass=constraint_ok,
+                             geo_pass=constraint_ok,
                              passed=constraint_ok,
                              reason="全部通过" if constraint_ok else "未通过：政策约束")
         db.session.add(ck)

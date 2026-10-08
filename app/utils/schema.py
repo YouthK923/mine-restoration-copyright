@@ -36,6 +36,12 @@ REQUIRED_COLUMNS = [
 # 旧数据里的后两种统一归为操作员。
 ROLE_MIGRATION = {"evaluator": "operator", "viewer": "operator"}
 
+# 已经废弃的列（表名, 列名）：新库不会再建，旧库启动时删掉
+RETIRED_COLUMNS = [
+    # 「耕地属性」不再作为限制性指标
+    ("constraint_checks", "farmland_pass"),
+]
+
 
 def _add_columns(db):
     added = []
@@ -70,10 +76,34 @@ def _migrate_roles(db):
     return changed
 
 
+def _drop_retired_columns(db):
+    """删掉已经废弃的列。
+
+    「耕地属性」不再作为限制性指标，`constraint_checks.farmland_pass`
+    随之废弃：新库由 create_all 直接按新模型建表，不会再有这一列；
+    旧库在这里删一次，避免源码与库结构长期对不上。
+    SQLite 3.35 以下不支持 DROP COLUMN，失败就跳过，不影响启动。
+    """
+    dropped = []
+    for table, column in RETIRED_COLUMNS:
+        try:
+            with db.engine.connect() as conn:
+                rows = conn.execute(text("PRAGMA table_info(%s)" % table)).fetchall()
+                if not rows or column not in {r[1] for r in rows}:
+                    continue
+                conn.execute(text("ALTER TABLE %s DROP COLUMN %s" % (table, column)))
+                conn.commit()
+                dropped.append("%s.%s" % (table, column))
+        except Exception:                          # 老版本 SQLite 不支持就跳过
+            continue
+    return dropped
+
+
 def ensure_schema(db):
-    """为已有表补齐缺失列，并做必要的数据迁移。返回变更清单。"""
+    """为已有表补齐缺失列、删掉废弃列，并做必要的数据迁移。返回变更清单。"""
     try:
         changed = _add_columns(db)
+        changed += _drop_retired_columns(db)
         n = _migrate_roles(db)
         if n:
             changed.append("用户角色归一为管理员/操作员 %d 条" % n)

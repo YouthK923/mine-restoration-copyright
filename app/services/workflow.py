@@ -124,7 +124,7 @@ def patch_progress(patch_id):
     if not constraint_step["done"]:
         blocking.append({
             "step": "constraint", "label": "限制性条件判定未执行",
-            "reason": "五项限制性条件尚未逐项判定。",
+            "reason": "四项限制性条件尚未逐项判定。",
             "fix_url": "/constraint/%d" % patch_id, "fix_label": "去执行判定",
         })
     elif not constraint_step["passed"]:

@@ -81,7 +81,7 @@ def add_constraint(pid, passed=True):
     with app.app_context():
         db.session.add(ConstraintCheck(
             patch_id=pid, policy_pass=True, location_pass=passed,
-            pollution_pass=True, geo_pass=True, farmland_pass=True,
+            pollution_pass=True, geo_pass=True,
             passed=passed, reason="全部通过" if passed else "未通过：区位约束"))
         db.session.commit()
 

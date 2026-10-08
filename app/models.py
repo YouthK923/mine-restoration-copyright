@@ -161,7 +161,6 @@ class ConstraintCheck(db.Model):
     location_pass = db.Column(db.Boolean, nullable=True)       # 区位约束
     pollution_pass = db.Column(db.Boolean, nullable=True)      # 土壤污染
     geo_pass = db.Column(db.Boolean, nullable=True)            # 地质灾害
-    farmland_pass = db.Column(db.Boolean, nullable=True)       # 耕地属性
     passed = db.Column(db.Boolean, nullable=True)              # 总体是否通过
     reason = db.Column(db.Text, nullable=True)                 # 不通过原因
     checked_at = db.Column(db.DateTime, default=utcnow)

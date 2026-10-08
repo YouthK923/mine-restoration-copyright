@@ -70,7 +70,7 @@ def build_case():
             slope=28.75, aspect="阳坡"))
         db.session.add(ConstraintCheck(
             patch_id=patch.id, policy_pass=True, location_pass=True,
-            pollution_pass=True, geo_pass=True, farmland_pass=True,
+            pollution_pass=True, geo_pass=True,
             passed=True, reason="全部通过"))
         db.session.commit()
         return patch.id

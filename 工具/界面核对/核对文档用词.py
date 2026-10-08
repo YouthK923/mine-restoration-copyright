@@ -54,7 +54,7 @@ c.post("/unit/%d/add" % patch_id, data={"unit_type": "碎石边坡", "area": "10
        follow_redirects=True)
 c.post("/constraint/%d" % patch_id,
        data={"policy_pass": "1", "location_pass": "1", "pollution_pass": "1",
-             "geo_pass": "1", "farmland_pass": "1"}, follow_redirects=True)
+             "geo_pass": "1"}, follow_redirects=True)
 with io.open(CSV, "rb") as fh:
     raw = fh.read()
 c.post("/indicator/import",
@@ -68,7 +68,7 @@ CHECKS = [
      ["添加微地质单元", "占比合计", "100.00%", "类型"]),
     ("限制性判定页", "/constraint/%d" % patch_id,
      ["保存判定", "通过", "不通过", "判定结论", "通过，可进入定量评价",
-      "政策约束", "区位约束", "土壤污染", "地质灾害", "耕地属性"]),
+      "政策约束", "区位约束", "土壤污染", "地质灾害"]),
     ("批量导入页", "/indicator/import",
      ["目标矿山图斑", "数据文件", "开始导入", "下载导入模板"]),
     ("评价列表", "/evaluate/", ["前置条件", "已具备", "执行评价"]),

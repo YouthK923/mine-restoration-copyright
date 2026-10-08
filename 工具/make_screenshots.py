@@ -63,7 +63,7 @@ def prepare_data(app):
         if ConstraintCheck.query.filter_by(patch_id=patch.id).first() is None:
             db.session.add(ConstraintCheck(
                 patch_id=patch.id, policy_pass=True, location_pass=True,
-                pollution_pass=True, geo_pass=True, farmland_pass=True,
+                pollution_pass=True, geo_pass=True,
                 passed=True, reason="全部通过"))
             db.session.commit()
         res = EvaluationResult.query.filter_by(patch_id=patch.id) \

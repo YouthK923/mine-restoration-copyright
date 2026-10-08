@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """限制性指标判定 —— 一票否决判定。
 
-按指标清单与评价流程，共 5 项：政策、区位约束、土壤污染、地质灾害、耕地属性。
+按指标清单与评价流程，共 4 项：政策、区位约束、土壤污染、地质灾害。
 任一项不通过即判定为"人工辅助或生态重建"，不再进入定量评价。
 """
 from flask import Blueprint, render_template, request, redirect, url_for, flash
@@ -19,7 +19,6 @@ FIELDS = [
     ("location_pass", "区位约束"),
     ("pollution_pass", "土壤污染"),
     ("geo_pass", "地质灾害"),
-    ("farmland_pass", "耕地属性"),
 ]
 
 

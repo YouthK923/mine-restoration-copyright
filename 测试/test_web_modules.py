@@ -106,13 +106,13 @@ print("测试 6  限制性指标判定（一票否决）")
 print(LINE)
 r = client.get("/constraint/%d" % pid)
 body = r.get_data(as_text=True)
-print("  含五项条件:", all(x in body for x in ("政策约束", "区位约束", "土壤污染", "地质灾害", "耕地属性")))
-assert all(x in body for x in ("政策约束", "区位约束", "土壤污染", "地质灾害", "耕地属性"))
+print("  含四项条件:", all(x in body for x in ("政策约束", "区位约束", "土壤污染", "地质灾害")))
+assert all(x in body for x in ("政策约束", "区位约束", "土壤污染", "地质灾害"))
 
 # 全部通过
 client.post("/constraint/%d" % pid, data={
     "policy_pass": "1", "location_pass": "1", "pollution_pass": "1",
-    "geo_pass": "1", "farmland_pass": "1"})
+    "geo_pass": "1"})
 r = client.get("/constraint/%d" % pid)
 body = r.get_data(as_text=True)
 print("  全通过后显示「通过，可进入定量评价」:", "可进入定量评价" in body)
@@ -121,7 +121,7 @@ assert "可进入定量评价" in body
 # 一项不通过
 client.post("/constraint/%d" % pid, data={
     "policy_pass": "1", "location_pass": "0", "pollution_pass": "1",
-    "geo_pass": "1", "farmland_pass": "1"})
+    "geo_pass": "1"})
 r = client.get("/constraint/%d" % pid)
 body = r.get_data(as_text=True)
 print("  一项不通过后显示「不通过」:", "不通过" in body)
@@ -131,7 +131,7 @@ assert "不通过" in body
 # 恢复为全部通过，避免把演示数据留在「不通过」状态影响后续步骤
 client.post("/constraint/%d" % pid, data={
     "policy_pass": "1", "location_pass": "1", "pollution_pass": "1",
-    "geo_pass": "1", "farmland_pass": "1"})
+    "geo_pass": "1"})
 r = client.get("/constraint/%d" % pid)
 print("  已恢复为全部通过:", "可进入定量评价" in r.get_data(as_text=True))
 

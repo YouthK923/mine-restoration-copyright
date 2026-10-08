@@ -214,7 +214,7 @@ CASES = [
         expect_units={"平台": 1.0000},
         calc=[
             "平台按论文表 3 不设地形指标，故坡度 90 与坡向 阳坡不参与计算。",
-            "土壤 = 1.0000（五项全取最优）",
+            "土壤 = 1.0000（各项均取最优）",
             "植被 = 0.61×1 + 0.39×1 = 1.0000",
             "F' = 0.54×1 + 0.46×1 = 1.0000",
             "F = 1.0000 → 适宜",
@@ -245,8 +245,8 @@ CASES = [
     ),
     dict(
         key="08",
-        title="限制性条件一票否决：耕地属性不通过",
-        file="一票否决_耕地不通过",
+        title="限制性条件一票否决：政策约束不通过",
+        file="一票否决_政策约束不通过",
         patch="验证8 一票否决",
         units=[("碎石边坡", 10.0)],
         rows=[row("碎石边坡", soil=(0.8, 20, 7, 30), metals=NO_METAL,
@@ -254,8 +254,8 @@ CASES = [
         expect_f=None, expect_grade="不进入定量评价",
         constraint=False,          # 判定不通过
         calc=[
-            "数据本身为理想上限（与算例 01 相同），但限制性条件判定不通过。",
-            "按论文 4.1 节，此类矿山应直接判定为「人工辅助或生态重建」，",
+            "数据本身为理想上限（与算例 01 相同），但政策约束判定不通过（如位于重要区域可视范围内）。",
+            "按评价流程，此类矿山应直接判定为「人工辅助或生态重建」，",
             "不进入定量评价。期望：执行评价被拦下，且不产生任何评价结果。",
         ],
     ),
@@ -370,8 +370,8 @@ def build_and_check(app, c, case, suffix="", patch_name=None, rows=None):
     passed = "1" if case.get("constraint", True) else "0"
     c.post("/constraint/%d" % patch_id,
            data={"policy_pass": passed, "location_pass": passed,
-                 "pollution_pass": passed, "geo_pass": passed,
-                 "farmland_pass": passed}, follow_redirects=True)
+                 "pollution_pass": passed, "geo_pass": passed},
+               follow_redirects=True)
 
     # 4) 批量导入指标数据（走真实的导入接口）
     use_rows = case["rows"] if rows is None else rows
