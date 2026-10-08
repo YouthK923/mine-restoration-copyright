@@ -38,7 +38,7 @@ ROLE_MIGRATION = {"evaluator": "operator", "viewer": "operator"}
 
 # 已经废弃的列（表名, 列名）：新库不会再建，旧库启动时删掉
 RETIRED_COLUMNS = [
-    # 「耕地属性」不再作为限制性指标
+    # 早期版本的限制性判定字段，现行版本已不再使用
     ("constraint_checks", "farmland_pass"),
 ]
 
@@ -79,8 +79,8 @@ def _migrate_roles(db):
 def _drop_retired_columns(db):
     """删掉已经废弃的列。
 
-    「耕地属性」不再作为限制性指标，`constraint_checks.farmland_pass`
-    随之废弃：新库由 create_all 直接按新模型建表，不会再有这一列；
+    RETIRED_COLUMNS 里登记的字段都是早期版本用过、现行版本不再使用的：
+    新库由 create_all 直接按新模型建表，不会再有这些列；
     旧库在这里删一次，避免源码与库结构长期对不上。
     SQLite 3.35 以下不支持 DROP COLUMN，失败就跳过，不影响启动。
     """
