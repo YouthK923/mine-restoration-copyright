@@ -7,7 +7,7 @@ from flask_login import login_required, current_user
 from app.forms import EmptyForm
 from app.models import db, Project, MinePatch, ReferenceEcosystem
 from app.services import cleanup
-from app.utils.parsing import FieldError, parse_float
+from app.utils.parsing import FieldError, parse_float, parse_text
 from app.utils.timefmt import utcnow
 
 bp = Blueprint("project", __name__, url_prefix="/project")
@@ -26,19 +26,22 @@ def index():
 def add():
     form = EmptyForm()
     if request.method == "POST" and form.validate_on_submit():
-        p = Project(
-            name=request.form.get("name", "").strip(),
-            code=request.form.get("code", "").strip() or None,
-            description=request.form.get("description", "").strip() or None,
-            created_by=current_user.id,
-        )
-        if not p.name:
-            flash("项目名称不能为空", "error")
-        else:
-            db.session.add(p)
-            db.session.commit()
-            flash("项目已创建", "ok")
-            return redirect(url_for("project.index"))
+        try:
+            p = Project(
+                name=parse_text(request.form.get("name"), "项目名称",
+                                max_len=128, required=True),
+                code=parse_text(request.form.get("code"), "项目编号", max_len=64),
+                description=parse_text(request.form.get("description"), "项目说明",
+                                       max_len=2000),
+                created_by=current_user.id,
+            )
+        except FieldError as e:
+            flash(str(e), "error")
+            return render_template("project/edit.html", form=form, project=None)
+        db.session.add(p)
+        db.session.commit()
+        flash("项目已创建", "ok")
+        return redirect(url_for("project.index"))
     return render_template("project/edit.html", form=form, project=None)
 
 
@@ -48,9 +51,15 @@ def edit(pid):
     p = db.get_or_404(Project, pid)
     form = EmptyForm()
     if request.method == "POST" and form.validate_on_submit():
-        p.name = request.form.get("name", "").strip()
-        p.code = request.form.get("code", "").strip() or None
-        p.description = request.form.get("description", "").strip() or None
+        try:
+            p.name = parse_text(request.form.get("name"), "项目名称",
+                                max_len=128, required=True)
+            p.code = parse_text(request.form.get("code"), "项目编号", max_len=64)
+            p.description = parse_text(request.form.get("description"), "项目说明",
+                                       max_len=2000)
+        except FieldError as e:
+            flash(str(e), "error")
+            return render_template("project/edit.html", form=form, project=p)
         p.status = request.form.get("status", "进行中")
         db.session.commit()
         flash("项目已保存", "ok")
@@ -109,31 +118,36 @@ def patch_add(pid):
                                   minimum=0)
             stop_years = parse_float(request.form.get("stop_years"), "停产年限",
                                      minimum=0)
+            name = parse_text(request.form.get("name"), "图斑名称",
+                              max_len=128, required=True)
+            admin_region = parse_text(request.form.get("admin_region"),
+                                      "所在行政区", max_len=128)
+            mineral_type = parse_text(request.form.get("mineral_type"),
+                                      "开采矿种", max_len=64)
+            mining_method = parse_text(request.form.get("mining_method"),
+                                       "开采方式", max_len=64)
         except FieldError as e:
             flash(str(e), "error")
             return redirect(url_for("project.patch_add", pid=p.id))
 
         patch = MinePatch(
             project_id=p.id,
-            name=request.form.get("name", "").strip(),
-            admin_region=fv("admin_region"),
+            name=name,
+            admin_region=admin_region,
             area_ha=area_ha,
-            mineral_type=fv("mineral_type"),
-            mining_method=fv("mining_method"),
+            mineral_type=mineral_type,
+            mining_method=mining_method,
             stop_years=stop_years,
             responsible_entity_missing=bool(request.form.get("responsible_entity_missing")),
         )
-        if not patch.name:
-            flash("图斑名称不能为空", "error")
-        else:
-            db.session.add(patch)
-            db.session.flush()
-            # 参照生态系统默认取系统内置值
-            db.session.add(ReferenceEcosystem(
-                patch_id=patch.id, coverage_benchmark=75.0, shannon_benchmark=0.7))
-            db.session.commit()
-            flash("图斑已创建", "ok")
-            return redirect(url_for("project.patches", pid=p.id))
+        db.session.add(patch)
+        db.session.flush()
+        # 参照生态系统默认取系统内置值
+        db.session.add(ReferenceEcosystem(
+            patch_id=patch.id, coverage_benchmark=75.0, shannon_benchmark=0.7))
+        db.session.commit()
+        flash("图斑已创建", "ok")
+        return redirect(url_for("project.patches", pid=p.id))
     return render_template("project/patch_edit.html", form=form, project=p, patch=None)
 
 
@@ -157,15 +171,23 @@ def patch_edit(patch_id):
                               "植被覆盖度基准（%）", minimum=0, maximum=100)
             sha = parse_float(request.form.get("shannon_benchmark"),
                               "Shannon 基准", minimum=0)
+            name = parse_text(request.form.get("name"), "图斑名称",
+                              max_len=128, required=True)
+            admin_region = parse_text(request.form.get("admin_region"),
+                                      "所在行政区", max_len=128)
+            mineral_type = parse_text(request.form.get("mineral_type"),
+                                      "开采矿种", max_len=64)
+            mining_method = parse_text(request.form.get("mining_method"),
+                                       "开采方式", max_len=64)
         except FieldError as e:
             flash(str(e), "error")
             return redirect(url_for("project.patch_edit", patch_id=patch.id))
 
-        patch.name = request.form.get("name", "").strip()
-        patch.admin_region = fv("admin_region")
+        patch.name = name
+        patch.admin_region = admin_region
         patch.area_ha = area_ha
-        patch.mineral_type = fv("mineral_type")
-        patch.mining_method = fv("mining_method")
+        patch.mineral_type = mineral_type
+        patch.mining_method = mining_method
         patch.stop_years = stop_years
         patch.responsible_entity_missing = bool(request.form.get("responsible_entity_missing"))
         # 参照生态系统

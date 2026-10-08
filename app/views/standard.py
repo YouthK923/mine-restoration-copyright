@@ -6,6 +6,7 @@ from flask_login import login_required
 from app.forms import EmptyForm
 from app.models import db, Standard, StandardRule
 from app.services import standard_check
+from app.utils.parsing import FieldError, parse_text
 
 bp = Blueprint("standard", __name__, url_prefix="/standard")
 
@@ -25,10 +26,20 @@ def index():
 def add():
     form = EmptyForm()
     if request.method == "POST" and form.validate_on_submit():
+        try:
+            province = parse_text(request.form.get("province"), "省份",
+                                  max_len=32, required=True)
+            name = parse_text(request.form.get("name"), "标准 / 文件名称",
+                              max_len=256, required=True)
+            doc_number = parse_text(request.form.get("doc_number"), "标准编号或文号",
+                                    max_len=128)
+        except FieldError as e:
+            flash(str(e), "error")
+            return redirect(url_for("standard.index"))
         s = Standard(
-            province=request.form.get("province", "").strip(),
-            name=request.form.get("name", "").strip(),
-            doc_number=request.form.get("doc_number", "").strip() or None,
+            province=province,
+            name=name,
+            doc_number=doc_number,
             publish_date=request.form.get("publish_date", "").strip() or None,
             implement_date=request.form.get("implement_date", "").strip() or None,
             category=request.form.get("category", "地方标准"),

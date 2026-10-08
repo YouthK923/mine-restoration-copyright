@@ -22,6 +22,7 @@ if ROOT not in sys.path:
 
 from app import create_app
 from app.config import Config
+from app.services import cleanup
 from app.models import (db, Project, MinePatch, MicroUnit, IndicatorData,
                         ReferenceEcosystem, Indicator)
 from app.services import evaluation_service as ev
@@ -211,14 +212,7 @@ print("五、清理现场")
 print(LINE)
 with app.app_context():
     for row in Project.query.filter_by(code="CFG-CHK").all():
-        for mp in row.patches.all():
-            db.session.execute(text("DELETE FROM indicator_data WHERE unit_id IN "
-                                    "(SELECT id FROM micro_units WHERE patch_id=:i)"),
-                               {"i": mp.id})
-            db.session.execute(text("DELETE FROM reference_ecosystems WHERE patch_id=:i"),
-                               {"i": mp.id})
-            db.session.delete(mp)
-        db.session.delete(row)
+        cleanup.delete_project(row)          # 级联清掉图斑与各子表
     db.session.commit()
     left = Project.query.filter_by(code="CFG-CHK").count()
     print("  自检项目残留：%d 个" % left)

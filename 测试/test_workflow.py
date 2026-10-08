@@ -52,12 +52,10 @@ def purge_fixtures():
     生成软著截图时这些测试数据会被拍进去。
     """
     with app.app_context():
+        from app.services import cleanup as cleanup_svc
         leftovers = Project.query.filter(Project.code.like("WF-%")).all()
         for p in leftovers:
-            for m in p.patches.all():
-                db.session.delete(m)
-            db.session.delete(p)
-        db.session.commit()
+            cleanup_svc.delete_project(p)   # 级联清掉图斑下面的子表，避免留孤儿
         return len(leftovers)
 
 
@@ -98,27 +96,18 @@ def add_data(pid):
 
 
 def cleanup(pid, tag):
+    """删掉这套自检项目。
+
+    原先只手工删了得分明细/评价记录/判定/单元/指标数据，图斑下面
+    其余子表（参照生态系统等）会留孤儿；改用 cleanup 服务统一级联。
+    """
     with app.app_context():
-        from app.models import ScoreDetail
-        # 先删得分明细，再删评价记录，避免留下孤儿明细
-        rids = [r.id for r in EvaluationResult.query.filter_by(patch_id=pid)]
-        if rids:
-            ScoreDetail.query.filter(ScoreDetail.result_id.in_(rids)).delete(
-                synchronize_session=False)
-        EvaluationResult.query.filter_by(patch_id=pid).delete()
-        ConstraintCheck.query.filter_by(patch_id=pid).delete()
-        uids = [u.id for u in MicroUnit.query.filter_by(patch_id=pid)]
-        if uids:
-            IndicatorData.query.filter(IndicatorData.unit_id.in_(uids)).delete(
-                synchronize_session=False)
-        MicroUnit.query.filter_by(patch_id=pid).delete()
-        m = db.session.get(MinePatch, pid)
-        if m:
-            db.session.delete(m)
+        from app.services import cleanup as cleanup_svc
+        if db.session.get(MinePatch, pid):
+            cleanup_svc.delete_patch(pid)
         pr = Project.query.filter_by(name="门禁-" + tag).first()
         if pr:
-            db.session.delete(pr)
-        db.session.commit()
+            cleanup_svc.delete_project(pr)
 
 
 def results_of(pid):
@@ -310,13 +299,12 @@ with app.app_context():
 ok(demo_back is not None, "演示案例可重新写入（幂等恢复）")
 
 with app.app_context():
-    m = db.session.get(MinePatch, keep_patch_id)
-    if m:
-        db.session.delete(m)
+    from app.services import cleanup as cleanup_svc
+    if db.session.get(MinePatch, keep_patch_id):
+        cleanup_svc.delete_patch(keep_patch_id)      # 级联清子表
     p = db.session.get(Project, keep_pid)
     if p:
-        db.session.delete(p)
-    db.session.commit()
+        cleanup_svc.delete_project(p)
 
 print()
 print(LINE)

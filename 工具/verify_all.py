@@ -29,6 +29,7 @@ print("一、系统可运行性")
 print("-" * 78)
 
 from app import create_app
+from app.services import cleanup
 app = create_app()
 eps = {x.endpoint for x in app.url_map.iter_rules()}
 rules = [x for x in app.url_map.iter_rules() if x.endpoint != "static"]
@@ -69,6 +70,23 @@ for t in tests:
     passed += ok
     print("  %s %-24s" % ("[通过]" if ok else "[失败]", t))
 print("  合计：%d / %d 通过" % (passed, len(tests)))
+
+# 自检跑完，库里不应留下孤儿行 —— 自检夹具若绕过 cleanup 的级联清理，
+# 残留数据会出现在工作台、项目列表与标准列表里，被拍进软著截图。
+print()
+print("三、自检残留（孤儿数据）")
+print("-" * 78)
+with app.app_context():
+    orphans = cleanup.purge_orphans(apply=False)
+orphan_total = sum(n for _, n, _ in orphans)
+for table, n, note in orphans:
+    if n:
+        print("  [残留] %-22s %d 条  %s" % (table, n, note))
+if orphan_total:
+    print("  合计 %d 条残留。请修掉留下残留的那套自检，"
+          "或运行 python 工具/清理孤儿数据.py --apply 清理。" % orphan_total)
+else:
+    print("  [通过] 各子表均无孤儿行")
 
 # ---------------------------------------------------------------------------
 print()

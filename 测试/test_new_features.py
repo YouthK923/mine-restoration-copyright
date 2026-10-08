@@ -106,9 +106,9 @@ with app.app_context():
     ok(db.session.get(User, uid) is None, "账号删除生效")
 # 清理日志核对用的项目
 with app.app_context():
+    from app.services import cleanup
     for p in Project.query.filter_by(name="日志核对项目").all():
-        db.session.delete(p)
-    db.session.commit()
+        cleanup.delete_project(p)          # 级联清子表，避免留孤儿
 
 # ---------------------------------------------------------------------------
 print()

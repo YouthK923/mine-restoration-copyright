@@ -18,6 +18,14 @@ LINE = "#dfe3e8"
 GRAYS = ["#6FAE47", "#FCE5D6", "#FFF2CC", "#DAE3F2", "#E9C9C9", "#559FCF"]
 
 
+def _num(v):
+    """图表里容忍空值：None / 非数字按 0 处理，避免一条脏数据把页面打成 500。"""
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return 0.0
+
+
 def _fmt(v, digits=4):
     try:
         return ("%%.%df" % digits) % float(v)
@@ -31,7 +39,7 @@ def hbars(items, width=620, bar_h=22, gap=12, label_w=150, value_w=76):
         return '<p class="muted">暂无数据</p>'
     n = len(items)
     height = n * (bar_h + gap) + 10
-    max_v = max((abs(float(v)) for _, v, _ in items), default=1) or 1
+    max_v = max((abs(_num(v)) for _, v, _ in items), default=1) or 1
     body_w = width - label_w - value_w
 
     parts = ['<svg viewBox="0 0 %d %d" width="100%%" height="%d" '
@@ -39,7 +47,7 @@ def hbars(items, width=620, bar_h=22, gap=12, label_w=150, value_w=76):
              'style="max-width:%dpx;font-family:inherit;">' % (width, height, height, width)]
     for i, (label, value, disp) in enumerate(items):
         y = i * (bar_h + gap) + 5
-        frac = (abs(float(value)) / max_v) if max_v else 0
+        frac = (abs(_num(value)) / max_v) if max_v else 0
         w = max(2.0, body_w * frac)
         fill = GRAYS[i % len(GRAYS)]
         parts.append(
@@ -61,7 +69,7 @@ def donut(items, size=210, thickness=34):
 
     图例中给出数值与占比，黑白打印时靠图例与灰度深浅区分。
     """
-    vals = [(l, float(v), d) for l, v, d in items if float(v) > 0]
+    vals = [(l, _num(v), d) for l, v, d in items if _num(v) > 0]
     if not vals:
         return '<p class="muted">暂无数据</p>'
     total = sum(v for _, v, _ in vals) or 1

@@ -225,17 +225,15 @@ def demo_patch():
 
 
 def _purge_orphan_details():
-    """清理指向已不存在评价记录的孤儿得分明细。
+    """清理库里的孤儿行（指向已删除父记录的子表数据）。
 
-    长期运行后 score_details 表可能堆积无效明细，启动时顺带清一次。
+    原先只清 score_details，实测还不够：删图斑若绕过 cleanup 的级联，
+    indicator_data、constraint_checks 等同样会留孤儿（自检夹具中断时尤其常见），
+    孤儿的 unit_id 还会占住自增号，导致新数据插不进去。
+    判定规则统一在 app/services/cleanup.py 的 ORPHAN_RULES。
     """
-    live_ids = [r.id for r in EvaluationResult.query.all()]
-    if live_ids:
-        ScoreDetail.query.filter(~ScoreDetail.result_id.in_(live_ids)).delete(
-            synchronize_session=False)
-    else:
-        ScoreDetail.query.delete()
-    db.session.commit()
+    from app.services import cleanup
+    cleanup.purge_orphans(apply=True)
 
 
 def seed(reset=False):

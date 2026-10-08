@@ -55,3 +55,21 @@ def parse_int(raw, field, *, default=None, minimum=None, maximum=None):
     if maximum is not None and value > maximum:
         value = maximum
     return value
+
+
+def parse_text(raw, field, *, max_len=None, required=False, default=None):
+    """文本字段的统一处理：去空白、查必填、查长度。
+
+    SQLite 不强制 String(128) 的长度，超长名称会原样写进库（自检实测：
+    300 字的项目名照样落库），换到 MySQL/PostgreSQL 会直接报错；
+    界面版式也会被撑坏。所以在入口处挡一次。
+    """
+    text = "" if raw is None else str(raw).strip()
+    if not text:
+        if required:
+            raise FieldError("「%s」不能为空" % field)
+        return default
+    if max_len is not None and len(text) > max_len:
+        raise FieldError("「%s」不能超过 %d 个字符（当前 %d 个）"
+                         % (field, max_len, len(text)))
+    return text

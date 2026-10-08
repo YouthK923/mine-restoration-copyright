@@ -86,43 +86,20 @@ def purge_fixtures():
         from app.models import Project, ReferenceEcosystem
         leftovers = Project.query.filter(Project.code.like("WEIGHT-%")).all()
         for p in leftovers:
-            for m in p.patches.all():
-                uids = [u.id for u in MicroUnit.query.filter_by(patch_id=m.id)]
-                if uids:
-                    IndicatorData.query.filter(
-                        IndicatorData.unit_id.in_(uids)).delete(
-                        synchronize_session=False)
-                EvaluationResult.query.filter_by(patch_id=m.id).delete()
-                ConstraintCheck.query.filter_by(patch_id=m.id).delete()
-                ReferenceEcosystem.query.filter_by(patch_id=m.id).delete()
-                MicroUnit.query.filter_by(patch_id=m.id).delete()
-                db.session.delete(m)
-            db.session.delete(p)
-        db.session.commit()
+            from app.services import cleanup as cleanup_svc
+            cleanup_svc.delete_project(p)   # 级联清子表，避免留孤儿
         return len(leftovers)
 
 
 def cleanup(pid):
+    """删掉这套自检项目（级联清掉图斑下面的子表）。"""
     with app.app_context():
-        from app.models import ScoreDetail
-        rids = [r.id for r in EvaluationResult.query.filter_by(patch_id=pid)]
-        if rids:
-            ScoreDetail.query.filter(ScoreDetail.result_id.in_(rids)).delete(
-                synchronize_session=False)
-        EvaluationResult.query.filter_by(patch_id=pid).delete()
-        ConstraintCheck.query.filter_by(patch_id=pid).delete()
-        uids = [u.id for u in MicroUnit.query.filter_by(patch_id=pid)]
-        if uids:
-            IndicatorData.query.filter(IndicatorData.unit_id.in_(uids)).delete(
-                synchronize_session=False)
-        MicroUnit.query.filter_by(patch_id=pid).delete()
-        m = db.session.get(MinePatch, pid)
-        if m:
-            db.session.delete(m)
+        from app.services import cleanup as cleanup_svc
+        if db.session.get(MinePatch, pid):
+            cleanup_svc.delete_patch(pid)
         p = Project.query.filter_by(code="WEIGHT-%s" % TAG).first()
         if p:
-            db.session.delete(p)
-        db.session.commit()
+            cleanup_svc.delete_project(p)
 
 
 def run_eval(pid):
