@@ -26,7 +26,7 @@ BASE = "历史遗留废弃矿山自然恢复适宜性评价系统V1.0"
 ZIP = OUT / (BASE + ".zip")
 FOLDER = OUT / BASE
 
-SYSTEM_FILES = ["启动（免安装）.bat", "run.py", "seed_demo.py", "requirements.txt"]
+SYSTEM_FILES = ["run.py", "seed_demo.py", "requirements.txt"]
 SUBMIT_FILES = [
     "软著材料/源程序_提交版（前30页+后30页）_历史遗留废弃矿山自然恢复适宜性评价系统V1.0.pdf",
     "软著材料/说明书_历史遗留废弃矿山自然恢复适宜性评价系统V1.0.pdf",
@@ -46,7 +46,6 @@ USAGE = """历史遗留废弃矿山自然恢复适宜性评价系统 V1.0
 若 Windows 提示「已保护你的电脑」，点「更多信息 → 仍要运行」。
 出问题看同目录的 启动日志.txt，或先运行：
     "历史遗留废弃矿山自然恢复适宜性评价系统V1.0.exe" --check
-也可以用备用入口「启动（免安装）.bat」启动。
 """
 
 SUBMIT_README = """软著登记提交材料
