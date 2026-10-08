@@ -35,6 +35,11 @@ app/                    应用代码（详见下方「系统代码结构」）
     生成Word中文模板.py         生成 pandoc 中文排版模板
     生成文档Word.py             把 文档/ 与 软著材料/ 下的 Markdown 批量转成 docx
     修正Word标题配色.py         修正 docx 标题样式为「黑体 + 纯黑」
+    离线依赖.py                 把依赖下成 wheel 到 offline_wheels/（给别人离线安装）
+    构建免安装运行时.py          组装 portable_runtime/（内嵌 Python，免安装双击可用）
+    exe启动器.py                桌面启动器（小窗口：打开系统 / 停止并退出 / --check 自检）
+    打包exe.py                  把启动器打成 exe（独立构建环境 + 图标 + 版本信息）
+    装配exe版.py                装配「材料 + 可运行软件」的免安装 exe 包并打 zip
     数值核对/                   案例数值的独立复算与正确性验证脚本
     界面核对/                   界面行为、文档用词的自检脚本
 
