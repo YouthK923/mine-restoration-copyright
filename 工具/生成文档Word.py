@@ -14,12 +14,13 @@ sys.stdout.reconfigure(encoding="utf-8")
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PANDOC = r"D:\Pandoc\pandoc.exe"
 
-# 需要出 Word 的文稿；联网核实报告只作存档，不转 Word
+# 需要出 Word 的文稿（送审包只带 docx；md 作为源文件留在仓库里）
 SOURCES = [
     os.path.join("文档", "软著功能计划.md"),
     os.path.join("文档", "制作步骤与分工.md"),
     os.path.join("文档", "演示脚本.md"),
     os.path.join("文档", "开发日志.md"),
+    os.path.join("文档", "软著登记申请材料形式要求_联网核实报告.md"),
     os.path.join("软著材料", "登记信息表底稿.md"),
 ]
 
