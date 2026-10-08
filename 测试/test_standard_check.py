@@ -89,7 +89,7 @@ constraint_bad = types.SimpleNamespace(pollution_pass=False, geo_pass=False)
 patch = types.SimpleNamespace(responsible_entity_missing=True)
 ctx = {"coverage": 62.5, "coverage_min": 48.0, "benchmark": 75.0,
        "has_reference": True, "constraint": constraint_ok, "patch": patch,
-       "grade": "适宜", "score": 0.7156, "result": object()}
+       "grade": "适宜", "score": 0.7404, "result": object()}
 
 ok(sc._judge("植被覆盖度", ">=", "50", ctx)[0] == sc.OK, "覆盖度 62.5 ≥ 50 → 符合")
 ok(sc._judge("植被覆盖度", ">", "75", ctx)[0] == sc.BAD, "覆盖度 62.5 未 > 75 → 不符合")

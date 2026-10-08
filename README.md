@@ -102,7 +102,7 @@ app/
 ├── views/                auth/project/unit/standard/constraint
 │                         ahp/indicator/evaluate/report
 └── templates/            各功能页面模板
-seed_demo.py              内置玉田县案例 + 论文表1的 11 项标准与 32 条规则
+seed_demo.py              内置示例案例 + 内置标准库的 12 项标准与 37 条规则
 ```
 
 ## 启动

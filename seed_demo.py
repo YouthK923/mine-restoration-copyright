@@ -20,7 +20,7 @@ app = create_app()
 # 内置演示案例的项目编号，用于区分「演示数据」与「用户自建数据」
 DEMO_CODE = "DEMO-001"
 
-# 内置标准库：11 项地方标准与政策文件
+# 内置标准库：12 项地方标准与政策文件
 STANDARDS = [
     dict(category="地方标准", province="辽宁", name="矿山废弃地植被自然恢复技术规程",
          doc_number="DB21/T 3702—2023", publish_date="2023-03-30",
@@ -30,6 +30,18 @@ STANDARDS = [
                 ("无地质灾害", "==", "是", "必要条件", None),
                 ("无水土污染", "==", "是", "必要条件", None),
                 ("与参照系差距", "<", "20", "充分条件", "%")]),
+    dict(category="地方标准", province="辽宁", name="废弃矿山自然恢复评估规程",
+         doc_number="DB21/T 4421—2026", publish_date="2026-05-07",
+         implement_date="2026-06-07",
+         summary="按水热条件分成湿润区、半湿润区、半干旱区，分区确定植被覆盖度要求；"
+                 "评估考虑地质灾害、水土污染、立地条件、土地损毁程度、植被发育情况、"
+                 "植被群落六个方面",
+         # 植被覆盖度按水热条件分区给阈值，分区写进判定项名称，便于对照时看清适用分区
+         rules=[("植被覆盖度（湿润区）", ">=", "70", "必要条件", "湿润区"),
+                ("植被覆盖度（半湿润区）", ">=", "60", "必要条件", "半湿润区"),
+                ("植被覆盖度（半干旱区）", ">=", "50", "必要条件", "半干旱区"),
+                ("无地质灾害", "==", "是", "必要条件", None),
+                ("无水土污染", "==", "是", "必要条件", None)]),
     dict(category="地方标准", province="湖北", name="废弃露天矿山生态环境自然恢复标准",
          doc_number="DB42/T 2421—2025", publish_date="2025-08-20",
          implement_date="2025-10-20",
@@ -105,14 +117,17 @@ CASE = {
     "patch_name": "玉田县孤树镇白云岩采石场",
     "area_ha": 5.6,
     "mineral_type": "白云岩",
+    # 三类微地质单元的面积占比与各项实测值，与最新版评价方法表 5 一致：
+    # 平台 26.3%、碎石边坡 69.5%、岩质边坡 4.2%；
+    # 单元面积按占比 × 图斑面积（5.6 公顷）换算，保证面积与占比互相对得上。
     "units": [
         {
-            "unit_type": "岩质边坡", "ratio": 0.1386,
-            "data": {"coverage": 68.88, "shannon": 0.00,
+            "unit_type": "岩质边坡", "ratio": 0.042, "area": 0.2352,
+            "data": {"coverage": 68.88, "shannon": 0.51,
                      "slope": 63.33, "aspect": "阴阳坡"},
         },
         {
-            "unit_type": "碎石边坡", "ratio": 0.6295,
+            "unit_type": "碎石边坡", "ratio": 0.695, "area": 3.892,
             "data": {"soil_ratio": 0.34, "thickness": 10, "ph": 9.24,
                      "organic_matter": 4.89,
                      "heavy_metals": {"Hg": 0.05, "As": 5.17, "Ni": 12.60,
@@ -121,7 +136,7 @@ CASE = {
                      "slope": 28.75, "aspect": "阳坡"},
         },
         {
-            "unit_type": "平台", "ratio": 0.2319,
+            "unit_type": "平台", "ratio": 0.263, "area": 1.4728,
             "data": {"soil_ratio": 0.56, "thickness": 30, "ph": 8.72,
                      "organic_matter": 10.92,
                      "heavy_metals": {"Hg": 0.02, "As": 3.13, "Ni": 12.33,
@@ -267,7 +282,7 @@ def seed(reset=False):
 
         for u in CASE["units"]:
             unit = MicroUnit(patch_id=patch.id, unit_type=u["unit_type"],
-                             ratio=u["ratio"], area=None)
+                             ratio=u["ratio"], area=u.get("area"))
             db.session.add(unit)
             db.session.flush()
             d = u["data"]
@@ -297,7 +312,7 @@ def seed(reset=False):
         db.session.commit()
         print("已写入案例：", CASE["name"])
         print("  图斑：", CASE["patch_name"])
-        print("  微地质单元：岩质边坡 13.86% / 碎石边坡 62.95% / 平台 23.19%")
+        print("  微地质单元：平台 26.3% / 碎石边坡 69.5% / 岩质边坡 4.2%")
         print("  管理员账号：admin / admin123")
 
         _seed_reference_data(reset=reset)
@@ -328,7 +343,7 @@ def _report():
 
 
 def seed_standards():
-    """写入内置标准库的 11 项标准与政策文件及其结构化规则。"""
+    """写入内置标准库的 12 项标准与政策文件及其结构化规则。"""
     StandardRule.query.delete()
     Standard.query.delete()
     db.session.commit()

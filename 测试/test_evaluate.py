@@ -16,22 +16,22 @@ from app.services import standardization as std
 LINE = "=" * 70
 
 # ---------------------------------------------------------------------------
-# 论文第 5 节案例数据（表 5，逐字抄录）
+# 论文第 5 节案例数据（表 5：占比与各单元实测值逐字抄录）
 # ---------------------------------------------------------------------------
-# 三类单元面积占比：岩质边坡 13.86%、碎石边坡 62.95%、平台 23.19%
+# 三类单元面积占比：平台 26.3%、碎石边坡 69.5%、岩质边坡 4.2%
 # 注：岩质边坡无土壤指标、平台无地形指标，对应"不适用"。
 case = [
     {
         "unit_type": "岩质边坡",
-        "ratio": 0.1386,
+        "ratio": 0.042,
         "data": {
-            "coverage": 68.88, "shannon": 0.00,
+            "coverage": 68.88, "shannon": 0.51,
             "slope": 63.33, "aspect": "阴阳坡",
         },
     },
     {
         "unit_type": "碎石边坡",
-        "ratio": 0.6295,
+        "ratio": 0.695,
         "data": {
             "soil_ratio": 0.34, "thickness": 10, "ph": 9.24, "organic_matter": 4.89,
             "heavy_metals": {"Hg": 0.05, "As": 5.17, "Ni": 12.60,
@@ -42,7 +42,7 @@ case = [
     },
     {
         "unit_type": "平台",
-        "ratio": 0.2319,
+        "ratio": 0.263,
         "data": {
             "soil_ratio": 0.56, "thickness": 30, "ph": 8.72, "organic_matter": 10.92,
             "heavy_metals": {"Hg": 0.02, "As": 3.13, "Ni": 12.33,
@@ -94,6 +94,6 @@ print("  - 评价引擎按论文式(8)(9) 与表 3 权重完整跑通")
 print("  - 坡度标准化采用论文 25° 分界的线性折减默认值（见 standardization.py）")
 print("  - 最终 F ≈ %.2f，判定为「%s」，与论文「最终适宜自然恢复」的结论一致"
       % (total, res["grade"]))
-print("  - 论文表 5 所载最终得分为 0.76；差异集中在坡度、坡向的标准化口径，")
-print("    该口径在 standardization.std_slope / aspect_score 中集中定义、可配置")
+print("  - 论文表 5 载 0.77、正文载 0.76，而按表 5 单元得分×占比加权为 0.7614；")
+print("    系统差异集中在坡度、坡向的标准化口径（standardization.std_slope 可配置）")
 print(LINE)
