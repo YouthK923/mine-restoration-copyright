@@ -24,8 +24,29 @@ if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
 SOFTWARE_NAME = "历史遗留废弃矿山自然恢复适宜性评价系统V1.0"
-FONT = "china-s"
-FONT_BOLD = "china-s"          # 内置字体，用字号区分层级
+
+# 字体：用系统里真实的中文字体（正文宋体、标题黑体）。
+# 为什么不用 PyMuPDF 内置的 china-s：它把 ASCII 当**全角**渲染，
+# 「0.3」会占三个全角宽（31.5pt），排出来像「0 . 3」「F = 0 . 7 4 0 4」，
+# 而宋体的西文是比例宽度（15.75pt），与 Word 里的显示一致。
+# 找不到系统字体时退回内置字体：排版仍能出，只是数字会偏宽。
+SIMSUN = r"C:\Windows\Fonts\simsun.ttc"
+SIMHEI = r"C:\Windows\Fonts\simhei.ttf"
+
+
+def _load_font(path, fallback):
+    try:
+        if os.path.exists(path):
+            return fitz.Font(fontfile=path)
+    except Exception:
+        pass
+    print("  [提示] 未找到 %s，退回内置字体（数字会偏宽）" % path)
+    return fitz.Font(fallback)
+
+
+FONT = _load_font(SIMSUN, "china-s")        # 正文（宋体）
+FONT_BOLD = _load_font(SIMHEI, "china-s")   # 标题（黑体）
+
 PAGE_W, PAGE_H = 595.28, 841.89
 MARGIN_L, MARGIN_R = 56, 56
 MARGIN_T, MARGIN_B = 62, 56
@@ -450,11 +471,17 @@ def toc_entries(blocks=None):
     return out
 
 
-def wrap_text(text, size, max_w, font=FONT):
+def text_w(text, size, font=None):
+    """按指定字体测文字宽度（宋体/黑体是嵌入式字体，必须用字体对象测）。"""
+    return (font or FONT).text_length(text, fontsize=size)
+
+
+def wrap_text(text, size, max_w, font=None):
     """按渲染宽度折行，兼容中英文混排。"""
+    font = font or FONT
     lines, cur = [], ""
     for ch in text:
-        if fitz.get_text_length(cur + ch, fontname=font, fontsize=size) <= max_w:
+        if text_w(cur + ch, size, font) <= max_w:
             cur += ch
         else:
             # 英文尽量按空格断行
@@ -478,9 +505,26 @@ class Manual:
         self.y = 0
         self.page_no = 0        # 编号页码（目录起算）
         self.cover = True
+        self.heading_pages = []     # [(标题, 页码, 层级)]，供目录跳转与书签
+        self.toc_rects = []         # 目录每条的点击区域
+        self.tw = None              # 当前页的文字累加器（每页只写一次，避免字体重复嵌入）
+
+    # ---- 文字写入 ----
+    def text(self, x, y, s, size, font=None):
+        """把一行文字累加到当前页（真正落页在 flush()）。"""
+        if self.tw is None:
+            self.tw = fitz.TextWriter(self.page.rect)
+        self.tw.append(fitz.Point(x, y), s, font=font or FONT, fontsize=size)
+
+    def flush(self):
+        """把当前页累计的文字一次写入，并重置累加器。"""
+        if self.tw is not None and self.tw.text_rect is not None:
+            self.tw.write_text(self.page)
+        self.tw = None
 
     # ---- 页面管理 ----
     def new_page(self, numbered=True):
+        self.flush()                      # 上一页的文字先落页
         self.page = self.doc.new_page(width=PAGE_W, height=PAGE_H)
         if numbered:
             self.page_no += 1
@@ -488,12 +532,11 @@ class Manual:
         self.y = CONTENT_TOP
 
     def _header(self, no):
-        self.page.insert_text((MARGIN_L, HEADER_Y), SOFTWARE_NAME,
-                              fontname=FONT, fontsize=9)
+        self.text(MARGIN_L, HEADER_Y, SOFTWARE_NAME, 9)
         s = "第 %d 页" % no
-        w = fitz.get_text_length(s, fontname=FONT, fontsize=9)
-        self.page.insert_text((PAGE_W - MARGIN_R - w, HEADER_Y), s,
-                              fontname=FONT, fontsize=9)
+        w = text_w(s, 9)
+        self.text(PAGE_W - MARGIN_R - w, HEADER_Y, s, 9)
+        self.flush()                      # 先落页眉文字，再画页眉下的横线
         self.page.draw_line(fitz.Point(MARGIN_L, RULE_Y),
                             fitz.Point(PAGE_W - MARGIN_R, RULE_Y),
                             color=(0, 0, 0), width=0.6)
@@ -511,13 +554,14 @@ class Manual:
         self.ensure(before + size + after + 17)
         self.y += before
         base = self.y
-        self.page.insert_text((MARGIN_L, base), text,
-                              fontname=FONT, fontsize=size)
+        self.text(MARGIN_L, base, text, size, font=FONT_BOLD)
         if level == 1:
+            self.flush()                  # 先落文字，再画标题下的分隔线
             self.page.draw_line(fitz.Point(MARGIN_L, base + 6),
                                 fitz.Point(PAGE_W - MARGIN_R, base + 6),
                                 color=(0.7, 0.7, 0.7), width=0.5)
         self.y = base + after
+        self.heading_pages.append((text, self.page_no, level))
 
     def para(self, text):
         text = plain(text)
@@ -525,8 +569,7 @@ class Manual:
         lh = 17
         for ln in wrap_text(text, size, BODY_W):
             self.ensure(lh)
-            self.page.insert_text((MARGIN_L, self.y), ln,
-                                  fontname=FONT, fontsize=size)
+            self.text(MARGIN_L, self.y, ln, size)
             self.y += lh
         self.y += 6
 
@@ -545,11 +588,9 @@ class Manual:
         for ln in wrap_text(text, size, BODY_W - indent):
             self.ensure(lh)
             if first:
-                self.page.insert_text((MARGIN_L, self.y), marker,
-                                      fontname=FONT, fontsize=size)
+                self.text(MARGIN_L, self.y, marker, size)
                 first = False
-            self.page.insert_text((MARGIN_L + indent, self.y), ln,
-                                  fontname=FONT, fontsize=size)
+            self.text(MARGIN_L + indent, self.y, ln, size)
             self.y += lh
         self.y += 4
 
@@ -573,32 +614,33 @@ class Manual:
             h = avail
             w = pix.width * (h / pix.height)
         self.ensure(h + cap_h + 8)
+        self.flush()                      # 先落文字，再放图
         rect = fitz.Rect(MARGIN_L + (BODY_W - w) / 2, self.y,
                          MARGIN_L + (BODY_W - w) / 2 + w, self.y + h)
         self.page.insert_image(rect, stream=jpg)
         self.y += h + 4
-        cw = fitz.get_text_length(caption, fontname=FONT, fontsize=9)
-        self.page.insert_text((MARGIN_L + (BODY_W - cw) / 2, self.y + 10),
-                              caption, fontname=FONT, fontsize=9)
+        cw = text_w(caption, 9)
+        self.text(MARGIN_L + (BODY_W - cw) / 2, self.y + 10, caption, 9)
         self.y += cap_h + 8
 
     # ---- 封面 ----
     def cover_page(self):
+        self.flush()
         p = self.doc.new_page(width=PAGE_W, height=PAGE_H)
         self.page = p
+        self.tw = None
         y = 200
         title = "历史遗留废弃矿山自然恢复适宜性评价系统"
-        tw = fitz.get_text_length(title, fontname=FONT, fontsize=22)
-        p.insert_text(((PAGE_W - tw) / 2, y), title,
-                      fontname=FONT, fontsize=22)
+        tw = text_w(title, 22, FONT_BOLD)
+        self.text((PAGE_W - tw) / 2, y, title, 22, font=FONT_BOLD)
         y += 46
         v = "V1.0"
-        vw = fitz.get_text_length(v, fontname=FONT, fontsize=16)
-        p.insert_text(((PAGE_W - vw) / 2, y), v, fontname=FONT, fontsize=16)
+        vw = text_w(v, 16)
+        self.text((PAGE_W - vw) / 2, y, v, 16)
         y += 90
         sub = "软件说明书（用户手册）"
-        sw = fitz.get_text_length(sub, fontname=FONT, fontsize=18)
-        p.insert_text(((PAGE_W - sw) / 2, y), sub, fontname=FONT, fontsize=18)
+        sw = text_w(sub, 18, FONT_BOLD)
+        self.text((PAGE_W - sw) / 2, y, sub, 18, font=FONT_BOLD)
         y += 120
         info = [
             "软件全称：历史遗留废弃矿山自然恢复适宜性评价系统",
@@ -606,7 +648,7 @@ class Manual:
             "文档类型：软件说明书（用户手册）",
         ]
         for t in info:
-            p.insert_text((MARGIN_L + 60, y), t, fontname=FONT, fontsize=11)
+            self.text(MARGIN_L + 60, y, t, 11)
             y += 24
 
     # ---- 目录 ----
@@ -617,14 +659,20 @@ class Manual:
         for text, lvl in entries:
             size = 11 if lvl == 0 else 10.5
             self.ensure(20)
-            self.page.insert_text((MARGIN_L + lvl * 20, self.y), text,
-                                  fontname=FONT, fontsize=size)
+            x = MARGIN_L + lvl * 20
+            self.text(x, self.y, text, size)
+            # 记录点击区域，build() 末尾把它接到对应章节所在页
+            self.toc_rects.append(fitz.Rect(
+                x, self.y - size, x + text_w(text, size) + 6, self.y + 5))
             self.y += 20
+        self.toc_page_index = self.page.number
 
     # ---- 主流程 ----
     def build(self, blocks):
         self.cover_page()
         self.toc()
+        # 「目　录」这个标题本身也记进了 heading_pages，对目录条目时要跳过它
+        skip = len(self.heading_pages)
         self.new_page()
         li_no = 0            # 连续的小条目算一组，组内从「一、」重新数
         for kind, *rest in blocks:
@@ -643,24 +691,53 @@ class Manual:
                 self.bullet(rest[0])
             elif kind == "img":
                 self.image(rest[0], rest[1])
+
+        self.flush()                      # 最后一页的文字落页
+        # 目录每条接到对应章节：点击可跳转；同时写入 PDF 书签（左侧大纲）
+        toc_page = self.doc[self.toc_page_index]
+        added = 0
+        for i, rect in enumerate(self.toc_rects):
+            if i + skip >= len(self.heading_pages):
+                break
+            _, page_no, _ = self.heading_pages[i + skip]
+            target = min(page_no + 1, self.doc.page_count) - 1   # 封面不编号
+            toc_page.insert_link({"kind": fitz.LINK_GOTO, "from": rect,
+                                  "page": target,
+                                  "to": fitz.Point(MARGIN_L, CONTENT_TOP)})
+            added += 1
+        outline = [[level, text, page_no + 1]      # 书签页码用物理页号（1 起）
+                   for text, page_no, level in self.heading_pages]
+        try:
+            self.doc.set_toc(outline)
+        except Exception as e:
+            print("  [提示] 写入 PDF 书签失败：%s" % e)
+
         out = os.path.join(
             OUT_DIR,
             "说明书_历史遗留废弃矿山自然恢复适宜性评价系统V1.0.pdf")
-        self.doc.save(out)
+        # 字体子集化：嵌入式宋体/黑体整份约 25 MB，只保留用到的字形后体积才适合上传
+        # （不子集化时说明书 PDF 会从 2 MB 涨到 29 MB，线上申请对体积有限制）。
+        try:
+            self.doc.subset_fonts()
+        except Exception as e:
+            print("  [提示] 字体子集化失败（体积会偏大）：%s" % e)
+        self.doc.save(out, garbage=4, deflate=True)
         pages = self.doc.page_count
         self.doc.close()
-        return out, pages
+        return out, pages, added
 
 
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     m = Manual()
-    out, pages = m.build(CONTENT)
+    out, pages, links = m.build(CONTENT)
     print("已生成说明书：%s" % os.path.relpath(out, BASE))
     print("  总页数：%d（含封面 1 页）" % pages)
     print("  正文字数：约 %d 字"
           % sum(len(b[1]) for b in CONTENT if b[0] in ("p", "li")))
     print("  插图：%d 张" % sum(1 for b in CONTENT if b[0] == "img"))
+    print("  目录跳转链接：%d 条（另写入 PDF 书签 %d 条）"
+          % (links, len(m.heading_pages)))
 
 
 if __name__ == "__main__":

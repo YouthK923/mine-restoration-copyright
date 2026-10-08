@@ -198,22 +198,53 @@ def build_cover(doc):
         r0.font.size = Pt(11)
 
 
+def add_bookmark(paragraph, name, bid):
+    """在段落首尾插入书签，供目录内部跳转使用。
+
+    注意书签必须插在 `w:pPr` **之后**：`w:pPr` 必须是段落的第一个子元素，
+    插到它前面会让 Word 报「内容有问题」。
+    """
+    start = OxmlElement("w:bookmarkStart")
+    start.set(qn("w:id"), str(bid))
+    start.set(qn("w:name"), name)
+    end = OxmlElement("w:bookmarkEnd")
+    end.set(qn("w:id"), str(bid))
+    ppr = paragraph._p.find(qn("w:pPr"))
+    if ppr is not None:
+        ppr.addnext(start)
+    else:
+        paragraph._p.insert(0, start)
+    paragraph._p.append(end)
+
+
+def add_internal_link(paragraph, text, anchor, size):
+    """把一段文字做成指向书签的内部超链接（外观仍是正文样式，不变成蓝色链接）。"""
+    run = paragraph.add_run(text)
+    run.font.size = Pt(size)
+    link = OxmlElement("w:hyperlink")
+    link.set(qn("w:anchor"), anchor)
+    link.set(qn("w:history"), "1")
+    paragraph._p.replace(run._r, link)
+    link.append(run._r)
+
+
 def build_toc(doc):
+    """目录：每条都做成指向对应章节的内部链接，点一下就能跳过去。"""
     doc.add_heading("目　录", 1)
-    for text, lvl in M.toc_entries():
+    for idx, (text, lvl) in enumerate(M.toc_entries()):
         p = doc.add_paragraph()
         pf = p.paragraph_format
         pf.left_indent = Pt(lvl * 20)
         pf.space_after = Pt(0)
         pf.line_spacing = Pt(20)
-        r = p.add_run(text)
-        r.font.size = Pt(11 if lvl == 0 else 10.5)
+        add_internal_link(p, text, "toc_%d" % idx, 11 if lvl == 0 else 10.5)
 
 
 def build_body(doc, blocks):
     li_no = 0
     images = 0
     missing = []
+    bookmark_no = 0
     for kind, *rest in blocks:
         if kind == "li":
             li_no += 1
@@ -221,10 +252,10 @@ def build_body(doc, blocks):
         else:
             li_no = 0
 
-        if kind == "h1":
-            doc.add_heading(M.plain(rest[0]), 1)
-        elif kind == "h2":
-            doc.add_heading(M.plain(rest[0]), 2)
+        if kind in ("h1", "h2"):
+            h = doc.add_heading(M.plain(rest[0]), 1 if kind == "h1" else 2)
+            add_bookmark(h, "toc_%d" % bookmark_no, 1000 + bookmark_no)
+            bookmark_no += 1
         elif kind == "p":
             p = doc.add_paragraph(M.plain(rest[0]))
             p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
