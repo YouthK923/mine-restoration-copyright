@@ -70,3 +70,7 @@ Desktop.ini
 secrets.json
 # 首次运行时随机生成的会话签名密钥（见 app/config.py）
 app/.secret_key
+
+# 外部送审的稿件与评审材料，只作参考，不进仓库
+/20261095_审稿*.docx
+/*_审稿*.docx
