@@ -21,23 +21,74 @@ if not errorlevel 1 (
 )
 
 REM ---- Locate Python ----
-set PY=python
-where python >nul 2>&1
+set PY=
+where python >nul 2>&1 && set PY=python
+if not defined PY (
+  where py >nul 2>&1 && set PY=py -3
+)
+if not defined PY (
+  for %%P in (
+    "%USERPROFILE%\anaconda3\python.exe"
+    "%USERPROFILE%\miniconda3\python.exe"
+    "D:\Anaconda3\python.exe"
+    "C:\ProgramData\Anaconda3\python.exe"
+    "C:\Python312\python.exe"
+    "C:\Python311\python.exe"
+    "C:\Python310\python.exe"
+  ) do (
+    if not defined PY if exist %%P set PY=%%P
+  )
+)
+if not defined PY (
+  echo [ERROR] Python was not found on this computer.
+  echo.
+  echo   This system needs Python 3.10+ ^(Anaconda is fine^).
+  echo   Install from https://www.python.org/downloads/ , tick
+  echo   "Add python.exe to PATH" during setup, then run this file again.
+  echo.
+  pause
+  exit /b 1
+)
+echo [OK] Python: %PY%
+echo.
+
+REM ---- Check dependencies (install from the bundled wheels first) ----
+set IMP=import flask, flask_login, flask_wtf, flask_sqlalchemy, numpy, openpyxl, docx
+%PY% -c "%IMP%" >nul 2>&1
 if errorlevel 1 (
-  if exist "%USERPROFILE%\anaconda3\python.exe" set PY=%USERPROFILE%\anaconda3\python.exe
-  if exist "D:\Anaconda3\python.exe" set PY=D:\Anaconda3\python.exe
-  if exist "C:\ProgramData\Anaconda3\python.exe" set PY=C:\ProgramData\Anaconda3\python.exe
+  echo [1/3] Installing dependencies ...
+  echo.
+  if exist "offline_wheels" (
+    echo       Trying the offline wheels in .\offline_wheels ...
+    %PY% -m pip install --no-index --find-links offline_wheels -r requirements.txt
+    echo.
+  )
+  %PY% -c "%IMP%" >nul 2>&1
+  if errorlevel 1 (
+    echo       Offline install did not finish it, trying the network ...
+    %PY% -m pip install -r requirements.txt
+    echo.
+  )
+  %PY% -c "%IMP%" >nul 2>&1
+  if errorlevel 1 (
+    echo [ERROR] Dependencies are still missing. Please run this line and read
+    echo         the message it prints:
+    echo             %PY% -m pip install -r requirements.txt
+    echo.
+    pause
+    exit /b 1
+  )
+) else (
+  echo [1/3] Dependencies: OK
 )
 
 REM ---- Prepare demo data (idempotent; never deletes your own data) ----
-echo [1/2] Preparing demo data ...
+echo [2/3] Preparing demo data ...
 echo.
 %PY% seed_demo.py
 if errorlevel 1 (
   echo.
-  echo [ERROR] Failed to prepare demo data.
-  echo         Please make sure Python is installed, then run:
-  echo             pip install -r requirements.txt
+  echo [ERROR] Failed to prepare demo data. See the message above.
   echo.
   pause
   exit /b 1
@@ -45,8 +96,9 @@ if errorlevel 1 (
 
 REM ---- Start the server (the browser opens automatically) ----
 echo.
-echo [2/2] Starting server on port %PORT% ...
+echo [3/3] Starting server on port %PORT% ...
 echo   The browser will open automatically in a moment.
+echo   Demo account: admin / admin123
 echo   To stop the system: press Ctrl+C, or just close this window.
 echo.
 echo ============================================================
