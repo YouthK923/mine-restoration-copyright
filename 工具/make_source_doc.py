@@ -11,7 +11,7 @@
 用法：
     python make_source_doc.py
 输出：
-    软著材料/源程序_历史遗留废弃矿山自然恢复适宜性评价系统V1.0.pdf
+    软著材料/源程序_完整版_历史遗留废弃矿山自然恢复适宜性评价系统V1.0.pdf
 """
 import os
 import sys
@@ -275,7 +275,7 @@ def main():
     print("  文件数：%d" % len(SOURCE_ORDER))
 
     full = os.path.join(OUT_DIR,
-                        "源程序_历史遗留废弃矿山自然恢复适宜性评价系统V1.0.pdf")
+                        "源程序_完整版_历史遗留废弃矿山自然恢复适宜性评价系统V1.0.pdf")
     pages = build_pdf(numbered, full)
     print()
     print("已生成源程序全文：%s" % os.path.relpath(full, BASE))

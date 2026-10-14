@@ -22,7 +22,7 @@ MAT = os.path.join(BASE, "软著材料")
 NAME = "历史遗留废弃矿山自然恢复适宜性评价系统V1.0"
 VERSION = "V1.0"
 
-SRC = os.path.join(MAT, "源程序_历史遗留废弃矿山自然恢复适宜性评价系统V1.0.pdf")
+SRC = os.path.join(MAT, "源程序_完整版_历史遗留废弃矿山自然恢复适宜性评价系统V1.0.pdf")
 SRC60 = os.path.join(MAT, "源程序_提交版（前30页+后30页）_历史遗留废弃矿山自然恢复适宜性评价系统V1.0.pdf")
 MAN = os.path.join(MAT, "操作使用手册_历史遗留废弃矿山自然恢复适宜性评价系统V1.0.pdf")
 MAN_DOCX = os.path.join(MAT, "操作使用手册_历史遗留废弃矿山自然恢复适宜性评价系统V1.0.docx")

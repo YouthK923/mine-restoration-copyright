@@ -11,7 +11,7 @@ r"""生成软著源程序材料的 Word 版（与 PDF 版内容完全一致）�
 
 输出：
     软著材料/源程序_提交版（前30页+后30页）_……V1.0.docx     前 30 页 + 后 30 页（3000 行）
-    软著材料/源程序_……V1.0.docx                          全文
+    软著材料/源程序_完整版_……V1.0.docx                     全文
 """
 import os
 import sys
@@ -108,7 +108,7 @@ def main():
     numbered = [(i + 1, t) for i, t in enumerate(lines)]
     print("  有效代码行数：%d" % len(numbered))
 
-    full = OUT_DIR / ("源程序_%s.docx" % S.SOFTWARE_NAME)
+    full = OUT_DIR / ("源程序_完整版_%s.docx" % S.SOFTWARE_NAME)
     n = build_docx(numbered, full, "源程序_全文_%s" % S.SOFTWARE_NAME)
     print("已生成全文 Word：%s（%d 行）" % (full.name, n))
 
