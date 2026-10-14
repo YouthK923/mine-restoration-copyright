@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""生成《软件说明书》的 Word 版。
+"""生成《操作使用手册》的 Word 版。
 
 为什么要有 Word 版：正式提交给审查员的是 PDF（线上申请只收 PDF），
 Word 版是给项目成员与师兄直接改字、写批注用的。
@@ -10,7 +10,7 @@ Word 版是给项目成员与师兄直接改字、写批注用的。
 用法：
     python 工具/make_manual_docx.py
 输出：
-    软著材料/说明书_历史遗留废弃矿山自然恢复适宜性评价系统V1.0.docx
+    软著材料/操作使用手册_历史遗留废弃矿山自然恢复适宜性评价系统V1.0.docx
 """
 import os
 import sys
@@ -37,7 +37,7 @@ EN_FONT = "Times New Roman"
 BLACK = RGBColor(0, 0, 0)
 
 OUT = os.path.join(
-    M.OUT_DIR, "说明书_历史遗留废弃矿山自然恢复适宜性评价系统V1.0.docx")
+    M.OUT_DIR, "操作使用手册_历史遗留废弃矿山自然恢复适宜性评价系统V1.0.docx")
 
 # pPr 里 pBdr 之后的合法子元素顺序（ECMA-376 CT_PPrBase）
 PPR_AFTER_PBDR = (
@@ -180,7 +180,7 @@ def build_cover(doc):
     s = doc.add_paragraph()
     s.alignment = WD_ALIGN_PARAGRAPH.CENTER
     s.paragraph_format.space_before = Pt(72)
-    rs = s.add_run("软件说明书（用户手册）")
+    rs = s.add_run("操作使用手册")
     rs.font.size = Pt(18)
     rs.font.name = CN_HEAD
     rs._element.rPr.rFonts.set(qn("w:eastAsia"), CN_HEAD)
@@ -190,7 +190,8 @@ def build_cover(doc):
     first.paragraph_format.left_indent = Pt(M.MARGIN_L + 60)
     for i, line in enumerate(("软件全称：历史遗留废弃矿山自然恢复适宜性评价系统",
                               "版本号：V1.0",
-                              "文档类型：软件说明书（用户手册）")):
+                              "文档类型：操作使用手册",
+                              "申请人：＿＿＿＿＿＿＿＿＿＿＿＿")):
         p = first if i == 0 else doc.add_paragraph()
         p.paragraph_format.left_indent = Pt(M.MARGIN_L + 60)
         p.paragraph_format.space_after = Pt(12)
@@ -242,6 +243,7 @@ def build_toc(doc):
 
 def build_body(doc, blocks):
     li_no = 0
+    fig_no = 0
     images = 0
     missing = []
     bookmark_no = 0
@@ -270,6 +272,8 @@ def build_body(doc, blocks):
             p.add_run(marker + M.plain(rest[0]))
         elif kind == "img":
             name, caption = rest[0], rest[1]
+            fig_no += 1
+            caption = "图 %d　%s" % (fig_no, caption)
             path = os.path.join(M.SHOT_DIR, name)
             if not os.path.exists(path):
                 missing.append(name)
